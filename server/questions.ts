@@ -1,7 +1,8 @@
 import type { Question } from './types.js'
+import { EXTRA_QUESTIONS } from './questions-extra.js'
 
 /** Stor frågebank — blandade kategorier, fyra alternativ. */
-export const QUESTIONS: Question[] = [
+const BASE_QUESTIONS: Question[] = [
   // Geografi
   {
     id: 'geo-1',
@@ -792,6 +793,8 @@ export const QUESTIONS: Question[] = [
     correctIndex: 1,
   },
 ]
+
+export const QUESTIONS: Question[] = [...BASE_QUESTIONS, ...EXTRA_QUESTIONS]
 
 export function pickQuestions(count: number): Question[] {
   const shuffled = [...QUESTIONS]

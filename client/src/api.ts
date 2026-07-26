@@ -86,11 +86,17 @@ async function emitAck<T>(event: string, data: unknown): Promise<Ack<T>> {
   }
 }
 
-export function createGame(name: string, questionCount: number, hostPlays: boolean) {
+export function createGame(
+  name: string,
+  questionCount: number,
+  hostPlays: boolean,
+  advanceMode: 'auto' | 'manual',
+) {
   return emitAck<{ playerId: string; room: PublicRoom }>('create', {
     name,
     questionCount,
     hostPlays,
+    advanceMode,
   })
 }
 
@@ -110,8 +116,16 @@ export function setHostPlaying(playing: boolean) {
   return emitAck<{ ok?: boolean }>('setHostPlaying', { playing })
 }
 
+export function setAdvanceMode(mode: 'auto' | 'manual') {
+  return emitAck<{ ok?: boolean }>('setAdvanceMode', { mode })
+}
+
 export function startGame() {
   return emitAck<{ ok?: boolean }>('start', {})
+}
+
+export function nextQuestion() {
+  return emitAck<{ ok?: boolean }>('next', {})
 }
 
 export function submitAnswer(answerIndex: number) {

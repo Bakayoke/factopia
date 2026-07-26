@@ -16,8 +16,10 @@ import {
   reconnectSocket,
   setQuestionCount,
   setHostPlaying,
+  setAdvanceMode,
   startGame,
   submitAnswer,
+  nextQuestion,
   toPublicRoom,
 } from './rooms.js'
 
@@ -86,9 +88,15 @@ function broadcastRoom(roomCode: string) {
 }
 
 io.on('connection', (socket) => {
-  socket.on('create', ({ name, questionCount, hostPlays }, ack) => {
+  socket.on('create', ({ name, questionCount, hostPlays, advanceMode }, ack) => {
     try {
-      const { room, playerId } = createRoom(name, questionCount, socket.id, hostPlays !== false)
+      const { room, playerId } = createRoom(
+        name,
+        questionCount,
+        socket.id,
+        hostPlays !== false,
+        advanceMode === 'manual' ? 'manual' : 'auto',
+      )
       socket.join(room.code)
       const payload = { playerId, room: toPublicRoom(room, playerId) }
       ack?.(payload)
@@ -139,10 +147,28 @@ io.on('connection', (socket) => {
     broadcastRoom(result.code)
   })
 
+  socket.on('setAdvanceMode', ({ mode }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = setAdvanceMode(binding.code, binding.playerId, mode === 'manual' ? 'manual' : 'auto')
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
   socket.on('start', (_data, ack) => {
     const binding = getBinding(socket.id)
     if (!binding) return ack?.({ error: 'Inte ansluten' })
     const result = startGame(binding.code, binding.playerId)
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
+  socket.on('next', (_data, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = nextQuestion(binding.code, binding.playerId)
     if ('error' in result) return ack?.({ error: result.error })
     ack?.({ ok: true })
     broadcastRoom(result.code)

@@ -459,6 +459,89 @@ input:focus {
   color: var(--brand);
 }
 
+.correct-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  text-align: center;
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--success) 22%, var(--bg));
+  border: 2px solid color-mix(in srgb, var(--success) 55%, transparent);
+  animation: pop-in 0.4s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.correct-banner span {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--success);
+}
+
+.correct-banner strong {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.round-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.round-results li {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr auto;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+  font-weight: 800;
+  animation: pop-in 0.4s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.round-results li.hit {
+  background: color-mix(in srgb, var(--success) 18%, var(--bg));
+}
+
+.round-results li.miss {
+  background: color-mix(in srgb, var(--danger) 12%, var(--bg));
+  opacity: 0.92;
+}
+
+.round-results .mark {
+  font-size: 1.1rem;
+}
+
+.round-results li.hit .mark {
+  color: var(--success);
+}
+
+.round-results li.miss .mark {
+  color: var(--danger);
+}
+
+.round-results .gain {
+  font-variant-numeric: tabular-nums;
+}
+
+.round-results li.hit .gain {
+  color: var(--success);
+}
+
+.scoreboard {
+  margin-top: 0.25rem;
+}
+
+.scoreboard li {
+  font-size: 0.95rem;
+}
+
 .winner-screen {
   text-align: center;
   position: relative;

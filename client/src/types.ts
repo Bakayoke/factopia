@@ -7,6 +7,7 @@ export type Player = {
 }
 
 export type RoomStatus = 'lobby' | 'question' | 'reveal' | 'finished'
+export type AdvanceMode = 'auto' | 'manual'
 
 export type PublicQuestion = {
   index: number
@@ -17,11 +18,20 @@ export type PublicQuestion = {
   endsAt: number
 }
 
+export type RoundResult = {
+  playerId: string
+  name: string
+  correct: boolean
+  gained: number
+  answerIndex: number | null
+}
+
 export type PublicRoom = {
   code: string
   hostId: string
   players: Player[]
   questionCount: number
+  advanceMode: AdvanceMode
   status: RoomStatus
   currentIndex: number
   totalQuestions: number
@@ -30,4 +40,5 @@ export type PublicRoom = {
   yourAnswer: number | null
   answeredCount: number
   playingCount: number
+  lastRound: RoundResult[] | null
 }

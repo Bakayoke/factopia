@@ -1,10 +1,10 @@
 import { customAlphabet } from 'nanoid'
 import { pickQuestions } from './questions.js'
-import type { Player, PublicRoom, Room, RoomStatus } from './types.js'
+import type { AdvanceMode, Player, PublicRoom, Room, RoomStatus, RoundResult } from './types.js'
 
 const makeCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ', 4)
 const QUESTION_MS = 20_000
-const REVEAL_MS = 5_000
+const REVEAL_MS = 6_000
 const ALLOWED_COUNTS = [10, 20, 30] as const
 
 const rooms = new Map<string, Room>()
@@ -29,6 +29,7 @@ export function createRoom(
   questionCount: number,
   socketId: string,
   hostPlays = true,
+  advanceMode: AdvanceMode = 'auto',
 ): { room: Room; playerId: string } {
   const count = ALLOWED_COUNTS.includes(questionCount as (typeof ALLOWED_COUNTS)[number])
     ? questionCount
@@ -49,6 +50,7 @@ export function createRoom(
     hostId: playerId,
     players: [host],
     questionCount: count,
+    advanceMode: advanceMode === 'manual' ? 'manual' : 'auto',
     status: 'lobby',
     questions: [],
     currentIndex: -1,
@@ -57,6 +59,7 @@ export function createRoom(
     questionStartedAt: 0,
     endsAt: 0,
     revealCorrectIndex: null,
+    lastRound: null,
   }
 
   rooms.set(code, room)
@@ -121,6 +124,19 @@ export function setHostPlaying(
   return room
 }
 
+export function setAdvanceMode(
+  code: string,
+  playerId: string,
+  mode: AdvanceMode,
+): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan ändra detta' }
+  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+  room.advanceMode = mode === 'manual' ? 'manual' : 'auto'
+  return room
+}
+
 export function startGame(code: string, playerId: string): Room | { error: string } {
   const room = rooms.get(code)
   if (!room) return { error: 'Rummet finns inte' }
@@ -144,6 +160,7 @@ function advanceToQuestion(room: Room) {
   room.answers = {}
   room.answerTimes = {}
   room.revealCorrectIndex = null
+  room.lastRound = null
 
   if (room.currentIndex >= room.questions.length) {
     room.status = 'finished'
@@ -186,18 +203,40 @@ export function revealQuestion(room: Room) {
   const q = room.questions[room.currentIndex]
   room.status = 'reveal'
   room.revealCorrectIndex = q.correctIndex
-  room.endsAt = Date.now() + REVEAL_MS
+  room.endsAt = room.advanceMode === 'manual' ? 0 : Date.now() + REVEAL_MS
 
+  const results: RoundResult[] = []
   for (const player of room.players) {
     if (!player.playing) continue
     const ans = room.answers[player.id]
-    if (ans === q.correctIndex) {
-      const answeredAt = room.answerTimes[player.id] ?? room.endsAt
+    let gained = 0
+    const correct = ans === q.correctIndex
+    if (correct) {
+      const answeredAt = room.answerTimes[player.id] ?? Date.now()
       const elapsed = answeredAt - room.questionStartedAt
       const speedBonus = Math.max(0, Math.round(500 * (1 - elapsed / QUESTION_MS)))
-      player.score += 1000 + speedBonus
+      gained = 1000 + speedBonus
+      player.score += gained
     }
+    results.push({
+      playerId: player.id,
+      name: player.name,
+      correct,
+      gained,
+      answerIndex: ans ?? null,
+    })
   }
+  results.sort((a, b) => b.gained - a.gained || b.correct.toString().localeCompare(a.correct.toString()))
+  room.lastRound = results
+}
+
+export function nextQuestion(code: string, playerId: string): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan gå vidare' }
+  if (room.status !== 'reveal') return { error: 'Ingen resultatvy just nu' }
+  advanceToQuestion(room)
+  return room
 }
 
 export function onQuestionTimeout(room: Room) {
@@ -209,7 +248,8 @@ export function onQuestionTimeout(room: Room) {
 }
 
 export function onRevealTimeout(room: Room) {
-  if (room.status === 'reveal' && Date.now() >= room.endsAt) {
+  if (room.advanceMode === 'manual') return false
+  if (room.status === 'reveal' && room.endsAt > 0 && Date.now() >= room.endsAt) {
     advanceToQuestion(room)
     return true
   }
@@ -226,7 +266,6 @@ export function disconnectSocket(socketId: string): Room | null {
   const player = room.players.find((p) => p.id === binding.playerId)
   if (player) player.connected = false
 
-  // Keep lobby rooms + players so mobile WebSocket blips don't wipe the session code
   return room
 }
 
@@ -265,6 +304,7 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
     hostId: room.hostId,
     players: room.players.map((p) => ({ ...p })),
     questionCount: room.questionCount,
+    advanceMode: room.advanceMode,
     status: room.status as RoomStatus,
     currentIndex: room.currentIndex,
     totalQuestions: room.questions.length || room.questionCount,
@@ -273,6 +313,7 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
     yourAnswer: playerId ? (room.answers[playerId] ?? null) : null,
     answeredCount: Object.keys(room.answers).length,
     playingCount: playing.length,
+    lastRound: room.status === 'reveal' ? room.lastRound : null,
   }
 }
 

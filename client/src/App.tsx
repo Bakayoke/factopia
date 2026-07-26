@@ -5,21 +5,23 @@ import {
   getSocket,
   joinGame,
   loadSession,
+  nextQuestion,
   rejoinGame,
   saveSession,
+  setAdvanceMode,
   setCount,
   setHostPlaying,
   startGame,
   submitAnswer,
 } from './api'
-import type { PublicRoom } from './types'
+import type { AdvanceMode, PublicRoom } from './types'
 import { Confetti, useCountdown } from './ui'
 
 type Screen = 'home' | 'create' | 'join' | 'play'
 
 const COUNTS = [10, 20, 30]
 const QUESTION_MS = 20_000
-const REVEAL_MS = 5_000
+const REVEAL_MS = 6_000
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
@@ -27,6 +29,7 @@ export default function App() {
   const [code, setCode] = useState('')
   const [questionCount, setQuestionCount] = useState(10)
   const [hostPlays, setHostPlays] = useState(true)
+  const [advanceMode, setAdvanceModeLocal] = useState<AdvanceMode>('manual')
   const [playerId, setPlayerId] = useState<string | null>(null)
   const [room, setRoom] = useState<PublicRoom | null>(null)
   const [error, setError] = useState('')
@@ -62,7 +65,7 @@ export default function App() {
     e.preventDefault()
     setError('')
     setBusy(true)
-    const res = await createGame(name, questionCount, hostPlays)
+    const res = await createGame(name, questionCount, hostPlays, advanceMode)
     setBusy(false)
     if (res.error || !res.room) {
       setError(res.error || 'Något gick fel')
@@ -172,6 +175,25 @@ export default function App() {
                 </button>
               </div>
             </div>
+            <div>
+              <label style={{ marginBottom: '0.4rem' }}>Mellan frågor</label>
+              <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <button
+                  type="button"
+                  className={`choice ${advanceMode === 'manual' ? 'selected' : ''}`}
+                  onClick={() => setAdvanceModeLocal('manual')}
+                >
+                  Klicka nästa
+                </button>
+                <button
+                  type="button"
+                  className={`choice ${advanceMode === 'auto' ? 'selected' : ''}`}
+                  onClick={() => setAdvanceModeLocal('auto')}
+                >
+                  Auto
+                </button>
+              </div>
+            </div>
             {error && <p className="error">{error}</p>}
             <button className="btn btn-primary" type="submit" disabled={busy || !name.trim()}>
               Skapa spel
@@ -262,7 +284,7 @@ function PlayView({
     return <WinnerView room={room} playerId={playerId} onLeave={onLeave} />
   }
 
-  return <QuestionView room={room} playerId={playerId} onError={onError} />
+  return <QuestionView room={room} playerId={playerId} isHost={isHost} onError={onError} />
 }
 
 function Lobby({
@@ -283,6 +305,7 @@ function Lobby({
   const [busy, setBusy] = useState(false)
   const me = room.players.find((p) => p.id === playerId)
   const hostPlaying = me?.playing ?? true
+  const participants = room.players.filter((p) => p.playing)
 
   async function changeCount(n: number) {
     if (!isHost) return
@@ -293,6 +316,12 @@ function Lobby({
   async function changeHostPlaying(playing: boolean) {
     if (!isHost) return
     const res = await setHostPlaying(playing)
+    if (res.error) onError(res.error)
+  }
+
+  async function changeAdvance(mode: AdvanceMode) {
+    if (!isHost) return
+    const res = await setAdvanceMode(mode)
     if (res.error) onError(res.error)
   }
 
@@ -347,30 +376,54 @@ function Lobby({
               </button>
             </div>
           </div>
+          <div>
+            <label style={{ marginBottom: '0.4rem' }}>Mellan frågor</label>
+            <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <button
+                type="button"
+                className={`choice ${room.advanceMode === 'manual' ? 'selected' : ''}`}
+                onClick={() => changeAdvance('manual')}
+              >
+                Klicka nästa
+              </button>
+              <button
+                type="button"
+                className={`choice ${room.advanceMode === 'auto' ? 'selected' : ''}`}
+                onClick={() => changeAdvance('auto')}
+              >
+                Auto
+              </button>
+            </div>
+          </div>
         </>
       ) : (
-        <p className="waiting">{room.questionCount} frågor · väntar på att värden startar…</p>
+        <p className="waiting">
+          {room.questionCount} frågor · {room.advanceMode === 'manual' ? 'värden klickar vidare' : 'auto'} · väntar…
+        </p>
       )}
 
       <div>
         <p className="meta" style={{ marginBottom: '0.5rem' }}>
-          <span>Spelare</span>
-          <span>
-            {room.playingCount} svarar · {room.players.length} totalt
-          </span>
+          <span>Deltagare</span>
+          <span>{participants.length}/12</span>
         </p>
-        <ul className="players">
-          {room.players.map((p) => (
-            <li key={p.id}>
-              <span>
-                {p.name}{' '}
-                {p.id === room.hostId && <span className="host-tag">värd</span>}
-                {!p.playing && <span className="host-tag"> hostar</span>}
-              </span>
-              {p.id === playerId && <span className="you">du</span>}
-            </li>
-          ))}
-        </ul>
+        {participants.length === 0 ? (
+          <p className="waiting">Inga spelare ännu — dela koden!</p>
+        ) : (
+          <ul className="players">
+            {participants.map((p) => (
+              <li key={p.id}>
+                <span>{p.name}</span>
+                {p.id === playerId && <span className="you">du</span>}
+              </li>
+            ))}
+          </ul>
+        )}
+        {isHost && !hostPlaying && (
+          <p className="footer-note" style={{ marginTop: '0.6rem' }}>
+            Du hostar och syns inte i listan
+          </p>
+        )}
       </div>
 
       {error && <p className="error">{error}</p>}
@@ -390,22 +443,26 @@ function Lobby({
 function QuestionView({
   room,
   playerId,
+  isHost,
   onError,
 }: {
   room: PublicRoom
   playerId: string
+  isHost: boolean
   onError: (msg: string) => void
 }) {
   const q = room.question
   const me = room.players.find((p) => p.id === playerId)
   const isSpectator = me ? !me.playing : false
   const revealing = room.status === 'reveal'
+  const manual = room.advanceMode === 'manual'
   const { ratio, seconds } = useCountdown(
-    q?.endsAt ?? null,
+    revealing && manual ? null : (q?.endsAt ?? null),
     revealing ? REVEAL_MS : QUESTION_MS,
   )
   const locked = isSpectator || room.yourAnswer !== null || revealing
   const isLast = q ? q.index + 1 >= q.total : false
+  const [busyNext, setBusyNext] = useState(false)
 
   async function answer(i: number) {
     if (locked) return
@@ -413,7 +470,17 @@ function QuestionView({
     if (res.error) onError(res.error)
   }
 
+  async function onNext() {
+    setBusyNext(true)
+    const res = await nextQuestion()
+    setBusyNext(false)
+    if (res.error) onError(res.error)
+  }
+
   if (!q) return null
+
+  const correctText =
+    room.revealCorrectIndex !== null ? q.options[room.revealCorrectIndex] : null
 
   return (
     <div className="card stack">
@@ -435,54 +502,90 @@ function QuestionView({
         </>
       )}
 
-      {revealing && (
-        <p className="next-countdown">
-          {isLast ? 'Resultat om' : 'Nästa fråga om'} <strong>{seconds}</strong>s
-        </p>
-      )}
-
       <h2 className="question-text">{q.text}</h2>
+
+      {revealing && correctText && (
+        <div className="correct-banner">
+          <span>Rätt svar</span>
+          <strong>{correctText}</strong>
+        </div>
+      )}
 
       {isSpectator && !revealing && (
         <p className="waiting">Du hostar — spelarna svarar nu</p>
       )}
 
-      <div className="answers">
-        {q.options.map((opt, i) => {
-          let cls = 'answer'
-          if (room.yourAnswer === i) cls += ' picked'
-          if (revealing && room.revealCorrectIndex === i) cls += ' correct'
-          if (revealing && room.yourAnswer === i && room.revealCorrectIndex !== i) cls += ' wrong'
-          return (
-            <button
-              key={i}
-              type="button"
-              className={cls}
-              disabled={locked}
-              onClick={() => answer(i)}
-            >
-              {opt}
-            </button>
-          )
-        })}
-      </div>
+      {!revealing && (
+        <div className="answers">
+          {q.options.map((opt, i) => {
+            let cls = 'answer'
+            if (room.yourAnswer === i) cls += ' picked'
+            return (
+              <button
+                key={i}
+                type="button"
+                className={cls}
+                disabled={locked}
+                onClick={() => answer(i)}
+              >
+                {opt}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {room.yourAnswer !== null && !revealing && !isSpectator && (
         <p className="waiting">Svar skickat! Väntar på de andra…</p>
       )}
 
+      {revealing && room.lastRound && (
+        <ul className="round-results">
+          {room.lastRound.map((r) => (
+            <li key={r.playerId} className={r.correct ? 'hit' : 'miss'}>
+              <span className="mark" aria-hidden>
+                {r.correct ? '✓' : '✗'}
+              </span>
+              <span className="who">
+                {r.name}
+                {r.playerId === playerId ? ' (du)' : ''}
+              </span>
+              <span className="gain">{r.correct ? `+${r.gained}` : '0'}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
       {revealing && (
-        <ul className="players">
+        <ul className="players scoreboard">
           {[...room.players]
             .filter((p) => p.playing)
             .sort((a, b) => b.score - a.score)
-            .map((p) => (
+            .map((p, i) => (
               <li key={p.id}>
-                <span>{p.name}</span>
+                <span>
+                  {i + 1}. {p.name}
+                </span>
                 <span>{p.score} p</span>
               </li>
             ))}
         </ul>
+      )}
+
+      {revealing && manual && isHost && (
+        <button className="btn btn-primary" type="button" onClick={onNext} disabled={busyNext}>
+          {isLast ? 'Visa vinnare' : 'Nästa fråga'}
+        </button>
+      )}
+
+      {revealing && manual && !isHost && (
+        <p className="waiting">Väntar på att värden går vidare…</p>
+      )}
+
+      {revealing && !manual && (
+        <p className="next-countdown">
+          {isLast ? 'Resultat om' : 'Nästa fråga om'} <strong>{seconds}</strong>s
+        </p>
       )}
     </div>
   )
