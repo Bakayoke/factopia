@@ -4,6 +4,8 @@ client/dist/
 dist/
 .DS_Store
 .env
-.env.*
+.env.local
+.env.*.local
 *.log
 .vite/
+.wrangler/
