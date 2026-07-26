@@ -18,7 +18,8 @@ function cleanSecret(raw: string | undefined): string {
 export function resolveStripeSecretKey(): string {
   for (const name of STRIPE_KEY_ENVS) {
     const value = cleanSecret(process.env[name])
-    if (value.startsWith('sk_')) return value
+    // Standard secret keys (sk_) and restricted keys (rk_)
+    if (value.startsWith('sk_') || value.startsWith('rk_')) return value
   }
   return ''
 }
@@ -29,16 +30,24 @@ export function stripeConfigured(): boolean {
 
 export function stripeEnvDiagnostics() {
   const found: Record<string, boolean> = {}
+  const prefixes: Record<string, string | null> = {}
   for (const name of STRIPE_KEY_ENVS) {
     const value = cleanSecret(process.env[name])
     found[name] = Boolean(value)
+    prefixes[name] = value ? `${value.slice(0, 8)}…` : null
   }
   const key = resolveStripeSecretKey()
   return {
     configured: Boolean(key),
-    keyPrefix: key ? `${key.slice(0, 7)}…` : null,
+    keyPrefix: key ? `${key.slice(0, 8)}…` : null,
     envPresent: found,
+    envPrefixes: prefixes,
     publicAppUrl: Boolean(cleanSecret(process.env.PUBLIC_APP_URL)),
+    hint: key
+      ? null
+      : found.STRIPE_SECRET_KEY
+        ? 'STRIPE_SECRET_KEY finns men börjar inte med sk_ eller rk_. Klistra in Secret key (inte Publishable pk_…).'
+        : 'STRIPE_SECRET_KEY saknas på tjänsten.',
   }
 }
 
