@@ -29,11 +29,16 @@ export type PartyPass = {
   expiresAt: number
 }
 
-/** In-memory passes until Stripe exists. Survives per server process. */
+/** In-memory passes. Survives per server process. */
 const passes = new Map<string, PartyPass>()
 
 function configuredPassCodes(): Set<string> {
-  const raw = process.env.PARTY_PASS_CODES ?? 'PARTY24'
+  const raw = process.env.PARTY_PASS_CODES
+  if (raw === undefined) {
+    // Local/dev default only when Stripe is not configured
+    if (process.env.STRIPE_SECRET_KEY?.trim()) return new Set()
+    return new Set(['PARTY24'])
+  }
   return new Set(
     raw
       .split(',')
@@ -54,20 +59,23 @@ export function tierFromExpiry(expiresAt: number | null | undefined): PremiumTie
   return isPartyActive(expiresAt) ? 'party' : 'free'
 }
 
+export function issuePartyPass(): PartyPass {
+  const pass: PartyPass = {
+    token: crypto.randomUUID(),
+    tier: 'party',
+    expiresAt: Date.now() + PARTY_PASS_MS,
+  }
+  passes.set(pass.token, pass)
+  return pass
+}
+
 export function redeemPassCode(code: string): PartyPass | { error: string } {
   const normalized = code.trim().toUpperCase()
   if (!normalized) return { error: 'Ange en party-kod' }
   if (!configuredPassCodes().has(normalized)) {
     return { error: 'Ogiltig party-kod' }
   }
-  const token = crypto.randomUUID()
-  const pass: PartyPass = {
-    token,
-    tier: 'party',
-    expiresAt: Date.now() + PARTY_PASS_MS,
-  }
-  passes.set(token, pass)
-  return pass
+  return issuePartyPass()
 }
 
 export function lookupPass(token: string | null | undefined): PartyPass | null {

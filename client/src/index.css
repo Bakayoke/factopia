@@ -777,8 +777,56 @@ input:focus {
 .party-home {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.55rem;
   padding: 0.85rem 0.2rem 0.2rem;
+}
+
+.party-hint {
+  margin: 0;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.party-pitch {
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.party-flash {
+  margin: 0;
+  text-align: center;
+  font-weight: 800;
+  color: var(--accent-deep);
+}
+
+.btn-party {
+  appearance: none;
+  border: none;
+  width: 100%;
+  border-radius: 18px;
+  padding: 1.05rem 1.2rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 4vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #1a2744;
+  background: linear-gradient(120deg, var(--sun), #ffe08a 45%, var(--accent));
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.btn-party:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn-party:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }
 
 .party-banner {

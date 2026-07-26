@@ -29,6 +29,13 @@ import {
   setCustomQuestions,
 } from './rooms.js'
 import { redeemPassCode } from './premium.js'
+import {
+  claimPartyCheckoutSession,
+  createPartyCheckoutSession,
+  handleStripeWebhook,
+  partyCheckoutPublicInfo,
+  stripeConfigured,
+} from './stripe.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PORT = Number(process.env.PORT) || 3001
@@ -55,10 +62,49 @@ app.use(
     credentials: true,
   }),
 )
+
+// Stripe needs the raw body for signature verification
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const result = await handleStripeWebhook(
+    Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body ?? {})),
+    req.headers['stripe-signature'] as string | undefined,
+  )
+  if ('error' in result) {
+    res.status(result.status).send(result.error)
+    return
+  }
+  res.json({ received: true })
+})
+
 app.use(express.json())
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, name: 'factopia' })
+  res.json({ ok: true, name: 'factopia', stripe: stripeConfigured() })
+})
+
+app.get('/api/party/info', (_req, res) => {
+  res.json(partyCheckoutPublicInfo())
+})
+
+app.post('/api/party/checkout', async (req, res) => {
+  const locale = req.body?.locale === 'en' ? 'en' : 'sv'
+  const roomCode = typeof req.body?.roomCode === 'string' ? req.body.roomCode : null
+  const result = await createPartyCheckoutSession({ locale, roomCode })
+  if ('error' in result) {
+    res.status(400).json({ error: result.error })
+    return
+  }
+  res.json(result)
+})
+
+app.post('/api/party/claim', async (req, res) => {
+  const sessionId = String(req.body?.sessionId ?? '')
+  const result = await claimPartyCheckoutSession(sessionId)
+  if ('error' in result) {
+    res.status(400).json({ error: result.error })
+    return
+  }
+  res.json({ token: result.token, expiresAt: result.expiresAt })
 })
 
 // Serve built client when present (Railway all-in-one). Cloudflare can host UI separately.

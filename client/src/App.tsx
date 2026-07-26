@@ -3,10 +3,12 @@ import {
   activateParty,
   applyStoredPartyToken,
   bindSocketHandlers,
+  claimPartySession,
   clearSession,
   createGame,
   endGame,
   ensureSessionBound,
+  fetchPartyInfo,
   joinGame,
   loadPartyPass,
   loadSession,
@@ -20,7 +22,9 @@ import {
   setLanguage,
   setRoomTitle,
   startGame,
+  startPartyCheckout,
   submitAnswer,
+  type PartyInfo,
 } from './api'
 import { t } from './i18n'
 import type { AdvanceMode, PublicCustomQuestion, PublicRoom, QuizLanguage } from './types'
@@ -66,11 +70,20 @@ export default function App() {
   const [connected, setConnected] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [partyPass, setPartyPass] = useState(() => loadPartyPass())
+  const [partyInfo, setPartyInfo] = useState<PartyInfo>({
+    enabled: false,
+    amountOre: 9900,
+    amountLabel: '99 kr',
+    durationHours: 24,
+  })
+  const [partyFlash, setPartyFlash] = useState('')
+  const [checkoutBusy, setCheckoutBusy] = useState(false)
 
   const uiLang = room?.language ?? language
   const ui = t(uiLang)
   const hasParty = Boolean(partyPass && partyPass.expiresAt > Date.now())
   const createCounts = hasParty ? ALL_COUNTS : FREE_COUNTS
+  const buyLabel = `Party · ${partyInfo.amountLabel} · ${partyInfo.durationHours} h`
 
   useEffect(() => {
     const onFs = () => setIsFullscreen(Boolean(document.fullscreenElement))
@@ -79,8 +92,60 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    void fetchPartyInfo().then(setPartyInfo)
+  }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const sessionId = params.get('party_session')
+    const cancelled = params.get('party_cancel')
+    if (!sessionId && !cancelled) return
+
+    const clean = () => {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('party_session')
+      url.searchParams.delete('party_cancel')
+      window.history.replaceState({}, '', url.pathname + url.search)
+    }
+
+    if (cancelled) {
+      setPartyFlash(ui.partyCancelled)
+      clean()
+      return
+    }
+
+    setCheckoutBusy(true)
+    void claimPartySession(sessionId!).then((res) => {
+      setCheckoutBusy(false)
+      clean()
+      if (res.error || !res.token || !res.expiresAt) {
+        setError(res.error || ui.somethingWrong)
+        return
+      }
+      const pass = { token: res.token, expiresAt: res.expiresAt }
+      savePartyPass(pass)
+      setPartyPass(pass)
+      setPartyFlash(ui.partyUnlocked)
+      void fetchPartyInfo().then(setPartyInfo)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
     if (questionCount === 50 && !hasParty) setQuestionCount(30)
   }, [hasParty, questionCount])
+
+  async function onBuyParty(roomCode?: string) {
+    setError('')
+    setCheckoutBusy(true)
+    const res = await startPartyCheckout(uiLang, roomCode)
+    if (res.error || !res.url) {
+      setCheckoutBusy(false)
+      setError(res.error || ui.somethingWrong)
+      return
+    }
+    window.location.href = res.url
+  }
 
   async function toggleFullscreen() {
     try {
@@ -208,9 +273,29 @@ export default function App() {
             </button>
             <div className="party-home">
               <p className="section-title">{ui.party}</p>
-              <p className="footer-note">{ui.partyPitch}</p>
-              <p className="footer-note">{hasParty ? `${ui.partyActive} · ${ui.partyUntil} ${formatExpiry(partyPass!.expiresAt, uiLang)}` : ui.partyFreeNote}</p>
-              {!hasParty && <p className="footer-note">{ui.buyPartySoon}</p>}
+              <p className="party-pitch">{ui.partyPitch}</p>
+              {hasParty ? (
+                <p className="footer-note">
+                  {ui.partyActive} · {ui.partyUntil} {formatExpiry(partyPass!.expiresAt, uiLang)}
+                </p>
+              ) : (
+                <>
+                  <p className="party-hint">{ui.buyPartyHint}</p>
+                  {partyInfo.enabled ? (
+                    <button
+                      className="btn btn-party"
+                      type="button"
+                      disabled={checkoutBusy}
+                      onClick={() => void onBuyParty()}
+                    >
+                      {checkoutBusy ? ui.buyPartyBusy : buyLabel}
+                    </button>
+                  ) : (
+                    <p className="footer-note">{ui.buyPartySoon}</p>
+                  )}
+                </>
+              )}
+              {partyFlash && <p className="party-flash">{partyFlash}</p>}
               {TIP_URL && (
                 <a className="btn btn-ghost" href={TIP_URL} target="_blank" rel="noreferrer">
                   {ui.tipLink}
@@ -293,12 +378,26 @@ export default function App() {
                   </button>
                 )}
               </div>
-              {!hasParty && <p className="footer-note" style={{ marginTop: '0.5rem' }}>{ui.buyPartySoon}</p>}
+              {!hasParty && partyInfo.enabled && (
+                <button
+                  className="btn btn-party"
+                  type="button"
+                  style={{ marginTop: '0.65rem' }}
+                  disabled={checkoutBusy}
+                  onClick={() => void onBuyParty()}
+                >
+                  {checkoutBusy ? ui.buyPartyBusy : buyLabel}
+                </button>
+              )}
+              {!hasParty && !partyInfo.enabled && (
+                <p className="footer-note" style={{ marginTop: '0.5rem' }}>{ui.buyPartySoon}</p>
+              )}
               {hasParty && partyPass && (
                 <p className="footer-note" style={{ marginTop: '0.5rem' }}>
                   {ui.partyActive} · {formatExpiry(partyPass.expiresAt, language)}
                 </p>
               )}
+              {partyFlash && <p className="party-flash">{partyFlash}</p>}
             </div>
             <div>
               <label style={{ marginBottom: '0.4rem' }}>{ui.betweenQuestions}</label>
@@ -398,6 +497,10 @@ export default function App() {
               savePartyPass(pass)
               setPartyPass(pass)
             }}
+            partyInfo={partyInfo}
+            buyLabel={buyLabel}
+            onBuyParty={() => void onBuyParty(room.code)}
+            checkoutBusy={checkoutBusy}
           />
         )}
       </div>
@@ -412,6 +515,10 @@ function PlayView({
   onError,
   error,
   onPartyPass,
+  partyInfo,
+  buyLabel,
+  onBuyParty,
+  checkoutBusy,
 }: {
   room: PublicRoom
   playerId: string
@@ -419,6 +526,10 @@ function PlayView({
   onError: (msg: string) => void
   error: string
   onPartyPass: (pass: { token: string; expiresAt: number }) => void
+  partyInfo: PartyInfo
+  buyLabel: string
+  onBuyParty: () => void
+  checkoutBusy: boolean
 }) {
   const isHost = room.hostId === playerId
 
@@ -432,12 +543,26 @@ function PlayView({
         onError={onError}
         onLeave={onLeave}
         onPartyPass={onPartyPass}
+        partyInfo={partyInfo}
+        buyLabel={buyLabel}
+        onBuyParty={onBuyParty}
+        checkoutBusy={checkoutBusy}
       />
     )
   }
 
   if (room.status === 'finished') {
-    return <WinnerView room={room} playerId={playerId} onLeave={onLeave} />
+    return (
+      <WinnerView
+        room={room}
+        playerId={playerId}
+        onLeave={onLeave}
+        partyInfo={partyInfo}
+        buyLabel={buyLabel}
+        onBuyParty={onBuyParty}
+        checkoutBusy={checkoutBusy}
+      />
+    )
   }
 
   return <QuestionView room={room} playerId={playerId} isHost={isHost} onError={onError} onLeave={onLeave} />
@@ -451,6 +576,10 @@ function Lobby({
   onError,
   onLeave,
   onPartyPass,
+  partyInfo,
+  buyLabel,
+  onBuyParty,
+  checkoutBusy,
 }: {
   room: PublicRoom
   playerId: string
@@ -459,9 +588,14 @@ function Lobby({
   onError: (msg: string) => void
   onLeave: () => void
   onPartyPass: (pass: { token: string; expiresAt: number }) => void
+  partyInfo: PartyInfo
+  buyLabel: string
+  onBuyParty: () => void
+  checkoutBusy: boolean
 }) {
   const [busy, setBusy] = useState(false)
   const [partyCode, setPartyCode] = useState('')
+  const [showCode, setShowCode] = useState(false)
   const [titleDraft, setTitleDraft] = useState(room.roomTitle || '')
   const [customs, setCustoms] = useState<PublicCustomQuestion[]>(
     room.customQuestions?.length ? room.customQuestions : [],
@@ -569,22 +703,41 @@ function Lobby({
           <div className={`party-banner ${isParty ? 'on' : ''}`}>
             <div>
               <strong>{isParty ? ui.partyActive : ui.party}</strong>
-              <p>{isParty && room.premiumExpiresAt ? `${ui.partyUntil} ${formatExpiry(room.premiumExpiresAt, room.language)}` : ui.partyPitch}</p>
+              <p>
+                {isParty && room.premiumExpiresAt
+                  ? `${ui.partyUntil} ${formatExpiry(room.premiumExpiresAt, room.language)}`
+                  : ui.partyPitch}
+              </p>
             </div>
-            {!isParty && (
-              <div className="party-redeem">
-                <input
-                  value={partyCode}
-                  onChange={(e) => setPartyCode(e.target.value.toUpperCase())}
-                  placeholder={ui.partyCode}
-                  maxLength={24}
-                />
-                <button className="btn btn-secondary" type="button" onClick={onUnlockParty} disabled={busy}>
-                  {ui.activate}
+            {!isParty && partyInfo.enabled && (
+              <>
+                <p className="party-hint">{ui.buyPartyHint}</p>
+                <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={onBuyParty}>
+                  {checkoutBusy ? ui.buyPartyBusy : buyLabel}
                 </button>
-              </div>
+              </>
             )}
-            {!isParty && <p className="footer-note">{ui.buyPartySoon}</p>}
+            {!isParty && (
+              <>
+                <button className="btn-tiny" type="button" onClick={() => setShowCode((v) => !v)}>
+                  {showCode ? ui.hideCode : ui.haveCode}
+                </button>
+                {showCode && (
+                  <div className="party-redeem">
+                    <input
+                      value={partyCode}
+                      onChange={(e) => setPartyCode(e.target.value.toUpperCase())}
+                      placeholder={ui.partyCode}
+                      maxLength={24}
+                    />
+                    <button className="btn btn-secondary" type="button" onClick={onUnlockParty} disabled={busy}>
+                      {ui.activate}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+            {!isParty && !partyInfo.enabled && <p className="footer-note">{ui.buyPartySoon}</p>}
           </div>
 
           <div>
@@ -976,10 +1129,18 @@ function WinnerView({
   room,
   playerId,
   onLeave,
+  partyInfo,
+  buyLabel,
+  onBuyParty,
+  checkoutBusy,
 }: {
   room: PublicRoom
   playerId: string
   onLeave: () => void
+  partyInfo: PartyInfo
+  buyLabel: string
+  onBuyParty: () => void
+  checkoutBusy: boolean
 }) {
   const ui = t(room.language)
   const ranked = [...room.players].filter((p) => p.playing).sort((a, b) => b.score - a.score)
@@ -1022,7 +1183,12 @@ function WinnerView({
       <button className="btn btn-primary" type="button" onClick={onLeave}>
         {ui.playAgain}
       </button>
-      {room.premiumTier !== 'party' && room.hostId === playerId && (
+      {room.premiumTier !== 'party' && room.hostId === playerId && partyInfo.enabled && (
+        <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={onBuyParty}>
+          {checkoutBusy ? ui.buyPartyBusy : buyLabel}
+        </button>
+      )}
+      {room.premiumTier !== 'party' && room.hostId === playerId && !partyInfo.enabled && (
         <p className="footer-note">{ui.buyPartySoon}</p>
       )}
     </div>

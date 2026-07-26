@@ -75,6 +75,13 @@ const sv = {
   partyLocked: 'Party',
   tipLink: 'Bjud på kaffe',
   buyPartySoon: 'Köp Party-pass kommer snart — testa med koden PARTY24.',
+  buyParty: 'Party · 99 kr · 24 h',
+  buyPartyBusy: 'Öppnar betalning…',
+  buyPartyHint: 'Ett tryck. Klar på sekunder.',
+  partyUnlocked: 'Party upplåst — kör igång!',
+  partyCancelled: 'Köp avbrutet — du kan försöka igen när du vill.',
+  haveCode: 'Har du kod?',
+  hideCode: 'Dölj kod',
 }
 
 const en: typeof sv = {
@@ -152,6 +159,13 @@ const en: typeof sv = {
   partyLocked: 'Party',
   tipLink: 'Buy me a coffee',
   buyPartySoon: 'Paid Party passes are coming — try code PARTY24 for now.',
+  buyParty: 'Party · 99 kr · 24 h',
+  buyPartyBusy: 'Opening checkout…',
+  buyPartyHint: 'One tap. Done in seconds.',
+  partyUnlocked: 'Party unlocked — let’s go!',
+  partyCancelled: 'Checkout cancelled — try again anytime.',
+  haveCode: 'Have a code?',
+  hideCode: 'Hide code',
 }
 
 export type UiStrings = typeof sv

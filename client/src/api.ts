@@ -261,3 +261,59 @@ export function endGame() {
 export function submitAnswer(answerIndex: number) {
   return emitAck<{ ok?: boolean }>('answer', { answerIndex })
 }
+
+function apiBase() {
+  const url = import.meta.env.VITE_SOCKET_URL as string | undefined
+  if (url && url.length > 0) return url.replace(/\/$/, '')
+  if (typeof window !== 'undefined') return window.location.origin
+  return ''
+}
+
+export type PartyInfo = {
+  enabled: boolean
+  amountOre: number
+  amountLabel: string
+  durationHours: number
+}
+
+export async function fetchPartyInfo(): Promise<PartyInfo> {
+  try {
+    const res = await fetch(`${apiBase()}/api/party/info`)
+    if (!res.ok) throw new Error('info failed')
+    return (await res.json()) as PartyInfo
+  } catch {
+    return { enabled: false, amountOre: 9900, amountLabel: '99 kr', durationHours: 24 }
+  }
+}
+
+export async function startPartyCheckout(locale: 'sv' | 'en', roomCode?: string) {
+  try {
+    const res = await fetch(`${apiBase()}/api/party/checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locale, roomCode: roomCode ?? null }),
+    })
+    const data = (await res.json()) as { url?: string; error?: string }
+    if (!res.ok || !data.url) return { error: data.error || 'Kunde inte starta köp' }
+    return { url: data.url }
+  } catch {
+    return { error: 'Kunde inte nå betalningen' }
+  }
+}
+
+export async function claimPartySession(sessionId: string) {
+  try {
+    const res = await fetch(`${apiBase()}/api/party/claim`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    })
+    const data = (await res.json()) as { token?: string; expiresAt?: number; error?: string }
+    if (!res.ok || !data.token || !data.expiresAt) {
+      return { error: data.error || 'Kunde inte hämta Party' }
+    }
+    return { token: data.token, expiresAt: data.expiresAt }
+  } catch {
+    return { error: 'Kunde inte hämta Party' }
+  }
+}
