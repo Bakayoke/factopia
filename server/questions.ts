@@ -4,6 +4,8 @@ import { EN_QUESTIONS } from './questions-en.js'
 import { SV_MORE_QUESTIONS } from './questions-sv-more.js'
 import { BULK_SV_QUESTIONS } from './questions-bulk-sv.js'
 import { BULK_EN_QUESTIONS } from './questions-bulk-en.js'
+import { TP_SV_QUESTIONS } from './questions-tp-sv.js'
+import { TP_EN_QUESTIONS } from './questions-tp-en.js'
 
 export type QuizLanguage = 'sv' | 'en'
 
@@ -804,22 +806,105 @@ export const QUESTIONS_SV: Question[] = [
   ...EXTRA_QUESTIONS,
   ...SV_MORE_QUESTIONS,
   ...BULK_SV_QUESTIONS,
+  ...TP_SV_QUESTIONS,
 ]
-export const QUESTIONS_EN: Question[] = [...EN_QUESTIONS, ...BULK_EN_QUESTIONS]
+export const QUESTIONS_EN: Question[] = [...EN_QUESTIONS, ...BULK_EN_QUESTIONS, ...TP_EN_QUESTIONS]
 /** @deprecated use QUESTIONS_SV / QUESTIONS_EN */
 export const QUESTIONS: Question[] = QUESTIONS_SV
 
-export function pickQuestions(count: number, language: QuizLanguage = 'sv'): Question[] {
-  const pool = (language === 'en' ? QUESTIONS_EN : QUESTIONS_SV).filter(
-    (q) => q.category !== 'Math' && q.category !== 'Matematik',
-  )
-  const shuffled = [...pool]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+const MATHISH =
+  /Hur många (meter|minuter|timmar|bokstäver|dygn)|Du betalar|°F|How many (meters|minutes|hours|letters|days)|You pay |\d+\s*km\?|timmar\?|minuter\?|Vad är \d+\s*[+×x*]/i
+
+function randInt(maxExclusive: number): number {
+  if (maxExclusive <= 0) return 0
+  if (typeof crypto !== 'undefined' && 'getRandomValues' in crypto) {
+    const buf = new Uint32Array(1)
+    crypto.getRandomValues(buf)
+    return buf[0]! % maxExclusive
   }
-  return shuffled.slice(0, Math.min(count, shuffled.length)).map((q) => ({
+  return Math.floor(Math.random() * maxExclusive)
+}
+
+function shuffle<T>(items: T[]): T[] {
+  const arr = [...items]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = randInt(i + 1)
+    ;[arr[i], arr[j]] = [arr[j]!, arr[i]!]
+  }
+  return arr
+}
+
+function normalizeText(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/[^a-z0-9åäö\s]/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function isMathish(q: Question): boolean {
+  return q.category === 'Math' || q.category === 'Matematik' || MATHISH.test(q.text)
+}
+
+function dedupePool(pool: Question[]): Question[] {
+  const seen = new Set<string>()
+  const out: Question[] = []
+  for (const q of shuffle(pool)) {
+    const key = normalizeText(q.text)
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(q)
+  }
+  return out
+}
+
+/** Prefer variety: round-robin across shuffled category buckets. */
+function pickDiverse(pool: Question[], count: number): Question[] {
+  const byCat = new Map<string, Question[]>()
+  for (const q of pool) {
+    const list = byCat.get(q.category) ?? []
+    list.push(q)
+    byCat.set(q.category, list)
+  }
+  const buckets = shuffle([...byCat.values()].map((list) => shuffle(list)))
+  const picked: Question[] = []
+  const used = new Set<string>()
+  let guard = 0
+  while (picked.length < count && guard < count * 50) {
+    guard++
+    let progressed = false
+    for (const bucket of buckets) {
+      while (bucket.length) {
+        const next = bucket.pop()!
+        if (used.has(next.id)) continue
+        used.add(next.id)
+        picked.push(next)
+        progressed = true
+        break
+      }
+      if (picked.length >= count) break
+    }
+    if (!progressed) break
+  }
+  return shuffle(picked)
+}
+
+function withShuffledOptions(q: Question): Question {
+  const indexed = q.options.map((text, index) => ({ text, index }))
+  const shuffled = shuffle(indexed)
+  const correctIndex = shuffled.findIndex((o) => o.index === q.correctIndex)
+  return {
     ...q,
-    options: [...q.options] as [string, string, string, string],
-  }))
+    options: shuffled.map((o) => o.text) as [string, string, string, string],
+    correctIndex: correctIndex < 0 ? 0 : correctIndex,
+  }
+}
+
+export function pickQuestions(count: number, language: QuizLanguage = 'sv'): Question[] {
+  const raw = language === 'en' ? QUESTIONS_EN : QUESTIONS_SV
+  const pool = dedupePool(raw.filter((q) => !isMathish(q)))
+  const selected = pickDiverse(pool, Math.min(count, pool.length))
+  return selected.map(withShuffledOptions)
 }
