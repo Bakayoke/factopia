@@ -83,7 +83,7 @@ const sv = {
   haveCode: 'Har du kod?',
   hideCode: 'Dölj kod',
   stripeMissing:
-    'Betalning är inte igång ännu. Lägg STRIPE_SECRET_KEY i Railway — eller använd din gratis-kod under “Har du kod?”.',
+    'Fel nyckel i Railway: du har pk_… (Publishable). Byt till sk_… (Secret key) från Stripe → API keys.',
   freeTierOk: 'Gratis: 10–30 frågor. Party (betalt/kod): 50 frågor + fler spelare.',
 }
 
@@ -170,7 +170,7 @@ const en: typeof sv = {
   haveCode: 'Have a code?',
   hideCode: 'Hide code',
   stripeMissing:
-    'Payments are not live yet. Add STRIPE_SECRET_KEY in Railway — or use your free code under “Have a code?”.',
+    'Wrong key in Railway: you have pk_… (Publishable). Replace with sk_… (Secret key) from Stripe → API keys.',
   freeTierOk: 'Free: 10–30 questions. Party (paid/code): 50 questions + more players.',
 }
 

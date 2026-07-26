@@ -9,6 +9,7 @@ import {
   endGame,
   ensureSessionBound,
   fetchPartyInfo,
+  fetchStripeHint,
   joinGame,
   loadPartyPass,
   loadSession,
@@ -81,6 +82,7 @@ export default function App() {
   const [checkoutBusy, setCheckoutBusy] = useState(false)
   const [ownerCode, setOwnerCode] = useState('')
   const [showOwnerCode, setShowOwnerCode] = useState(false)
+  const [stripeHint, setStripeHint] = useState<string | null>(null)
 
   const uiLang = room?.language ?? language
   const ui = t(uiLang)
@@ -96,6 +98,7 @@ export default function App() {
 
   useEffect(() => {
     void fetchPartyInfo().then(setPartyInfo)
+    void fetchStripeHint().then(setStripeHint)
   }, [])
 
   useEffect(() => {
@@ -144,10 +147,11 @@ export default function App() {
     const res = await startPartyCheckout(uiLang, roomCode)
     if (res.error || !res.url) {
       setCheckoutBusy(false)
+      const hint = stripeHint || (await fetchStripeHint())
       setError(
         partyInfo.enabled
           ? res.error || ui.somethingWrong
-          : ui.stripeMissing,
+          : hint || ui.stripeMissing,
       )
       return
     }

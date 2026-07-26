@@ -286,6 +286,22 @@ export async function fetchPartyInfo(): Promise<PartyInfo> {
   }
 }
 
+export async function fetchStripeHint(): Promise<string | null> {
+  try {
+    const res = await fetch(`${apiBase()}/api/health`)
+    if (!res.ok) return null
+    const data = (await res.json()) as { stripeDiag?: { hint?: string | null; envPrefixes?: Record<string, string | null> } }
+    if (data.stripeDiag?.hint) return data.stripeDiag.hint
+    const prefix = data.stripeDiag?.envPrefixes?.STRIPE_SECRET_KEY
+    if (prefix?.startsWith('pk_')) {
+      return 'Du har Publishable key (pk_…) i Railway. Byt till Secret key (sk_…).'
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 export async function startPartyCheckout(locale: 'sv' | 'en', roomCode?: string) {
   try {
     const res = await fetch(`${apiBase()}/api/party/checkout`, {
