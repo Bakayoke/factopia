@@ -128,7 +128,23 @@ export async function createPartyCheckoutSession(opts: {
     return { url: session.url, sessionId: session.id }
   } catch (e) {
     console.error('Stripe checkout error', e)
-    return { error: 'Kunde inte starta Stripe Checkout' }
+    const message =
+      e && typeof e === 'object' && 'message' in e && typeof (e as { message: unknown }).message === 'string'
+        ? (e as { message: string }).message
+        : 'Kunde inte starta Stripe Checkout'
+    const code =
+      e && typeof e === 'object' && 'code' in e && typeof (e as { code: unknown }).code === 'string'
+        ? (e as { code: string }).code
+        : undefined
+    const type =
+      e && typeof e === 'object' && 'type' in e && typeof (e as { type: unknown }).type === 'string'
+        ? (e as { type: string }).type
+        : undefined
+    return {
+      error: message,
+      stripeCode: code,
+      stripeType: type,
+    }
   }
 }
 

@@ -98,7 +98,7 @@ app.post('/api/party/checkout', async (req, res) => {
   const roomCode = typeof req.body?.roomCode === 'string' ? req.body.roomCode : null
   const result = await createPartyCheckoutSession({ locale, roomCode })
   if ('error' in result) {
-    res.status(400).json({ error: result.error })
+    res.status(400).json(result)
     return
   }
   res.json(result)
