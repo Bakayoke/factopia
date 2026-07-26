@@ -36,7 +36,7 @@ export function Confetti({ count = 36 }: { count?: number }) {
   )
 }
 
-export function useCountdown(endsAt: number | null) {
+export function useCountdown(endsAt: number | null, totalMs = 20_000) {
   const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
@@ -45,8 +45,11 @@ export function useCountdown(endsAt: number | null) {
     return () => clearInterval(id)
   }, [endsAt])
 
-  if (!endsAt) return { remainingMs: 0, ratio: 0 }
+  if (!endsAt) return { remainingMs: 0, ratio: 0, seconds: 0 }
   const remainingMs = Math.max(0, endsAt - now)
-  const total = 20_000
-  return { remainingMs, ratio: remainingMs / total }
+  return {
+    remainingMs,
+    ratio: Math.min(1, remainingMs / totalMs),
+    seconds: Math.ceil(remainingMs / 1000),
+  }
 }

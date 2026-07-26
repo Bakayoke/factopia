@@ -15,6 +15,7 @@ import {
   onRevealTimeout,
   reconnectSocket,
   setQuestionCount,
+  setHostPlaying,
   startGame,
   submitAnswer,
   toPublicRoom,
@@ -85,9 +86,9 @@ function broadcastRoom(roomCode: string) {
 }
 
 io.on('connection', (socket) => {
-  socket.on('create', ({ name, questionCount }, ack) => {
+  socket.on('create', ({ name, questionCount, hostPlays }, ack) => {
     try {
-      const { room, playerId } = createRoom(name, questionCount, socket.id)
+      const { room, playerId } = createRoom(name, questionCount, socket.id, hostPlays !== false)
       socket.join(room.code)
       const payload = { playerId, room: toPublicRoom(room, playerId) }
       ack?.(payload)
@@ -124,6 +125,15 @@ io.on('connection', (socket) => {
     const binding = getBinding(socket.id)
     if (!binding) return ack?.({ error: 'Inte ansluten' })
     const result = setQuestionCount(binding.code, binding.playerId, count)
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
+  socket.on('setHostPlaying', ({ playing }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = setHostPlaying(binding.code, binding.playerId, Boolean(playing))
     if ('error' in result) return ack?.({ error: result.error })
     ack?.({ ok: true })
     broadcastRoom(result.code)

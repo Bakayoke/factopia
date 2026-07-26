@@ -8,6 +8,7 @@ import {
   rejoinGame,
   saveSession,
   setCount,
+  setHostPlaying,
   startGame,
   submitAnswer,
 } from './api'
@@ -17,12 +18,15 @@ import { Confetti, useCountdown } from './ui'
 type Screen = 'home' | 'create' | 'join' | 'play'
 
 const COUNTS = [10, 20, 30]
+const QUESTION_MS = 20_000
+const REVEAL_MS = 5_000
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
   const [questionCount, setQuestionCount] = useState(10)
+  const [hostPlays, setHostPlays] = useState(true)
   const [playerId, setPlayerId] = useState<string | null>(null)
   const [room, setRoom] = useState<PublicRoom | null>(null)
   const [error, setError] = useState('')
@@ -58,7 +62,7 @@ export default function App() {
     e.preventDefault()
     setError('')
     setBusy(true)
-    const res = await createGame(name, questionCount)
+    const res = await createGame(name, questionCount, hostPlays)
     setBusy(false)
     if (res.error || !res.room) {
       setError(res.error || 'Något gick fel')
@@ -147,6 +151,25 @@ export default function App() {
                     {n}
                   </button>
                 ))}
+              </div>
+            </div>
+            <div>
+              <label style={{ marginBottom: '0.4rem' }}>Din roll</label>
+              <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <button
+                  type="button"
+                  className={`choice ${hostPlays ? 'selected' : ''}`}
+                  onClick={() => setHostPlays(true)}
+                >
+                  Spela med
+                </button>
+                <button
+                  type="button"
+                  className={`choice ${!hostPlays ? 'selected' : ''}`}
+                  onClick={() => setHostPlays(false)}
+                >
+                  Bara hosta
+                </button>
               </div>
             </div>
             {error && <p className="error">{error}</p>}
@@ -239,7 +262,7 @@ function PlayView({
     return <WinnerView room={room} playerId={playerId} onLeave={onLeave} />
   }
 
-  return <QuestionView room={room} onError={onError} />
+  return <QuestionView room={room} playerId={playerId} onError={onError} />
 }
 
 function Lobby({
@@ -258,10 +281,18 @@ function Lobby({
   onLeave: () => void
 }) {
   const [busy, setBusy] = useState(false)
+  const me = room.players.find((p) => p.id === playerId)
+  const hostPlaying = me?.playing ?? true
 
   async function changeCount(n: number) {
     if (!isHost) return
     const res = await setCount(n)
+    if (res.error) onError(res.error)
+  }
+
+  async function changeHostPlaying(playing: boolean) {
+    if (!isHost) return
+    const res = await setHostPlaying(playing)
     if (res.error) onError(res.error)
   }
 
@@ -281,21 +312,42 @@ function Lobby({
       </div>
 
       {isHost ? (
-        <div>
-          <label style={{ marginBottom: '0.4rem' }}>Antal frågor</label>
-          <div className="choice-row">
-            {COUNTS.map((n) => (
-              <button
-                key={n}
-                type="button"
-                className={`choice ${room.questionCount === n ? 'selected' : ''}`}
-                onClick={() => changeCount(n)}
-              >
-                {n}
-              </button>
-            ))}
+        <>
+          <div>
+            <label style={{ marginBottom: '0.4rem' }}>Antal frågor</label>
+            <div className="choice-row">
+              {COUNTS.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className={`choice ${room.questionCount === n ? 'selected' : ''}`}
+                  onClick={() => changeCount(n)}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+          <div>
+            <label style={{ marginBottom: '0.4rem' }}>Din roll</label>
+            <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <button
+                type="button"
+                className={`choice ${hostPlaying ? 'selected' : ''}`}
+                onClick={() => changeHostPlaying(true)}
+              >
+                Spela med
+              </button>
+              <button
+                type="button"
+                className={`choice ${!hostPlaying ? 'selected' : ''}`}
+                onClick={() => changeHostPlaying(false)}
+              >
+                Bara hosta
+              </button>
+            </div>
+          </div>
+        </>
       ) : (
         <p className="waiting">{room.questionCount} frågor · väntar på att värden startar…</p>
       )}
@@ -303,7 +355,9 @@ function Lobby({
       <div>
         <p className="meta" style={{ marginBottom: '0.5rem' }}>
           <span>Spelare</span>
-          <span>{room.players.length}/12</span>
+          <span>
+            {room.playingCount} svarar · {room.players.length} totalt
+          </span>
         </p>
         <ul className="players">
           {room.players.map((p) => (
@@ -311,6 +365,7 @@ function Lobby({
               <span>
                 {p.name}{' '}
                 {p.id === room.hostId && <span className="host-tag">värd</span>}
+                {!p.playing && <span className="host-tag"> hostar</span>}
               </span>
               {p.id === playerId && <span className="you">du</span>}
             </li>
@@ -332,11 +387,25 @@ function Lobby({
   )
 }
 
-function QuestionView({ room, onError }: { room: PublicRoom; onError: (msg: string) => void }) {
+function QuestionView({
+  room,
+  playerId,
+  onError,
+}: {
+  room: PublicRoom
+  playerId: string
+  onError: (msg: string) => void
+}) {
   const q = room.question
-  const { remainingMs, ratio } = useCountdown(q?.endsAt ?? null)
+  const me = room.players.find((p) => p.id === playerId)
+  const isSpectator = me ? !me.playing : false
   const revealing = room.status === 'reveal'
-  const locked = room.yourAnswer !== null || revealing
+  const { remainingMs, ratio, seconds } = useCountdown(
+    q?.endsAt ?? null,
+    revealing ? REVEAL_MS : QUESTION_MS,
+  )
+  const locked = isSpectator || room.yourAnswer !== null || revealing
+  const isLast = q ? q.index + 1 >= q.total : false
 
   async function answer(i: number) {
     if (locked) return
@@ -361,12 +430,22 @@ function QuestionView({ room, onError }: { room: PublicRoom; onError: (msg: stri
             <span style={{ width: `${ratio * 100}%` }} />
           </div>
           <p className="meta" style={{ justifyContent: 'center', margin: 0 }}>
-            {Math.ceil(remainingMs / 1000)}s · {room.answeredCount} har svarat
+            {seconds}s · {room.answeredCount}/{room.playingCount} har svarat
           </p>
         </>
       )}
 
+      {revealing && (
+        <p className="next-countdown">
+          {isLast ? 'Resultat om' : 'Nästa fråga om'} <strong>{seconds}</strong>s
+        </p>
+      )}
+
       <h2 className="question-text">{q.text}</h2>
+
+      {isSpectator && !revealing && (
+        <p className="waiting">Du hostar — spelarna svarar nu</p>
+      )}
 
       <div className="answers">
         {q.options.map((opt, i) => {
@@ -388,13 +467,14 @@ function QuestionView({ room, onError }: { room: PublicRoom; onError: (msg: stri
         })}
       </div>
 
-      {room.yourAnswer !== null && !revealing && (
+      {room.yourAnswer !== null && !revealing && !isSpectator && (
         <p className="waiting">Svar skickat! Väntar på de andra…</p>
       )}
 
       {revealing && (
         <ul className="players">
           {[...room.players]
+            .filter((p) => p.playing)
             .sort((a, b) => b.score - a.score)
             .map((p) => (
               <li key={p.id}>
@@ -417,9 +497,11 @@ function WinnerView({
   playerId: string
   onLeave: () => void
 }) {
-  const ranked = [...room.players].sort((a, b) => b.score - a.score)
+  const ranked = [...room.players].filter((p) => p.playing).sort((a, b) => b.score - a.score)
   const winner = ranked[0]
   const isYou = winner?.id === playerId
+  const me = room.players.find((p) => p.id === playerId)
+  const hostedOnly = me && !me.playing
 
   return (
     <div className="card winner-screen">
@@ -427,7 +509,7 @@ function WinnerView({
       <span className="trophy" aria-hidden>
         🏆
       </span>
-      <h2>{isYou ? 'Du vann!' : 'Vinnaren är'}</h2>
+      <h2>{hostedOnly ? 'Vinnaren är' : isYou ? 'Du vann!' : 'Vinnaren är'}</h2>
       <p className="name">{winner?.name ?? '—'}</p>
       <p className="score">{winner?.score ?? 0} poäng</p>
 

@@ -4,7 +4,7 @@ import type { Player, PublicRoom, Room, RoomStatus } from './types.js'
 
 const makeCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ', 4)
 const QUESTION_MS = 20_000
-const REVEAL_MS = 4_000
+const REVEAL_MS = 5_000
 const ALLOWED_COUNTS = [10, 20, 30] as const
 
 const rooms = new Map<string, Room>()
@@ -20,10 +20,15 @@ function uniqueCode(): string {
   return code
 }
 
+function activePlayers(room: Room) {
+  return room.players.filter((p) => p.playing && p.connected)
+}
+
 export function createRoom(
   hostName: string,
   questionCount: number,
   socketId: string,
+  hostPlays = true,
 ): { room: Room; playerId: string } {
   const count = ALLOWED_COUNTS.includes(questionCount as (typeof ALLOWED_COUNTS)[number])
     ? questionCount
@@ -36,6 +41,7 @@ export function createRoom(
     name: hostName.trim().slice(0, 20) || 'Värd',
     score: 0,
     connected: true,
+    playing: hostPlays,
   }
 
   const room: Room = {
@@ -74,6 +80,7 @@ export function joinRoom(
     name: name.trim().slice(0, 20) || 'Spelare',
     score: 0,
     connected: true,
+    playing: true,
   })
   socketToPlayer.set(socketId, { code: room.code, playerId })
   return { room, playerId }
@@ -99,13 +106,28 @@ export function setQuestionCount(code: string, playerId: string, count: number):
   return room
 }
 
+export function setHostPlaying(
+  code: string,
+  playerId: string,
+  playing: boolean,
+): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan ändra detta' }
+  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+  const host = room.players.find((p) => p.id === playerId)
+  if (!host) return { error: 'Värden hittades inte' }
+  host.playing = playing
+  return room
+}
+
 export function startGame(code: string, playerId: string): Room | { error: string } {
   const room = rooms.get(code)
   if (!room) return { error: 'Rummet finns inte' }
   if (room.hostId !== playerId) return { error: 'Bara värden kan starta' }
   if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
-  if (room.players.filter((p) => p.connected).length < 1) {
-    return { error: 'Behöver minst en spelare' }
+  if (activePlayers(room).length < 1) {
+    return { error: 'Behöver minst en spelare som svarar' }
   }
 
   room.questions = pickQuestions(room.questionCount)
@@ -143,16 +165,16 @@ export function submitAnswer(
   if (!room) return { error: 'Rummet finns inte' }
   if (room.status !== 'question') return { error: 'Ingen aktiv fråga' }
   if (answerIndex < 0 || answerIndex > 3) return { error: 'Ogiltigt svar' }
-  if (!room.players.some((p) => p.id === playerId)) {
-    return { error: 'Du är inte med i rummet' }
-  }
+  const player = room.players.find((p) => p.id === playerId)
+  if (!player) return { error: 'Du är inte med i rummet' }
+  if (!player.playing) return { error: 'Du hostar bara och svarar inte' }
   if (room.answers[playerId] !== undefined) return { error: 'Du har redan svarat' }
 
   room.answers[playerId] = answerIndex
   room.answerTimes[playerId] = Date.now()
 
-  const connected = room.players.filter((p) => p.connected)
-  if (connected.every((p) => room.answers[p.id] !== undefined)) {
+  const needAnswer = activePlayers(room)
+  if (needAnswer.length > 0 && needAnswer.every((p) => room.answers[p.id] !== undefined)) {
     revealQuestion(room)
   }
 
@@ -167,6 +189,7 @@ export function revealQuestion(room: Room) {
   room.endsAt = Date.now() + REVEAL_MS
 
   for (const player of room.players) {
+    if (!player.playing) continue
     const ans = room.answers[player.id]
     if (ans === q.correctIndex) {
       const answeredAt = room.answerTimes[player.id] ?? room.endsAt
@@ -235,6 +258,8 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
     }
   }
 
+  const playing = room.players.filter((p) => p.playing)
+
   return {
     code: room.code,
     hostId: room.hostId,
@@ -247,6 +272,7 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
     revealCorrectIndex: room.status === 'reveal' ? room.revealCorrectIndex : null,
     yourAnswer: playerId ? (room.answers[playerId] ?? null) : null,
     answeredCount: Object.keys(room.answers).length,
+    playingCount: playing.length,
   }
 }
 

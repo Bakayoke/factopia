@@ -444,6 +444,21 @@ input:focus {
   margin: 0;
 }
 
+.next-countdown {
+  text-align: center;
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--accent-deep);
+  animation: pop-in 0.35s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.next-countdown strong {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--brand);
+}
+
 .winner-screen {
   text-align: center;
   position: relative;

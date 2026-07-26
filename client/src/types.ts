@@ -3,6 +3,7 @@ export type Player = {
   name: string
   score: number
   connected: boolean
+  playing: boolean
 }
 
 export type RoomStatus = 'lobby' | 'question' | 'reveal' | 'finished'
@@ -28,4 +29,5 @@ export type PublicRoom = {
   revealCorrectIndex: number | null
   yourAnswer: number | null
   answeredCount: number
+  playingCount: number
 }

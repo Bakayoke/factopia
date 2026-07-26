@@ -86,8 +86,12 @@ async function emitAck<T>(event: string, data: unknown): Promise<Ack<T>> {
   }
 }
 
-export function createGame(name: string, questionCount: number) {
-  return emitAck<{ playerId: string; room: PublicRoom }>('create', { name, questionCount })
+export function createGame(name: string, questionCount: number, hostPlays: boolean) {
+  return emitAck<{ playerId: string; room: PublicRoom }>('create', {
+    name,
+    questionCount,
+    hostPlays,
+  })
 }
 
 export function joinGame(code: string, name: string) {
@@ -100,6 +104,10 @@ export function rejoinGame(code: string, playerId: string) {
 
 export function setCount(count: number) {
   return emitAck<{ ok?: boolean }>('setCount', { count })
+}
+
+export function setHostPlaying(playing: boolean) {
+  return emitAck<{ ok?: boolean }>('setHostPlaying', { playing })
 }
 
 export function startGame() {

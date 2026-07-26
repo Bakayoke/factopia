@@ -11,6 +11,8 @@ export type Player = {
   name: string
   score: number
   connected: boolean
+  /** false = hostar bara, svarar inte på frågor */
+  playing: boolean
 }
 
 export type RoomStatus = 'lobby' | 'question' | 'reveal' | 'finished'
@@ -51,4 +53,5 @@ export type PublicRoom = {
   revealCorrectIndex: number | null
   yourAnswer: number | null
   answeredCount: number
+  playingCount: number
 }
