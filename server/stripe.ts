@@ -3,12 +3,47 @@ import { issuePartyPass, type PartyPass } from './premium.js'
 
 const sessionPasses = new Map<string, PartyPass>()
 
+const STRIPE_KEY_ENVS = [
+  'STRIPE_SECRET_KEY',
+  'STRIPE_SECRET',
+  'STRIPE_API_KEY',
+  'SECRET_KEY',
+] as const
+
+function cleanSecret(raw: string | undefined): string {
+  if (!raw) return ''
+  return raw.trim().replace(/^['"]|['"]$/g, '')
+}
+
+export function resolveStripeSecretKey(): string {
+  for (const name of STRIPE_KEY_ENVS) {
+    const value = cleanSecret(process.env[name])
+    if (value.startsWith('sk_')) return value
+  }
+  return ''
+}
+
 export function stripeConfigured(): boolean {
-  return Boolean(process.env.STRIPE_SECRET_KEY?.trim())
+  return Boolean(resolveStripeSecretKey())
+}
+
+export function stripeEnvDiagnostics() {
+  const found: Record<string, boolean> = {}
+  for (const name of STRIPE_KEY_ENVS) {
+    const value = cleanSecret(process.env[name])
+    found[name] = Boolean(value)
+  }
+  const key = resolveStripeSecretKey()
+  return {
+    configured: Boolean(key),
+    keyPrefix: key ? `${key.slice(0, 7)}…` : null,
+    envPresent: found,
+    publicAppUrl: Boolean(cleanSecret(process.env.PUBLIC_APP_URL)),
+  }
 }
 
 function getStripe(): Stripe {
-  const key = process.env.STRIPE_SECRET_KEY?.trim()
+  const key = resolveStripeSecretKey()
   if (!key) throw new Error('STRIPE_SECRET_KEY saknas')
   return new Stripe(key)
 }

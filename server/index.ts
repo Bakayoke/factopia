@@ -35,6 +35,7 @@ import {
   handleStripeWebhook,
   partyCheckoutPublicInfo,
   stripeConfigured,
+  stripeEnvDiagnostics,
 } from './stripe.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -79,7 +80,13 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
 app.use(express.json())
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, name: 'factopia', stripe: stripeConfigured() })
+  const diag = stripeEnvDiagnostics()
+  res.json({
+    ok: true,
+    name: 'factopia',
+    stripe: diag.configured,
+    stripeDiag: diag,
+  })
 })
 
 app.get('/api/party/info', (_req, res) => {
@@ -317,6 +324,10 @@ setInterval(() => {
 }, 250)
 
 httpServer.listen(PORT, () => {
+  const diag = stripeEnvDiagnostics()
   console.log(`Factopia kör på port ${PORT}`)
   console.log(`Tillåtna origins: ${allowedOrigins.join(', ')}`)
+  console.log(
+    `Stripe: ${diag.configured ? `ok (${diag.keyPrefix})` : 'saknas'} | envPresent=${JSON.stringify(diag.envPresent)}`,
+  )
 })
