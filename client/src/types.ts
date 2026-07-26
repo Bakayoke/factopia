@@ -8,6 +8,7 @@ export type Player = {
 
 export type RoomStatus = 'lobby' | 'question' | 'reveal' | 'finished'
 export type AdvanceMode = 'auto' | 'manual'
+export type QuizLanguage = 'sv' | 'en'
 
 export type PublicQuestion = {
   index: number
@@ -32,6 +33,7 @@ export type PublicRoom = {
   players: Player[]
   questionCount: number
   advanceMode: AdvanceMode
+  language: QuizLanguage
   status: RoomStatus
   currentIndex: number
   totalQuestions: number

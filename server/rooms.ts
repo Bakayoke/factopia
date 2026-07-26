@@ -1,14 +1,29 @@
 import { customAlphabet } from 'nanoid'
 import { pickQuestions } from './questions.js'
-import type { AdvanceMode, Player, PublicRoom, Room, RoomStatus, RoundResult } from './types.js'
+import type { AdvanceMode, Player, PublicRoom, QuizLanguage, Room, RoomStatus, RoundResult } from './types.js'
 
 const makeCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ', 4)
 const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
+const DISCONNECT_GRACE_MS = 20_000
 const ALLOWED_COUNTS = [10, 20, 30] as const
 
 const rooms = new Map<string, Room>()
 const socketToPlayer = new Map<string, { code: string; playerId: string }>()
+const disconnectTimers = new Map<string, ReturnType<typeof setTimeout>>()
+
+function playerKey(code: string, playerId: string) {
+  return `${code}:${playerId}`
+}
+
+function cancelDisconnectTimer(code: string, playerId: string) {
+  const key = playerKey(code, playerId)
+  const t = disconnectTimers.get(key)
+  if (t) {
+    clearTimeout(t)
+    disconnectTimers.delete(key)
+  }
+}
 
 export function getAllowedCounts() {
   return ALLOWED_COUNTS
@@ -30,6 +45,7 @@ export function createRoom(
   socketId: string,
   hostPlays = true,
   advanceMode: AdvanceMode = 'auto',
+  language: QuizLanguage = 'sv',
 ): { room: Room; playerId: string } {
   const count = ALLOWED_COUNTS.includes(questionCount as (typeof ALLOWED_COUNTS)[number])
     ? questionCount
@@ -39,7 +55,7 @@ export function createRoom(
   const playerId = crypto.randomUUID()
   const host: Player = {
     id: playerId,
-    name: hostName.trim().slice(0, 20) || 'Värd',
+    name: hostName.trim().slice(0, 20) || (language === 'en' ? 'Host' : 'Värd'),
     score: 0,
     connected: true,
     playing: hostPlays,
@@ -51,6 +67,7 @@ export function createRoom(
     players: [host],
     questionCount: count,
     advanceMode: advanceMode === 'manual' ? 'manual' : 'auto',
+    language: language === 'en' ? 'en' : 'sv',
     status: 'lobby',
     questions: [],
     currentIndex: -1,
@@ -80,7 +97,7 @@ export function joinRoom(
   const playerId = crypto.randomUUID()
   room.players.push({
     id: playerId,
-    name: name.trim().slice(0, 20) || 'Spelare',
+    name: name.trim().slice(0, 20) || (room.language === 'en' ? 'Player' : 'Spelare'),
     score: 0,
     connected: true,
     playing: true,
@@ -137,6 +154,19 @@ export function setAdvanceMode(
   return room
 }
 
+export function setLanguage(
+  code: string,
+  playerId: string,
+  language: QuizLanguage,
+): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan ändra detta' }
+  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+  room.language = language === 'en' ? 'en' : 'sv'
+  return room
+}
+
 export function startGame(code: string, playerId: string): Room | { error: string } {
   const room = rooms.get(code)
   if (!room) return { error: 'Rummet finns inte' }
@@ -146,7 +176,7 @@ export function startGame(code: string, playerId: string): Room | { error: strin
     return { error: 'Behöver minst en spelare som svarar' }
   }
 
-  room.questions = pickQuestions(room.questionCount)
+  room.questions = pickQuestions(room.questionCount, room.language)
   room.currentIndex = -1
   room.players.forEach((p) => {
     p.score = 0
@@ -256,15 +286,31 @@ export function onRevealTimeout(room: Room) {
   return false
 }
 
-export function disconnectSocket(socketId: string): Room | null {
+export function disconnectSocket(
+  socketId: string,
+  onSettled?: (room: Room) => void,
+): Room | null {
   const binding = socketToPlayer.get(socketId)
   if (!binding) return null
   socketToPlayer.delete(socketId)
   const room = rooms.get(binding.code)
   if (!room) return null
 
-  const player = room.players.find((p) => p.id === binding.playerId)
-  if (player) player.connected = false
+  // Grace period: keep player "connected" briefly so mobile blips don't drop them mid-game
+  cancelDisconnectTimer(binding.code, binding.playerId)
+  const timer = setTimeout(() => {
+    disconnectTimers.delete(playerKey(binding.code, binding.playerId))
+    const current = rooms.get(binding.code)
+    if (!current) return
+    // Still connected via another socket?
+    for (const b of socketToPlayer.values()) {
+      if (b.code === binding.code && b.playerId === binding.playerId) return
+    }
+    const player = current.players.find((p) => p.id === binding.playerId)
+    if (player) player.connected = false
+    onSettled?.(current)
+  }, DISCONNECT_GRACE_MS)
+  disconnectTimers.set(playerKey(binding.code, binding.playerId), timer)
 
   return room
 }
@@ -278,7 +324,12 @@ export function reconnectSocket(
   if (!room) return { error: 'Rummet finns inte' }
   const player = room.players.find((p) => p.id === playerId)
   if (!player) return { error: 'Spelaren hittades inte' }
+  cancelDisconnectTimer(room.code, playerId)
   player.connected = true
+  // Drop stale bindings for this player
+  for (const [sid, b] of socketToPlayer.entries()) {
+    if (b.playerId === playerId && sid !== socketId) socketToPlayer.delete(sid)
+  }
   socketToPlayer.set(socketId, { code: room.code, playerId })
   return room
 }
@@ -305,6 +356,7 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
     players: room.players.map((p) => ({ ...p })),
     questionCount: room.questionCount,
     advanceMode: room.advanceMode,
+    language: room.language,
     status: room.status as RoomStatus,
     currentIndex: room.currentIndex,
     totalQuestions: room.questions.length || room.questionCount,

@@ -1,20 +1,22 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import {
+  bindSocketHandlers,
   clearSession,
   createGame,
-  getSocket,
+  ensureSessionBound,
   joinGame,
   loadSession,
   nextQuestion,
-  rejoinGame,
   saveSession,
   setAdvanceMode,
   setCount,
   setHostPlaying,
+  setLanguage,
   startGame,
   submitAnswer,
 } from './api'
-import type { AdvanceMode, PublicRoom } from './types'
+import { t } from './i18n'
+import type { AdvanceMode, PublicRoom, QuizLanguage } from './types'
 import { Confetti, useCountdown } from './ui'
 
 type Screen = 'home' | 'create' | 'join' | 'play'
@@ -30,45 +32,50 @@ export default function App() {
   const [questionCount, setQuestionCount] = useState(10)
   const [hostPlays, setHostPlays] = useState(true)
   const [advanceMode, setAdvanceModeLocal] = useState<AdvanceMode>('manual')
+  const [language, setLanguageLocal] = useState<QuizLanguage>('sv')
   const [playerId, setPlayerId] = useState<string | null>(null)
   const [room, setRoom] = useState<PublicRoom | null>(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [connected, setConnected] = useState(true)
+
+  const uiLang = room?.language ?? language
+  const ui = t(uiLang)
 
   useEffect(() => {
-    const socket = getSocket()
-    const onRoom = (next: PublicRoom) => setRoom(next)
-    socket.on('room', onRoom)
+    bindSocketHandlers({
+      onRoom: (next) => setRoom(next),
+      onConnection: (ok) => setConnected(ok),
+    })
 
     const session = loadSession()
-    if (session) {
-      setBusy(true)
-      rejoinGame(session.code, session.playerId).then((res) => {
-        setBusy(false)
-        if (res.error || !res.room) {
-          clearSession()
-          return
-        }
-        setName(session.name)
-        setPlayerId(res.playerId)
-        setRoom(res.room)
-        setScreen('play')
-      })
-    }
+    if (!session) return
 
-    return () => {
-      socket.off('room', onRoom)
-    }
+    setBusy(true)
+    ensureSessionBound(5).then((res) => {
+      setBusy(false)
+      if (!res || res.error || !res.room) {
+        // Only clear if room is truly gone
+        if (res?.error?.includes('finns inte') || res?.error?.includes('hittades inte')) {
+          clearSession()
+        }
+        return
+      }
+      setName(session.name)
+      setPlayerId(res.playerId)
+      setRoom(res.room)
+      setScreen('play')
+    })
   }, [])
 
   async function onCreate(e: FormEvent) {
     e.preventDefault()
     setError('')
     setBusy(true)
-    const res = await createGame(name, questionCount, hostPlays, advanceMode)
+    const res = await createGame(name, questionCount, hostPlays, advanceMode, language)
     setBusy(false)
     if (res.error || !res.room) {
-      setError(res.error || 'Något gick fel')
+      setError(res.error || ui.somethingWrong)
       return
     }
     setPlayerId(res.playerId)
@@ -84,7 +91,7 @@ export default function App() {
     const res = await joinGame(code, name)
     setBusy(false)
     if (res.error || !res.room) {
-      setError(res.error || 'Något gick fel')
+      setError(res.error || ui.somethingWrong)
       return
     }
     setPlayerId(res.playerId)
@@ -112,37 +119,60 @@ export default function App() {
       <div className="shell">
         <header className="brand">
           <h1>Factopia</h1>
-          <p>Partyquiz för hela gänget</p>
+          <p>{ui.tagline}</p>
         </header>
+
+        {!connected && screen === 'play' && (
+          <p className="reconnect-banner">{ui.reconnecting}</p>
+        )}
 
         {screen === 'home' && (
           <div className="card home-actions">
             <button className="btn btn-primary" type="button" onClick={() => setScreen('create')}>
-              Starta nytt spel
+              {ui.startNew}
             </button>
-            <div className="divider">eller</div>
+            <div className="divider">{ui.or}</div>
             <button className="btn btn-secondary" type="button" onClick={() => setScreen('join')}>
-              Gå med med kod
+              {ui.joinWithCode}
             </button>
-            <p className="footer-note">Dela koden — svara — fira vinnaren</p>
+            <p className="footer-note">{ui.footer}</p>
           </div>
         )}
 
         {screen === 'create' && (
           <form className="card stack" onSubmit={onCreate}>
             <label>
-              Ditt namn
+              {ui.yourName}
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="t.ex. Linus"
+                placeholder={language === 'en' ? 'e.g. Alex' : 't.ex. Linus'}
                 maxLength={20}
                 required
                 autoFocus
               />
             </label>
             <div>
-              <label style={{ marginBottom: '0.4rem' }}>Antal frågor</label>
+              <label style={{ marginBottom: '0.4rem' }}>{ui.language}</label>
+              <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <button
+                  type="button"
+                  className={`choice ${language === 'sv' ? 'selected' : ''}`}
+                  onClick={() => setLanguageLocal('sv')}
+                >
+                  {ui.swedish}
+                </button>
+                <button
+                  type="button"
+                  className={`choice ${language === 'en' ? 'selected' : ''}`}
+                  onClick={() => setLanguageLocal('en')}
+                >
+                  {ui.english}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label style={{ marginBottom: '0.4rem' }}>{ui.questionCount}</label>
               <div className="choice-row">
                 {COUNTS.map((n) => (
                   <button
@@ -157,49 +187,49 @@ export default function App() {
               </div>
             </div>
             <div>
-              <label style={{ marginBottom: '0.4rem' }}>Din roll</label>
+              <label style={{ marginBottom: '0.4rem' }}>{ui.yourRole}</label>
               <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
                 <button
                   type="button"
                   className={`choice ${hostPlays ? 'selected' : ''}`}
                   onClick={() => setHostPlays(true)}
                 >
-                  Spela med
+                  {ui.playAlong}
                 </button>
                 <button
                   type="button"
                   className={`choice ${!hostPlays ? 'selected' : ''}`}
                   onClick={() => setHostPlays(false)}
                 >
-                  Bara hosta
+                  {ui.hostOnly}
                 </button>
               </div>
             </div>
             <div>
-              <label style={{ marginBottom: '0.4rem' }}>Mellan frågor</label>
+              <label style={{ marginBottom: '0.4rem' }}>{ui.betweenQuestions}</label>
               <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
                 <button
                   type="button"
                   className={`choice ${advanceMode === 'manual' ? 'selected' : ''}`}
                   onClick={() => setAdvanceModeLocal('manual')}
                 >
-                  Klicka nästa
+                  {ui.clickNext}
                 </button>
                 <button
                   type="button"
                   className={`choice ${advanceMode === 'auto' ? 'selected' : ''}`}
                   onClick={() => setAdvanceModeLocal('auto')}
                 >
-                  Auto
+                  {ui.auto}
                 </button>
               </div>
             </div>
             {error && <p className="error">{error}</p>}
             <button className="btn btn-primary" type="submit" disabled={busy || !name.trim()}>
-              Skapa spel
+              {ui.createGame}
             </button>
             <button className="btn btn-ghost" type="button" onClick={() => setScreen('home')}>
-              Tillbaka
+              {ui.back}
             </button>
           </form>
         )}
@@ -207,18 +237,18 @@ export default function App() {
         {screen === 'join' && (
           <form className="card stack" onSubmit={onJoin}>
             <label>
-              Ditt namn
+              {ui.yourName}
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="t.ex. Alex"
+                placeholder={language === 'en' ? 'e.g. Sam' : 't.ex. Alex'}
                 maxLength={20}
                 required
                 autoFocus
               />
             </label>
             <label>
-              Spelkod
+              {ui.codeLabel}
               <input
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
@@ -230,10 +260,10 @@ export default function App() {
             </label>
             {error && <p className="error">{error}</p>}
             <button className="btn btn-accent" type="submit" disabled={busy || !name.trim() || code.length < 4}>
-              Gå med
+              {ui.join}
             </button>
             <button className="btn btn-ghost" type="button" onClick={() => setScreen('home')}>
-              Tillbaka
+              {ui.back}
             </button>
           </form>
         )}
@@ -303,6 +333,7 @@ function Lobby({
   onLeave: () => void
 }) {
   const [busy, setBusy] = useState(false)
+  const ui = t(room.language)
   const me = room.players.find((p) => p.id === playerId)
   const hostPlaying = me?.playing ?? true
   const participants = room.players.filter((p) => p.playing)
@@ -325,6 +356,12 @@ function Lobby({
     if (res.error) onError(res.error)
   }
 
+  async function changeLanguage(lang: QuizLanguage) {
+    if (!isHost) return
+    const res = await setLanguage(lang)
+    if (res.error) onError(res.error)
+  }
+
   async function onStart() {
     setBusy(true)
     onError('')
@@ -336,14 +373,33 @@ function Lobby({
   return (
     <div className="card stack">
       <div className="code-display">
-        <span>Spelkod</span>
+        <span>{ui.gameCode}</span>
         <strong>{room.code}</strong>
       </div>
 
       {isHost ? (
         <>
           <div>
-            <label style={{ marginBottom: '0.4rem' }}>Antal frågor</label>
+            <label style={{ marginBottom: '0.4rem' }}>{ui.language}</label>
+            <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <button
+                type="button"
+                className={`choice ${room.language === 'sv' ? 'selected' : ''}`}
+                onClick={() => changeLanguage('sv')}
+              >
+                {ui.swedish}
+              </button>
+              <button
+                type="button"
+                className={`choice ${room.language === 'en' ? 'selected' : ''}`}
+                onClick={() => changeLanguage('en')}
+              >
+                {ui.english}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label style={{ marginBottom: '0.4rem' }}>{ui.questionCount}</label>
             <div className="choice-row">
               {COUNTS.map((n) => (
                 <button
@@ -358,70 +414,70 @@ function Lobby({
             </div>
           </div>
           <div>
-            <label style={{ marginBottom: '0.4rem' }}>Din roll</label>
+            <label style={{ marginBottom: '0.4rem' }}>{ui.yourRole}</label>
             <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
               <button
                 type="button"
                 className={`choice ${hostPlaying ? 'selected' : ''}`}
                 onClick={() => changeHostPlaying(true)}
               >
-                Spela med
+                {ui.playAlong}
               </button>
               <button
                 type="button"
                 className={`choice ${!hostPlaying ? 'selected' : ''}`}
                 onClick={() => changeHostPlaying(false)}
               >
-                Bara hosta
+                {ui.hostOnly}
               </button>
             </div>
           </div>
           <div>
-            <label style={{ marginBottom: '0.4rem' }}>Mellan frågor</label>
+            <label style={{ marginBottom: '0.4rem' }}>{ui.betweenQuestions}</label>
             <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
               <button
                 type="button"
                 className={`choice ${room.advanceMode === 'manual' ? 'selected' : ''}`}
                 onClick={() => changeAdvance('manual')}
               >
-                Klicka nästa
+                {ui.clickNext}
               </button>
               <button
                 type="button"
                 className={`choice ${room.advanceMode === 'auto' ? 'selected' : ''}`}
                 onClick={() => changeAdvance('auto')}
               >
-                Auto
+                {ui.auto}
               </button>
             </div>
           </div>
         </>
       ) : (
         <p className="waiting">
-          {room.questionCount} frågor · {room.advanceMode === 'manual' ? 'värden klickar vidare' : 'auto'} · väntar…
+          {room.questionCount} {ui.waitingStart}
         </p>
       )}
 
       <div>
         <p className="meta" style={{ marginBottom: '0.5rem' }}>
-          <span>Deltagare</span>
+          <span>{ui.participants}</span>
           <span>{participants.length}/12</span>
         </p>
         {participants.length === 0 ? (
-          <p className="waiting">Inga spelare ännu — dela koden!</p>
+          <p className="waiting">{ui.noPlayers}</p>
         ) : (
           <ul className="players">
             {participants.map((p) => (
               <li key={p.id}>
                 <span>{p.name}</span>
-                {p.id === playerId && <span className="you">du</span>}
+                {p.id === playerId && <span className="you">{ui.you}</span>}
               </li>
             ))}
           </ul>
         )}
         {isHost && !hostPlaying && (
           <p className="footer-note" style={{ marginTop: '0.6rem' }}>
-            Du hostar och syns inte i listan
+            {ui.hostHidden}
           </p>
         )}
       </div>
@@ -430,11 +486,11 @@ function Lobby({
 
       {isHost && (
         <button className="btn btn-primary" type="button" onClick={onStart} disabled={busy}>
-          Starta quizet!
+          {ui.startQuiz}
         </button>
       )}
       <button className="btn btn-ghost" type="button" onClick={onLeave}>
-        Lämna
+        {ui.leave}
       </button>
     </div>
   )
@@ -451,6 +507,7 @@ function QuestionView({
   isHost: boolean
   onError: (msg: string) => void
 }) {
+  const ui = t(room.language)
   const q = room.question
   const me = room.players.find((p) => p.id === playerId)
   const isSpectator = me ? !me.playing : false
@@ -497,7 +554,7 @@ function QuestionView({
             <span style={{ width: `${ratio * 100}%` }} />
           </div>
           <p className="meta" style={{ justifyContent: 'center', margin: 0 }}>
-            {seconds}s · {room.answeredCount}/{room.playingCount} har svarat
+            {seconds}s · {room.answeredCount}/{room.playingCount} {ui.answered}
           </p>
         </>
       )}
@@ -506,14 +563,12 @@ function QuestionView({
 
       {revealing && correctText && (
         <div className="correct-banner">
-          <span>Rätt svar</span>
+          <span>{ui.correctAnswer}</span>
           <strong>{correctText}</strong>
         </div>
       )}
 
-      {isSpectator && !revealing && (
-        <p className="waiting">Du hostar — spelarna svarar nu</p>
-      )}
+      {isSpectator && !revealing && <p className="waiting">{ui.hosting}</p>}
 
       {!revealing && (
         <div className="answers">
@@ -536,7 +591,7 @@ function QuestionView({
       )}
 
       {room.yourAnswer !== null && !revealing && !isSpectator && (
-        <p className="waiting">Svar skickat! Väntar på de andra…</p>
+        <p className="waiting">{ui.answerSent}</p>
       )}
 
       {revealing && room.lastRound && (
@@ -548,7 +603,7 @@ function QuestionView({
               </span>
               <span className="who">
                 {r.name}
-                {r.playerId === playerId ? ' (du)' : ''}
+                {r.playerId === playerId ? ` (${ui.you})` : ''}
               </span>
               <span className="gain">{r.correct ? `+${r.gained}` : '0'}</span>
             </li>
@@ -566,7 +621,9 @@ function QuestionView({
                 <span>
                   {i + 1}. {p.name}
                 </span>
-                <span>{p.score} p</span>
+                <span>
+                  {p.score} {room.language === 'en' ? 'pts' : 'p'}
+                </span>
               </li>
             ))}
         </ul>
@@ -574,17 +631,15 @@ function QuestionView({
 
       {revealing && manual && isHost && (
         <button className="btn btn-primary" type="button" onClick={onNext} disabled={busyNext}>
-          {isLast ? 'Visa vinnare' : 'Nästa fråga'}
+          {isLast ? ui.showWinner : ui.nextQuestion}
         </button>
       )}
 
-      {revealing && manual && !isHost && (
-        <p className="waiting">Väntar på att värden går vidare…</p>
-      )}
+      {revealing && manual && !isHost && <p className="waiting">{ui.waitingNext}</p>}
 
       {revealing && !manual && (
         <p className="next-countdown">
-          {isLast ? 'Resultat om' : 'Nästa fråga om'} <strong>{seconds}</strong>s
+          {isLast ? ui.resultsIn : ui.nextIn} <strong>{seconds}</strong>s
         </p>
       )}
     </div>
@@ -600,6 +655,7 @@ function WinnerView({
   playerId: string
   onLeave: () => void
 }) {
+  const ui = t(room.language)
   const ranked = [...room.players].filter((p) => p.playing).sort((a, b) => b.score - a.score)
   const winner = ranked[0]
   const isYou = winner?.id === playerId
@@ -612,9 +668,11 @@ function WinnerView({
       <span className="trophy" aria-hidden>
         🏆
       </span>
-      <h2>{hostedOnly ? 'Vinnaren är' : isYou ? 'Du vann!' : 'Vinnaren är'}</h2>
+      <h2>{hostedOnly ? ui.winnerIs : isYou ? ui.youWon : ui.winnerIs}</h2>
       <p className="name">{winner?.name ?? '—'}</p>
-      <p className="score">{winner?.score ?? 0} poäng</p>
+      <p className="score">
+        {winner?.score ?? 0} {ui.points}
+      </p>
 
       <ol className="podium">
         {ranked.map((p, i) => (
@@ -622,15 +680,17 @@ function WinnerView({
             <span>{i + 1}.</span>
             <span>
               {p.name}
-              {p.id === playerId ? ' (du)' : ''}
+              {p.id === playerId ? ` (${ui.you})` : ''}
             </span>
-            <span>{p.score} p</span>
+            <span>
+              {p.score} {room.language === 'en' ? 'pts' : 'p'}
+            </span>
           </li>
         ))}
       </ol>
 
       <button className="btn btn-primary" type="button" onClick={onLeave}>
-        Spela igen
+        {ui.playAgain}
       </button>
     </div>
   )

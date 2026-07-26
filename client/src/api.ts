@@ -1,9 +1,9 @@
 import { io, Socket } from 'socket.io-client'
-import type { PublicRoom } from './types'
+import type { AdvanceMode, PublicRoom, QuizLanguage } from './types'
 
 const SESSION_KEY = 'factopia-session'
 
-type Session = { code: string; playerId: string; name: string }
+export type Session = { code: string; playerId: string; name: string }
 
 export function loadSession(): Session | null {
   try {
@@ -23,6 +23,15 @@ export function clearSession() {
 }
 
 let socket: Socket | null = null
+let rejoinInFlight: Promise<Ack<{ playerId: string; room: PublicRoom }>> | null = null
+let connectionListenersAttached = false
+
+type ConnectionHandlers = {
+  onRoom?: (room: PublicRoom) => void
+  onConnection?: (connected: boolean) => void
+}
+
+const handlers: ConnectionHandlers = {}
 
 function socketUrl() {
   const url = import.meta.env.VITE_SOCKET_URL as string | undefined
@@ -35,10 +44,70 @@ export function getSocket() {
       autoConnect: true,
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: 10,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 800,
+      reconnectionDelayMax: 5000,
+      timeout: 20_000,
     })
   }
+
+  if (!connectionListenersAttached) {
+    connectionListenersAttached = true
+    socket.on('connect', () => {
+      handlers.onConnection?.(true)
+      void ensureSessionBound()
+    })
+    socket.on('disconnect', () => {
+      handlers.onConnection?.(false)
+    })
+    socket.on('room', (room: PublicRoom) => {
+      handlers.onRoom?.(room)
+    })
+  }
+
   return socket
+}
+
+export function bindSocketHandlers(next: ConnectionHandlers) {
+  handlers.onRoom = next.onRoom
+  handlers.onConnection = next.onConnection
+  getSocket()
+}
+
+/** Re-attach saved session after (re)connect. Retries transient failures. */
+export async function ensureSessionBound(retries = 4): Promise<Ack<{ playerId: string; room: PublicRoom }> | null> {
+  const session = loadSession()
+  if (!session) return null
+  if (rejoinInFlight) return rejoinInFlight
+
+  rejoinInFlight = (async () => {
+    let last: Ack<{ playerId: string; room: PublicRoom }> = {
+      error: 'rejoin failed',
+    } as Ack<{ playerId: string; room: PublicRoom }>
+    for (let i = 0; i < retries; i++) {
+      last = await rejoinGame(session.code, session.playerId)
+      if (!last.error && last.room) {
+        saveSession(session)
+        return last
+      }
+      // Room truly gone — stop retrying
+      if (
+        last.error?.includes('finns inte') ||
+        last.error?.includes('hittades inte') ||
+        last.error?.includes('not found')
+      ) {
+        break
+      }
+      await new Promise((r) => setTimeout(r, 700 * (i + 1)))
+    }
+    return last
+  })()
+
+  try {
+    return await rejoinInFlight
+  } finally {
+    rejoinInFlight = null
+  }
 }
 
 function whenConnected(): Promise<Socket> {
@@ -48,7 +117,7 @@ function whenConnected(): Promise<Socket> {
     const timer = setTimeout(() => {
       cleanup()
       reject(new Error('Kunde inte ansluta till servern. Kolla nätverket och försök igen.'))
-    }, 12_000)
+    }, 15_000)
 
     const onConnect = () => {
       cleanup()
@@ -75,8 +144,12 @@ type Ack<T> = T & { error?: string }
 async function emitAck<T>(event: string, data: unknown): Promise<Ack<T>> {
   try {
     const s = await whenConnected()
+    // Make sure session is bound after reconnect before game actions
+    if (event !== 'create' && event !== 'join' && event !== 'rejoin') {
+      await ensureSessionBound(2)
+    }
     return await new Promise<Ack<T>>((resolve) => {
-      s.timeout(10000).emit(event, data, (err: Error | null, res: Ack<T>) => {
+      s.timeout(12_000).emit(event, data, (err: Error | null, res: Ack<T>) => {
         if (err) resolve({ error: 'Inget svar från servern' } as Ack<T>)
         else resolve(res ?? ({ error: 'Tomt svar' } as Ack<T>))
       })
@@ -90,13 +163,15 @@ export function createGame(
   name: string,
   questionCount: number,
   hostPlays: boolean,
-  advanceMode: 'auto' | 'manual',
+  advanceMode: AdvanceMode,
+  language: QuizLanguage,
 ) {
   return emitAck<{ playerId: string; room: PublicRoom }>('create', {
     name,
     questionCount,
     hostPlays,
     advanceMode,
+    language,
   })
 }
 
@@ -116,8 +191,12 @@ export function setHostPlaying(playing: boolean) {
   return emitAck<{ ok?: boolean }>('setHostPlaying', { playing })
 }
 
-export function setAdvanceMode(mode: 'auto' | 'manual') {
+export function setAdvanceMode(mode: AdvanceMode) {
   return emitAck<{ ok?: boolean }>('setAdvanceMode', { mode })
+}
+
+export function setLanguage(language: QuizLanguage) {
+  return emitAck<{ ok?: boolean }>('setLanguage', { language })
 }
 
 export function startGame() {

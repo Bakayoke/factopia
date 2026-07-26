@@ -1,7 +1,10 @@
 import type { Question } from './types.js'
 import { EXTRA_QUESTIONS } from './questions-extra.js'
+import { EN_QUESTIONS } from './questions-en.js'
+import { SV_MORE_QUESTIONS } from './questions-sv-more.js'
 
-/** Stor frågebank — blandade kategorier, fyra alternativ. */
+export type QuizLanguage = 'sv' | 'en'
+
 const BASE_QUESTIONS: Question[] = [
   // Geografi
   {
@@ -794,10 +797,14 @@ const BASE_QUESTIONS: Question[] = [
   },
 ]
 
-export const QUESTIONS: Question[] = [...BASE_QUESTIONS, ...EXTRA_QUESTIONS]
+export const QUESTIONS_SV: Question[] = [...BASE_QUESTIONS, ...EXTRA_QUESTIONS, ...SV_MORE_QUESTIONS]
+export const QUESTIONS_EN: Question[] = [...EN_QUESTIONS]
+/** @deprecated use QUESTIONS_SV / QUESTIONS_EN */
+export const QUESTIONS: Question[] = QUESTIONS_SV
 
-export function pickQuestions(count: number): Question[] {
-  const shuffled = [...QUESTIONS]
+export function pickQuestions(count: number, language: QuizLanguage = 'sv'): Question[] {
+  const pool = language === 'en' ? QUESTIONS_EN : QUESTIONS_SV
+  const shuffled = [...pool]
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]

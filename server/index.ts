@@ -17,6 +17,7 @@ import {
   setQuestionCount,
   setHostPlaying,
   setAdvanceMode,
+  setLanguage,
   startGame,
   submitAnswer,
   nextQuestion,
@@ -71,6 +72,9 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST'],
     credentials: true,
   },
+  pingInterval: 20_000,
+  pingTimeout: 60_000,
+  connectTimeout: 30_000,
 })
 
 function broadcastRoom(roomCode: string) {
@@ -88,7 +92,7 @@ function broadcastRoom(roomCode: string) {
 }
 
 io.on('connection', (socket) => {
-  socket.on('create', ({ name, questionCount, hostPlays, advanceMode }, ack) => {
+  socket.on('create', ({ name, questionCount, hostPlays, advanceMode, language }, ack) => {
     try {
       const { room, playerId } = createRoom(
         name,
@@ -96,6 +100,7 @@ io.on('connection', (socket) => {
         socket.id,
         hostPlays !== false,
         advanceMode === 'manual' ? 'manual' : 'auto',
+        language === 'en' ? 'en' : 'sv',
       )
       socket.join(room.code)
       const payload = { playerId, room: toPublicRoom(room, playerId) }
@@ -156,6 +161,15 @@ io.on('connection', (socket) => {
     broadcastRoom(result.code)
   })
 
+  socket.on('setLanguage', ({ language }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = setLanguage(binding.code, binding.playerId, language === 'en' ? 'en' : 'sv')
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
   socket.on('start', (_data, ack) => {
     const binding = getBinding(socket.id)
     if (!binding) return ack?.({ error: 'Inte ansluten' })
@@ -184,8 +198,9 @@ io.on('connection', (socket) => {
   })
 
   socket.on('disconnect', () => {
-    const room = disconnectSocket(socket.id)
-    if (room) broadcastRoom(room.code)
+    disconnectSocket(socket.id, (room) => {
+      broadcastRoom(room.code)
+    })
   })
 })
 
