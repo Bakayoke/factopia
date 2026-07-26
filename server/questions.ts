@@ -902,9 +902,17 @@ function withShuffledOptions(q: Question): Question {
   }
 }
 
-export function pickQuestions(count: number, language: QuizLanguage = 'sv'): Question[] {
+export function pickQuestions(
+  count: number,
+  language: QuizLanguage = 'sv',
+  custom: Question[] = [],
+): Question[] {
+  const customs = shuffle(custom).slice(0, Math.max(0, count)).map(withShuffledOptions)
+  const need = Math.max(0, count - customs.length)
+  if (need === 0) return shuffle(customs)
+
   const raw = language === 'en' ? QUESTIONS_EN : QUESTIONS_SV
   const pool = dedupePool(raw.filter((q) => !isMathish(q)))
-  const selected = pickDiverse(pool, Math.min(count, pool.length))
-  return selected.map(withShuffledOptions)
+  const selected = pickDiverse(pool, Math.min(need, pool.length)).map(withShuffledOptions)
+  return shuffle([...customs, ...selected])
 }

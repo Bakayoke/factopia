@@ -1,7 +1,8 @@
 import { io, Socket } from 'socket.io-client'
-import type { AdvanceMode, PublicRoom, QuizLanguage } from './types'
+import type { AdvanceMode, PartyPassLocal, PublicCustomQuestion, PublicRoom, QuizLanguage } from './types'
 
 const SESSION_KEY = 'factopia-session'
+const PARTY_PASS_KEY = 'factopia-party-pass'
 
 export type Session = { code: string; playerId: string; name: string }
 
@@ -20,6 +21,29 @@ export function saveSession(session: Session) {
 
 export function clearSession() {
   localStorage.removeItem(SESSION_KEY)
+}
+
+export function loadPartyPass(): PartyPassLocal | null {
+  try {
+    const raw = localStorage.getItem(PARTY_PASS_KEY)
+    if (!raw) return null
+    const pass = JSON.parse(raw) as PartyPassLocal
+    if (!pass?.token || !pass?.expiresAt || pass.expiresAt <= Date.now()) {
+      localStorage.removeItem(PARTY_PASS_KEY)
+      return null
+    }
+    return pass
+  } catch {
+    return null
+  }
+}
+
+export function savePartyPass(pass: PartyPassLocal) {
+  localStorage.setItem(PARTY_PASS_KEY, JSON.stringify(pass))
+}
+
+export function clearPartyPass() {
+  localStorage.removeItem(PARTY_PASS_KEY)
 }
 
 let socket: Socket | null = null
@@ -74,7 +98,6 @@ export function bindSocketHandlers(next: ConnectionHandlers) {
   getSocket()
 }
 
-/** Re-attach saved session after (re)connect. Retries transient failures. */
 export async function ensureSessionBound(retries = 4): Promise<Ack<{ playerId: string; room: PublicRoom }> | null> {
   const session = loadSession()
   if (!session) return null
@@ -90,7 +113,6 @@ export async function ensureSessionBound(retries = 4): Promise<Ack<{ playerId: s
         saveSession(session)
         return last
       }
-      // Room truly gone — stop retrying
       if (
         last.error?.includes('finns inte') ||
         last.error?.includes('hittades inte') ||
@@ -144,8 +166,7 @@ type Ack<T> = T & { error?: string }
 async function emitAck<T>(event: string, data: unknown): Promise<Ack<T>> {
   try {
     const s = await whenConnected()
-    // Make sure session is bound after reconnect before game actions
-    if (event !== 'create' && event !== 'join' && event !== 'rejoin') {
+    if (event !== 'create' && event !== 'join' && event !== 'rejoin' && event !== 'redeemParty') {
       await ensureSessionBound(2)
     }
     return await new Promise<Ack<T>>((resolve) => {
@@ -166,12 +187,14 @@ export function createGame(
   advanceMode: AdvanceMode,
   language: QuizLanguage,
 ) {
+  const pass = loadPartyPass()
   return emitAck<{ playerId: string; room: PublicRoom }>('create', {
     name,
     questionCount,
     hostPlays,
     advanceMode,
     language,
+    partyToken: pass?.token ?? null,
   })
 }
 
@@ -197,6 +220,30 @@ export function setAdvanceMode(mode: AdvanceMode) {
 
 export function setLanguage(language: QuizLanguage) {
   return emitAck<{ ok?: boolean }>('setLanguage', { language })
+}
+
+export function redeemParty(code: string) {
+  return emitAck<{ token: string; expiresAt: number }>('redeemParty', { code })
+}
+
+export function activateParty(code: string) {
+  return emitAck<{ ok?: boolean; token: string; expiresAt: number }>('activateParty', { code })
+}
+
+export function applyStoredPartyToken() {
+  const pass = loadPartyPass()
+  if (!pass) {
+    return Promise.resolve({ error: 'Inget party-pass sparat' } as Ack<{ ok?: boolean }>)
+  }
+  return emitAck<{ ok?: boolean }>('applyPartyToken', { token: pass.token })
+}
+
+export function setRoomTitle(title: string) {
+  return emitAck<{ ok?: boolean }>('setRoomTitle', { title })
+}
+
+export function setCustomQuestions(questions: PublicCustomQuestion[]) {
+  return emitAck<{ ok?: boolean }>('setCustomQuestions', { questions })
 }
 
 export function startGame() {

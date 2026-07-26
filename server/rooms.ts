@@ -1,12 +1,27 @@
 import { customAlphabet } from 'nanoid'
 import { pickQuestions } from './questions.js'
-import type { AdvanceMode, Player, PublicRoom, QuizLanguage, Room, RoomStatus, RoundResult } from './types.js'
+import {
+  limitsFor,
+  lookupPass,
+  redeemPassCode,
+  sanitizeCustomQuestions,
+  tierFromExpiry,
+  type CustomQuestionInput,
+} from './premium.js'
+import type {
+  AdvanceMode,
+  Player,
+  PublicRoom,
+  QuizLanguage,
+  Room,
+  RoomStatus,
+  RoundResult,
+} from './types.js'
 
 const makeCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ', 4)
 const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
 const DISCONNECT_GRACE_MS = 20_000
-const ALLOWED_COUNTS = [10, 20, 30] as const
 
 const rooms = new Map<string, Room>()
 const socketToPlayer = new Map<string, { code: string; playerId: string }>()
@@ -25,8 +40,16 @@ function cancelDisconnectTimer(code: string, playerId: string) {
   }
 }
 
-export function getAllowedCounts() {
-  return ALLOWED_COUNTS
+function roomLimits(room: Room) {
+  return limitsFor(tierFromExpiry(room.premiumExpiresAt))
+}
+
+function clampQuestionCount(count: number, allowed: number[]) {
+  return allowed.includes(count) ? count : allowed[0] ?? 10
+}
+
+export function getAllowedCounts(premiumExpiresAt: number | null = null) {
+  return limitsFor(tierFromExpiry(premiumExpiresAt)).questionCounts
 }
 
 function uniqueCode(): string {
@@ -46,10 +69,12 @@ export function createRoom(
   hostPlays = true,
   advanceMode: AdvanceMode = 'auto',
   language: QuizLanguage = 'sv',
+  partyToken?: string | null,
 ): { room: Room; playerId: string } {
-  const count = ALLOWED_COUNTS.includes(questionCount as (typeof ALLOWED_COUNTS)[number])
-    ? questionCount
-    : 10
+  const pass = lookupPass(partyToken)
+  const premiumExpiresAt = pass?.expiresAt ?? null
+  const limits = limitsFor(tierFromExpiry(premiumExpiresAt))
+  const count = clampQuestionCount(questionCount, limits.questionCounts)
 
   const code = uniqueCode()
   const playerId = crypto.randomUUID()
@@ -70,6 +95,9 @@ export function createRoom(
     language: language === 'en' ? 'en' : 'sv',
     status: 'lobby',
     questions: [],
+    customQuestions: [],
+    roomTitle: '',
+    premiumExpiresAt,
     currentIndex: -1,
     answers: {},
     answerTimes: {},
@@ -92,7 +120,10 @@ export function joinRoom(
   const room = rooms.get(code.toUpperCase().trim())
   if (!room) return { error: 'Hittade inget spel med den koden' }
   if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
-  if (room.players.length >= 12) return { error: 'Rummet är fullt (max 12)' }
+  const maxPlayers = roomLimits(room).maxPlayers
+  if (room.players.length >= maxPlayers) {
+    return { error: `Rummet är fullt (max ${maxPlayers})` }
+  }
 
   const playerId = crypto.randomUUID()
   room.players.push({
@@ -119,8 +150,9 @@ export function setQuestionCount(code: string, playerId: string, count: number):
   if (!room) return { error: 'Rummet finns inte' }
   if (room.hostId !== playerId) return { error: 'Bara värden kan välja antal frågor' }
   if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
-  if (!ALLOWED_COUNTS.includes(count as (typeof ALLOWED_COUNTS)[number])) {
-    return { error: 'Ogiltigt antal frågor' }
+  const allowed = roomLimits(room).questionCounts
+  if (!allowed.includes(count)) {
+    return { error: 'Ogiltigt antal frågor (Party krävs för 50)' }
   }
   room.questionCount = count
   return room
@@ -167,6 +199,77 @@ export function setLanguage(
   return room
 }
 
+export function activatePartyPass(
+  code: string,
+  playerId: string,
+  passCode: string,
+): { room: Room; pass: { token: string; expiresAt: number } } | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan aktivera Party' }
+  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+
+  const redeemed = redeemPassCode(passCode)
+  if ('error' in redeemed) return redeemed
+
+  room.premiumExpiresAt = redeemed.expiresAt
+  const limits = roomLimits(room)
+  if (!limits.questionCounts.includes(room.questionCount)) {
+    room.questionCount = limits.questionCounts[0] ?? 10
+  }
+  return { room, pass: { token: redeemed.token, expiresAt: redeemed.expiresAt } }
+}
+
+export function applyPartyToken(
+  code: string,
+  playerId: string,
+  token: string,
+): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan aktivera Party' }
+  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+  const pass = lookupPass(token)
+  if (!pass) return { error: 'Party-passet är ogiltigt eller har gått ut' }
+  room.premiumExpiresAt = pass.expiresAt
+  const limits = roomLimits(room)
+  if (!limits.questionCounts.includes(room.questionCount)) {
+    room.questionCount = limits.questionCounts[0] ?? 10
+  }
+  return room
+}
+
+export function setRoomTitle(
+  code: string,
+  playerId: string,
+  title: string,
+): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan ändra titel' }
+  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+  if (!roomLimits(room).canSetTitle) return { error: 'Rumtitel kräver Party' }
+  room.roomTitle = title.trim().slice(0, 40)
+  return room
+}
+
+export function setCustomQuestions(
+  code: string,
+  playerId: string,
+  input: CustomQuestionInput[],
+): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan lägga egna frågor' }
+  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+  const max = roomLimits(room).maxCustomQuestions
+  if (max <= 0) return { error: 'Egna frågor kräver Party' }
+  const sanitized = sanitizeCustomQuestions(input, max)
+  if ('error' in sanitized) return sanitized
+  room.customQuestions = sanitized.questions
+  return room
+}
+
 export function startGame(code: string, playerId: string): Room | { error: string } {
   const room = rooms.get(code)
   if (!room) return { error: 'Rummet finns inte' }
@@ -176,7 +279,14 @@ export function startGame(code: string, playerId: string): Room | { error: strin
     return { error: 'Behöver minst en spelare som svarar' }
   }
 
-  room.questions = pickQuestions(room.questionCount, room.language)
+  if (room.premiumExpiresAt && room.premiumExpiresAt <= Date.now()) {
+    room.premiumExpiresAt = null
+    room.customQuestions = []
+    room.roomTitle = ''
+    room.questionCount = clampQuestionCount(room.questionCount, roomLimits(room).questionCounts)
+  }
+
+  room.questions = pickQuestions(room.questionCount, room.language, room.customQuestions)
   room.currentIndex = -1
   room.players.forEach((p) => {
     p.score = 0
@@ -311,13 +421,11 @@ export function disconnectSocket(
   const room = rooms.get(binding.code)
   if (!room) return null
 
-  // Grace period: keep player "connected" briefly so mobile blips don't drop them mid-game
   cancelDisconnectTimer(binding.code, binding.playerId)
   const timer = setTimeout(() => {
     disconnectTimers.delete(playerKey(binding.code, binding.playerId))
     const current = rooms.get(binding.code)
     if (!current) return
-    // Still connected via another socket?
     for (const b of socketToPlayer.values()) {
       if (b.code === binding.code && b.playerId === binding.playerId) return
     }
@@ -341,7 +449,6 @@ export function reconnectSocket(
   if (!player) return { error: 'Spelaren hittades inte' }
   cancelDisconnectTimer(room.code, playerId)
   player.connected = true
-  // Drop stale bindings for this player
   for (const [sid, b] of socketToPlayer.entries()) {
     if (b.playerId === playerId && sid !== socketId) socketToPlayer.delete(sid)
   }
@@ -364,6 +471,9 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
   }
 
   const playing = room.players.filter((p) => p.playing)
+  const tier = tierFromExpiry(room.premiumExpiresAt)
+  const limits = limitsFor(tier)
+  const isHost = playerId === room.hostId
 
   return {
     code: room.code,
@@ -381,6 +491,18 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
     answeredCount: Object.keys(room.answers).length,
     playingCount: playing.length,
     lastRound: room.status === 'reveal' ? room.lastRound : null,
+    premiumTier: tier,
+    premiumExpiresAt: room.premiumExpiresAt,
+    limits,
+    roomTitle: room.roomTitle,
+    customQuestions: isHost
+      ? room.customQuestions.map((cq) => ({
+          text: cq.text,
+          options: cq.options,
+          correctIndex: cq.correctIndex,
+          category: cq.category,
+        }))
+      : undefined,
   }
 }
 

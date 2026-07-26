@@ -9,6 +9,14 @@ export type Player = {
 export type RoomStatus = 'lobby' | 'question' | 'reveal' | 'finished'
 export type AdvanceMode = 'auto' | 'manual'
 export type QuizLanguage = 'sv' | 'en'
+export type PremiumTier = 'free' | 'party'
+
+export type PremiumLimits = {
+  maxPlayers: number
+  questionCounts: number[]
+  maxCustomQuestions: number
+  canSetTitle: boolean
+}
 
 export type PublicQuestion = {
   index: number
@@ -27,6 +35,13 @@ export type RoundResult = {
   answerIndex: number | null
 }
 
+export type PublicCustomQuestion = {
+  text: string
+  options: [string, string, string, string]
+  correctIndex: number
+  category: string
+}
+
 export type PublicRoom = {
   code: string
   hostId: string
@@ -43,4 +58,14 @@ export type PublicRoom = {
   answeredCount: number
   playingCount: number
   lastRound: RoundResult[] | null
+  premiumTier: PremiumTier
+  premiumExpiresAt: number | null
+  limits: PremiumLimits
+  roomTitle: string
+  customQuestions?: PublicCustomQuestion[]
+}
+
+export type PartyPassLocal = {
+  token: string
+  expiresAt: number
 }

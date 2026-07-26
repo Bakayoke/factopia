@@ -23,7 +23,12 @@ import {
   nextQuestion,
   endGame,
   toPublicRoom,
+  activatePartyPass,
+  applyPartyToken,
+  setRoomTitle,
+  setCustomQuestions,
 } from './rooms.js'
+import { redeemPassCode } from './premium.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PORT = Number(process.env.PORT) || 3001
@@ -93,7 +98,7 @@ function broadcastRoom(roomCode: string) {
 }
 
 io.on('connection', (socket) => {
-  socket.on('create', ({ name, questionCount, hostPlays, advanceMode, language }, ack) => {
+  socket.on('create', ({ name, questionCount, hostPlays, advanceMode, language, partyToken }, ack) => {
     try {
       const { room, playerId } = createRoom(
         name,
@@ -102,6 +107,7 @@ io.on('connection', (socket) => {
         hostPlays !== false,
         advanceMode === 'manual' ? 'manual' : 'auto',
         language === 'en' ? 'en' : 'sv',
+        typeof partyToken === 'string' ? partyToken : null,
       )
       socket.join(room.code)
       const payload = { playerId, room: toPublicRoom(room, playerId) }
@@ -110,6 +116,48 @@ io.on('connection', (socket) => {
     } catch {
       ack?.({ error: 'Kunde inte skapa spel' })
     }
+  })
+
+  socket.on('redeemParty', ({ code: passCode }, ack) => {
+    const redeemed = redeemPassCode(String(passCode ?? ''))
+    if ('error' in redeemed) return ack?.({ error: redeemed.error })
+    ack?.({ token: redeemed.token, expiresAt: redeemed.expiresAt })
+  })
+
+  socket.on('activateParty', ({ code: passCode }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = activatePartyPass(binding.code, binding.playerId, String(passCode ?? ''))
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true, token: result.pass.token, expiresAt: result.pass.expiresAt })
+    broadcastRoom(result.room.code)
+  })
+
+  socket.on('applyPartyToken', ({ token }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = applyPartyToken(binding.code, binding.playerId, String(token ?? ''))
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
+  socket.on('setRoomTitle', ({ title }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = setRoomTitle(binding.code, binding.playerId, String(title ?? ''))
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
+  socket.on('setCustomQuestions', ({ questions }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = setCustomQuestions(binding.code, binding.playerId, Array.isArray(questions) ? questions : [])
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
   })
 
   socket.on('join', ({ code, name }, ack) => {

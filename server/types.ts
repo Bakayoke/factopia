@@ -36,6 +36,15 @@ export type RoundResult = {
   answerIndex: number | null
 }
 
+export type PremiumTier = 'free' | 'party'
+
+export type PremiumLimits = {
+  maxPlayers: number
+  questionCounts: number[]
+  maxCustomQuestions: number
+  canSetTitle: boolean
+}
+
 export type Room = {
   code: string
   hostId: string
@@ -45,6 +54,9 @@ export type Room = {
   language: QuizLanguage
   status: RoomStatus
   questions: Question[]
+  customQuestions: Question[]
+  roomTitle: string
+  premiumExpiresAt: number | null
   currentIndex: number
   answers: Record<string, number>
   answerTimes: Record<string, number>
@@ -52,6 +64,13 @@ export type Room = {
   endsAt: number
   revealCorrectIndex: number | null
   lastRound: RoundResult[] | null
+}
+
+export type PublicCustomQuestion = {
+  text: string
+  options: [string, string, string, string]
+  correctIndex: number
+  category: string
 }
 
 export type PublicRoom = {
@@ -70,4 +89,10 @@ export type PublicRoom = {
   answeredCount: number
   playingCount: number
   lastRound: RoundResult[] | null
+  premiumTier: PremiumTier
+  premiumExpiresAt: number | null
+  limits: PremiumLimits
+  roomTitle: string
+  /** Only included for the host */
+  customQuestions?: PublicCustomQuestion[]
 }
