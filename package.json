@@ -8,8 +8,9 @@
     "dev": "concurrently -n server,client -c coral,cyan \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "tsx watch server/index.ts",
     "dev:client": "npm run dev --prefix client",
-    "build": "npm run build --prefix client",
-    "start": "NODE_ENV=production tsx server/index.ts"
+    "build": "npm install --prefix client && npm run build --prefix client",
+    "start": "NODE_ENV=production tsx server/index.ts",
+    "deploy:cf": "npm run build && npx wrangler deploy"
   },
   "dependencies": {
     "@types/cors": "^2.8.19",
@@ -22,5 +23,8 @@
     "socket.io": "^4.8.3",
     "tsx": "^4.23.1",
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "wrangler": "^4.114.0"
   }
 }

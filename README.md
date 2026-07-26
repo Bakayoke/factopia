@@ -26,6 +26,24 @@ npm run dev
 
 ## Produktion
 
+### Cloudflare (frontend + auto-build från GitHub)
+
+Build command i Cloudflare:
+
+```bash
+npm install && npm run build
+```
+
+Deploy command (förifyllt):
+
+```bash
+npx wrangler deploy
+```
+
+Det publicerar Vite-bygget (`client/dist`) som statisk site. **Socket.io-servern** måste hostas separat (t.ex. Railway/Render) — se nedan.
+
+### Node-server (API + quiz-sessioner)
+
 ```bash
 npm run build
 npm start
