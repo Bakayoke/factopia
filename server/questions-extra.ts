@@ -898,13 +898,6 @@ export const EXTRA_QUESTIONS: Question[] = [
     correctIndex: 1,
   },
   {
-    id: "mix-x4",
-    category: "Allmänt",
-    text: "Vilken färg får man av rött + blått?",
-    options: ["Grönt","Lila","Orange","Brun"],
-    correctIndex: 1,
-  },
-  {
     id: "mix-x5",
     category: "Allmänt",
     text: "Vad heter den största planeten?",
@@ -972,13 +965,6 @@ export const EXTRA_QUESTIONS: Question[] = [
     category: "Allmänt",
     text: "Vilken månad kommer efter juni?",
     options: ["Maj","Juli","Augusti","September"],
-    correctIndex: 1,
-  },
-  {
-    id: "mix-x15",
-    category: "Allmänt",
-    text: "Vad är 7 × 8?",
-    options: ["54","56","58","64"],
     correctIndex: 1,
   },
   {
@@ -1346,13 +1332,6 @@ export const EXTRA_QUESTIONS: Question[] = [
     correctIndex: 1,
   },
   {
-    id: "misc-x3",
-    category: "Allmänt",
-    text: "Vad är 15% av 200?",
-    options: ["20","30","25","35"],
-    correctIndex: 1,
-  },
-  {
     id: "misc-x4",
     category: "Allmänt",
     text: "Vilken enhet mäter man ström i?",
@@ -1402,13 +1381,6 @@ export const EXTRA_QUESTIONS: Question[] = [
     correctIndex: 2,
   },
   {
-    id: "misc-x11",
-    category: "Allmänt",
-    text: "Vad är 2^5?",
-    options: ["16","32","64","10"],
-    correctIndex: 1,
-  },
-  {
     id: "misc-x12",
     category: "Allmänt",
     text: "Vilket ämne är flytande vid rumstemperatur och metalliskt?",
@@ -1441,13 +1413,6 @@ export const EXTRA_QUESTIONS: Question[] = [
     category: "Allmänt",
     text: "Vilken riktning pekar kompassens nål mot?",
     options: ["Syd","Magnetisk norr","Öst","Väst"],
-    correctIndex: 1,
-  },
-  {
-    id: "misc-x17",
-    category: "Allmänt",
-    text: "Vad är 0 grader Celsius i Kelvin ungefär?",
-    options: ["100","273","373","0"],
     correctIndex: 1,
   },
   {

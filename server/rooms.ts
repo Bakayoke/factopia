@@ -269,6 +269,21 @@ export function nextQuestion(code: string, playerId: string): Room | { error: st
   return room
 }
 
+export function endGame(code: string, playerId: string): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan avsluta' }
+  if (room.status === 'lobby' || room.status === 'finished') {
+    return { error: 'Spelet kan inte avslutas nu' }
+  }
+  room.status = 'finished'
+  room.endsAt = 0
+  room.questionStartedAt = 0
+  room.revealCorrectIndex = null
+  room.lastRound = null
+  return room
+}
+
 export function onQuestionTimeout(room: Room) {
   if (room.status === 'question' && Date.now() >= room.endsAt) {
     revealQuestion(room)

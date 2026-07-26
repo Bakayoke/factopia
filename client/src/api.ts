@@ -207,6 +207,10 @@ export function nextQuestion() {
   return emitAck<{ ok?: boolean }>('next', {})
 }
 
+export function endGame() {
+  return emitAck<{ ok?: boolean }>('end', {})
+}
+
 export function submitAnswer(answerIndex: number) {
   return emitAck<{ ok?: boolean }>('answer', { answerIndex })
 }

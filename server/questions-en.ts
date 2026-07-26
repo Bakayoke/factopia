@@ -891,13 +891,6 @@ export const EN_QUESTIONS: Question[] = [
     correctIndex: 2,
   },
   {
-    id: "en-gen-3",
-    category: "General",
-    text: "What is 9 × 9?",
-    options: ["72","81","99","89"],
-    correctIndex: 1,
-  },
-  {
     id: "en-gen-4",
     category: "General",
     text: "How many degrees in a right angle?",
@@ -1008,13 +1001,6 @@ export const EN_QUESTIONS: Question[] = [
     text: "How many months have 31 days?",
     options: ["5","6","7","8"],
     correctIndex: 2,
-  },
-  {
-    id: "en-gen-20",
-    category: "General",
-    text: "What is 1000 meters called?",
-    options: ["Hectometer","Kilometer","Mile","Megameter"],
-    correctIndex: 1,
   },
   {
     id: "en-pop-1",

@@ -3,6 +3,7 @@ import {
   bindSocketHandlers,
   clearSession,
   createGame,
+  endGame,
   ensureSessionBound,
   joinGame,
   loadSession,
@@ -33,6 +34,7 @@ export default function App() {
   const [hostPlays, setHostPlays] = useState(true)
   const [advanceMode, setAdvanceModeLocal] = useState<AdvanceMode>('manual')
   const [language, setLanguageLocal] = useState<QuizLanguage>('sv')
+  const [joinStep, setJoinStep] = useState<'code' | 'name'>('code')
   const [playerId, setPlayerId] = useState<string | null>(null)
   const [room, setRoom] = useState<PublicRoom | null>(null)
   const [error, setError] = useState('')
@@ -94,6 +96,11 @@ export default function App() {
   async function onJoin(e: FormEvent) {
     e.preventDefault()
     setError('')
+    if (joinStep === 'code') {
+      if (code.length < 4) return
+      setJoinStep('name')
+      return
+    }
     setBusy(true)
     const res = await joinGame(code, name)
     setBusy(false)
@@ -104,6 +111,7 @@ export default function App() {
     setPlayerId(res.playerId)
     setRoom(res.room)
     saveSession({ code: res.room.code, playerId: res.playerId, name })
+    setJoinStep('code')
     setScreen('play')
   }
 
@@ -139,7 +147,7 @@ export default function App() {
               {ui.startNew}
             </button>
             <div className="divider">{ui.or}</div>
-            <button className="btn btn-secondary" type="button" onClick={() => setScreen('join')}>
+            <button className="btn btn-secondary" type="button" onClick={() => { setJoinStep('code'); setScreen('join') }}>
               {ui.joinWithCode}
             </button>
             <p className="footer-note">{ui.footer}</p>
@@ -245,33 +253,57 @@ export default function App() {
 
         {screen === 'join' && (
           <form className="card stack" onSubmit={onJoin}>
-            <label>
-              {ui.yourName}
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={language === 'en' ? 'e.g. Sam' : 't.ex. Alex'}
-                maxLength={20}
-                required
-                autoFocus
-              />
-            </label>
-            <label>
-              {ui.codeLabel}
-              <input
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="ABCD"
-                maxLength={4}
-                required
-                style={{ letterSpacing: '0.25em', textTransform: 'uppercase', fontWeight: 800 }}
-              />
-            </label>
+            {joinStep === 'code' ? (
+              <label>
+                {ui.enterCode}
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.toUpperCase())}
+                  placeholder="ABCD"
+                  maxLength={4}
+                  required
+                  autoFocus
+                  style={{ letterSpacing: '0.25em', textTransform: 'uppercase', fontWeight: 800 }}
+                />
+              </label>
+            ) : (
+              <label>
+                {ui.enterName}
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={language === 'en' ? 'e.g. Sam' : 't.ex. Alex'}
+                  maxLength={20}
+                  required
+                  autoFocus
+                />
+              </label>
+            )}
+            {joinStep === 'name' && (
+              <p className="footer-note">
+                {ui.codeLabel}: <strong style={{ letterSpacing: '0.15em' }}>{code}</strong>
+              </p>
+            )}
             {error && <p className="error">{error}</p>}
-            <button className="btn btn-accent" type="submit" disabled={busy || !name.trim() || code.length < 4}>
-              {ui.join}
+            <button
+              className="btn btn-accent"
+              type="submit"
+              disabled={busy || (joinStep === 'code' ? code.length < 4 : !name.trim())}
+            >
+              {joinStep === 'code' ? ui.continueCode : ui.join}
             </button>
-            <button className="btn btn-ghost" type="button" onClick={() => setScreen('home')}>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => {
+                if (joinStep === 'name') {
+                  setJoinStep('code')
+                  setError('')
+                } else {
+                  setScreen('home')
+                }
+              }}
+            >
               {ui.back}
             </button>
           </form>
@@ -323,7 +355,7 @@ function PlayView({
     return <WinnerView room={room} playerId={playerId} onLeave={onLeave} />
   }
 
-  return <QuestionView room={room} playerId={playerId} isHost={isHost} onError={onError} />
+  return <QuestionView room={room} playerId={playerId} isHost={isHost} onError={onError} onLeave={onLeave} />
 }
 
 function Lobby({
@@ -499,7 +531,7 @@ function Lobby({
         </button>
       )}
       <button className="btn btn-ghost" type="button" onClick={onLeave}>
-        {ui.leave}
+        {ui.endQuiz}
       </button>
     </div>
   )
@@ -510,11 +542,13 @@ function QuestionView({
   playerId,
   isHost,
   onError,
+  onLeave,
 }: {
   room: PublicRoom
   playerId: string
   isHost: boolean
   onError: (msg: string) => void
+  onLeave: () => void
 }) {
   const ui = t(room.language)
   const q = room.question
@@ -529,6 +563,7 @@ function QuestionView({
   const locked = isSpectator || room.yourAnswer !== null || revealing
   const isLast = q ? q.index + 1 >= q.total : false
   const [busyNext, setBusyNext] = useState(false)
+  const [busyEnd, setBusyEnd] = useState(false)
 
   async function answer(i: number) {
     if (locked) return
@@ -540,6 +575,13 @@ function QuestionView({
     setBusyNext(true)
     const res = await nextQuestion()
     setBusyNext(false)
+    if (res.error) onError(res.error)
+  }
+
+  async function onEnd() {
+    setBusyEnd(true)
+    const res = await endGame()
+    setBusyEnd(false)
     if (res.error) onError(res.error)
   }
 
@@ -650,6 +692,16 @@ function QuestionView({
         <p className="next-countdown">
           {isLast ? ui.resultsIn : ui.nextIn} <strong>{seconds}</strong>s
         </p>
+      )}
+
+      {isHost ? (
+        <button className="btn btn-ghost" type="button" onClick={onEnd} disabled={busyEnd}>
+          {ui.endQuiz}
+        </button>
+      ) : (
+        <button className="btn btn-ghost" type="button" onClick={onLeave}>
+          {ui.leave}
+        </button>
       )}
     </div>
   )
