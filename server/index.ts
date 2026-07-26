@@ -22,27 +22,52 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PORT = Number(process.env.PORT) || 3001
-const isProd = process.env.NODE_ENV === 'production'
+
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://factopia.linus-stenvi.workers.dev',
+  'https://factopia.net',
+  'https://www.factopia.net',
+]
+
+const corsOrigins = (process.env.CORS_ORIGIN ?? '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+
+const allowedOrigins = [...new Set([...defaultOrigins, ...corsOrigins])]
 
 const app = express()
-app.use(cors())
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  }),
+)
 app.use(express.json())
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, name: 'factopia' })
 })
 
-if (isProd) {
-  const clientDist = path.join(__dirname, '../client/dist')
-  app.use(express.static(clientDist))
-  app.get('/{*splat}', (_req, res) => {
-    res.sendFile(path.join(clientDist, 'index.html'))
+// Serve built client when present (Railway all-in-one). Cloudflare can host UI separately.
+const clientDist = path.join(__dirname, '../client/dist')
+app.use(express.static(clientDist))
+app.get('/{*splat}', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) return next()
+  res.sendFile(path.join(clientDist, 'index.html'), (err) => {
+    if (err) next()
   })
-}
+})
 
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
-  cors: { origin: isProd ? false : ['http://localhost:5173', 'http://127.0.0.1:5173'] },
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
 })
 
 function broadcastRoom(roomCode: string) {
@@ -137,5 +162,6 @@ setInterval(() => {
 }, 250)
 
 httpServer.listen(PORT, () => {
-  console.log(`Factopia kör på http://localhost:${PORT}`)
+  console.log(`Factopia kör på port ${PORT}`)
+  console.log(`Tillåtna origins: ${allowedOrigins.join(', ')}`)
 })

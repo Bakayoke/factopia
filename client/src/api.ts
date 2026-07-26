@@ -26,7 +26,8 @@ let socket: Socket | null = null
 
 export function getSocket() {
   if (!socket) {
-    socket = io({
+    const url = import.meta.env.VITE_SOCKET_URL as string | undefined
+    socket = io(url && url.length > 0 ? url : undefined, {
       autoConnect: true,
       transports: ['websocket', 'polling'],
     })
