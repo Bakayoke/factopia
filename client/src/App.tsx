@@ -40,9 +40,28 @@ export default function App() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [connected, setConnected] = useState(true)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   const uiLang = room?.language ?? language
   const ui = t(uiLang)
+
+  useEffect(() => {
+    const onFs = () => setIsFullscreen(Boolean(document.fullscreenElement))
+    document.addEventListener('fullscreenchange', onFs)
+    return () => document.removeEventListener('fullscreenchange', onFs)
+  }, [])
+
+  async function toggleFullscreen() {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen()
+      } else {
+        await document.exitFullscreen()
+      }
+    } catch {
+      // ignore — browser may block without gesture or support
+    }
+  }
 
   useEffect(() => {
     bindSocketHandlers({
@@ -124,7 +143,7 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app${isFullscreen ? ' is-fullscreen' : ''}`}>
       <div className="blobs" aria-hidden>
         <div className="blob blob-a" />
         <div className="blob blob-b" />
@@ -132,6 +151,12 @@ export default function App() {
       </div>
 
       <div className="shell">
+        <div className="topbar-actions">
+          <button className="btn-tiny" type="button" onClick={toggleFullscreen}>
+            {isFullscreen ? ui.exitFullscreen : ui.fullscreen}
+          </button>
+        </div>
+
         <header className="brand">
           <h1>Factopia</h1>
           <p>{ui.tagline}</p>
@@ -646,38 +671,49 @@ function QuestionView({
       )}
 
       {revealing && room.lastRound && (
-        <ul className="round-results">
-          {room.lastRound.map((r) => (
-            <li key={r.playerId} className={r.correct ? 'hit' : 'miss'}>
-              <span className="mark" aria-hidden>
-                {r.correct ? '✓' : '✗'}
-              </span>
-              <span className="who">
-                {r.name}
-                {r.playerId === playerId ? ` (${ui.you})` : ''}
-              </span>
-              <span className="gain">{r.correct ? `+${r.gained}` : '0'}</span>
-            </li>
-          ))}
-        </ul>
+        <>
+          <p className="section-title">{ui.thisRound}</p>
+          <ul className="round-results">
+            {room.lastRound.map((r) => (
+              <li key={r.playerId} className={r.correct ? 'hit' : 'miss'}>
+                <span className="mark" aria-hidden>
+                  {r.correct ? '✓' : '✗'}
+                </span>
+                <span className="who">
+                  {r.name}
+                  {r.playerId === playerId ? ` (${ui.you})` : ''}
+                </span>
+                <span className="gain">{r.correct ? `+${r.gained}` : '0'}</span>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       {revealing && (
-        <ul className="players scoreboard">
-          {[...room.players]
-            .filter((p) => p.playing)
-            .sort((a, b) => b.score - a.score)
-            .map((p, i) => (
-              <li key={p.id}>
-                <span>
-                  {i + 1}. {p.name}
-                </span>
-                <span>
-                  {p.score} {room.language === 'en' ? 'pts' : 'p'}
-                </span>
-              </li>
-            ))}
-        </ul>
+        <>
+          <p className="section-title">{ui.standings}</p>
+          <ol className="scoreboard">
+            {[...room.players]
+              .filter((p) => p.playing)
+              .sort((a, b) => b.score - a.score)
+              .map((p, i) => (
+                <li
+                  key={p.id}
+                  className={i === 0 ? 'place-1' : i === 1 ? 'place-2' : i === 2 ? 'place-3' : undefined}
+                >
+                  <span className="rank">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}</span>
+                  <span>
+                    {p.name}
+                    {p.id === playerId ? ` (${ui.you})` : ''}
+                  </span>
+                  <span className="pts">
+                    {p.score} {room.language === 'en' ? 'pts' : 'p'}
+                  </span>
+                </li>
+              ))}
+          </ol>
+        </>
       )}
 
       {revealing && manual && isHost && (
@@ -735,15 +771,19 @@ function WinnerView({
         {winner?.score ?? 0} {ui.points}
       </p>
 
-      <ol className="podium">
+      <p className="section-title">{ui.standings}</p>
+      <ol className="scoreboard">
         {ranked.map((p, i) => (
-          <li key={p.id}>
-            <span>{i + 1}.</span>
+          <li
+            key={p.id}
+            className={i === 0 ? 'place-1' : i === 1 ? 'place-2' : i === 2 ? 'place-3' : undefined}
+          >
+            <span className="rank">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}</span>
             <span>
               {p.name}
               {p.id === playerId ? ` (${ui.you})` : ''}
             </span>
-            <span>
+            <span className="pts">
               {p.score} {room.language === 'en' ? 'pts' : 'p'}
             </span>
           </li>

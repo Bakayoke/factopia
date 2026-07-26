@@ -50,6 +50,10 @@ const sv = {
   connected: 'Ansluten',
   somethingWrong: 'Något gick fel',
   waitingStart: 'frågor · väntar på att värden startar…',
+  standings: 'Ställning',
+  thisRound: 'Denna omgång',
+  fullscreen: 'Helskärm',
+  exitFullscreen: 'Lämna helskärm',
 }
 
 const en: typeof sv = {
@@ -102,6 +106,10 @@ const en: typeof sv = {
   connected: 'Connected',
   somethingWrong: 'Something went wrong',
   waitingStart: 'questions · waiting for host to start…',
+  standings: 'Standings',
+  thisRound: 'This round',
+  fullscreen: 'Fullscreen',
+  exitFullscreen: 'Exit fullscreen',
 }
 
 export type UiStrings = typeof sv
