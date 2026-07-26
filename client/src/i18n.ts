@@ -82,6 +82,9 @@ const sv = {
   partyCancelled: 'Köp avbrutet — du kan försöka igen när du vill.',
   haveCode: 'Har du kod?',
   hideCode: 'Dölj kod',
+  stripeMissing:
+    'Betalning är inte igång ännu. Lägg STRIPE_SECRET_KEY i Railway — eller använd din gratis-kod under “Har du kod?”.',
+  freeTierOk: 'Gratis: 10–30 frågor. Party (betalt/kod): 50 frågor + fler spelare.',
 }
 
 const en: typeof sv = {
@@ -166,6 +169,9 @@ const en: typeof sv = {
   partyCancelled: 'Checkout cancelled — try again anytime.',
   haveCode: 'Have a code?',
   hideCode: 'Hide code',
+  stripeMissing:
+    'Payments are not live yet. Add STRIPE_SECRET_KEY in Railway — or use your free code under “Have a code?”.',
+  freeTierOk: 'Free: 10–30 questions. Party (paid/code): 50 questions + more players.',
 }
 
 export type UiStrings = typeof sv

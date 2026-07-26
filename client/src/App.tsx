@@ -13,6 +13,7 @@ import {
   loadPartyPass,
   loadSession,
   nextQuestion,
+  redeemParty,
   savePartyPass,
   saveSession,
   setAdvanceMode,
@@ -78,6 +79,8 @@ export default function App() {
   })
   const [partyFlash, setPartyFlash] = useState('')
   const [checkoutBusy, setCheckoutBusy] = useState(false)
+  const [ownerCode, setOwnerCode] = useState('')
+  const [showOwnerCode, setShowOwnerCode] = useState(false)
 
   const uiLang = room?.language ?? language
   const ui = t(uiLang)
@@ -141,10 +144,29 @@ export default function App() {
     const res = await startPartyCheckout(uiLang, roomCode)
     if (res.error || !res.url) {
       setCheckoutBusy(false)
-      setError(res.error || ui.somethingWrong)
+      setError(
+        partyInfo.enabled
+          ? res.error || ui.somethingWrong
+          : ui.stripeMissing,
+      )
       return
     }
     window.location.href = res.url
+  }
+
+  async function onRedeemOwnerCode(code: string) {
+    setError('')
+    setCheckoutBusy(true)
+    const res = await redeemParty(code.trim())
+    setCheckoutBusy(false)
+    if (res.error || !res.token || !res.expiresAt) {
+      setError(res.error || ui.somethingWrong)
+      return
+    }
+    const pass = { token: res.token, expiresAt: res.expiresAt }
+    savePartyPass(pass)
+    setPartyPass(pass)
+    setPartyFlash(ui.partyUnlocked)
   }
 
   async function toggleFullscreen() {
@@ -274,6 +296,7 @@ export default function App() {
             <div className="party-home">
               <p className="section-title">{ui.party}</p>
               <p className="party-pitch">{ui.partyPitch}</p>
+              <p className="footer-note">{ui.freeTierOk}</p>
               {hasParty ? (
                 <p className="footer-note">
                   {ui.partyActive} · {ui.partyUntil} {formatExpiry(partyPass!.expiresAt, uiLang)}
@@ -281,21 +304,39 @@ export default function App() {
               ) : (
                 <>
                   <p className="party-hint">{ui.buyPartyHint}</p>
-                  {partyInfo.enabled ? (
-                    <button
-                      className="btn btn-party"
-                      type="button"
-                      disabled={checkoutBusy}
-                      onClick={() => void onBuyParty()}
-                    >
-                      {checkoutBusy ? ui.buyPartyBusy : buyLabel}
-                    </button>
-                  ) : (
-                    <p className="footer-note">{ui.buyPartySoon}</p>
+                  <button
+                    className="btn btn-party"
+                    type="button"
+                    disabled={checkoutBusy}
+                    onClick={() => void onBuyParty()}
+                  >
+                    {checkoutBusy ? ui.buyPartyBusy : buyLabel}
+                  </button>
+                  <button className="btn-tiny" type="button" onClick={() => setShowOwnerCode((v) => !v)}>
+                    {showOwnerCode ? ui.hideCode : ui.haveCode}
+                  </button>
+                  {showOwnerCode && (
+                    <div className="party-redeem">
+                      <input
+                        value={ownerCode}
+                        onChange={(e) => setOwnerCode(e.target.value)}
+                        placeholder={ui.partyCode}
+                        maxLength={64}
+                      />
+                      <button
+                        className="btn btn-secondary"
+                        type="button"
+                        disabled={checkoutBusy || !ownerCode.trim()}
+                        onClick={() => void onRedeemOwnerCode(ownerCode)}
+                      >
+                        {ui.activate}
+                      </button>
+                    </div>
                   )}
                 </>
               )}
               {partyFlash && <p className="party-flash">{partyFlash}</p>}
+              {error && screen === 'home' && <p className="error">{error}</p>}
               {TIP_URL && (
                 <a className="btn btn-ghost" href={TIP_URL} target="_blank" rel="noreferrer">
                   {ui.tipLink}
@@ -373,31 +414,57 @@ export default function App() {
                   </button>
                 ))}
                 {!hasParty && (
-                  <button type="button" className="choice locked" disabled title={ui.partyPitch}>
+                  <button
+                    type="button"
+                    className="choice locked"
+                    onClick={() => setShowOwnerCode(true)}
+                    title={ui.partyPitch}
+                  >
                     50 <span className="lock-tag">{ui.partyLocked}</span>
                   </button>
                 )}
               </div>
-              {!hasParty && partyInfo.enabled && (
-                <button
-                  className="btn btn-party"
-                  type="button"
-                  style={{ marginTop: '0.65rem' }}
-                  disabled={checkoutBusy}
-                  onClick={() => void onBuyParty()}
-                >
-                  {checkoutBusy ? ui.buyPartyBusy : buyLabel}
-                </button>
-              )}
-              {!hasParty && !partyInfo.enabled && (
-                <p className="footer-note" style={{ marginTop: '0.5rem' }}>{ui.buyPartySoon}</p>
+              {!hasParty && (
+                <div className="party-banner" style={{ marginTop: '0.75rem' }}>
+                  <p className="party-pitch">{ui.partyPitch}</p>
+                  <p className="party-hint">{ui.buyPartyHint}</p>
+                  <button
+                    className="btn btn-party"
+                    type="button"
+                    disabled={checkoutBusy}
+                    onClick={() => void onBuyParty()}
+                  >
+                    {checkoutBusy ? ui.buyPartyBusy : buyLabel}
+                  </button>
+                  <button className="btn-tiny" type="button" onClick={() => setShowOwnerCode((v) => !v)}>
+                    {showOwnerCode ? ui.hideCode : ui.haveCode}
+                  </button>
+                  {showOwnerCode && (
+                    <div className="party-redeem">
+                      <input
+                        value={ownerCode}
+                        onChange={(e) => setOwnerCode(e.target.value)}
+                        placeholder={ui.partyCode}
+                        maxLength={64}
+                      />
+                      <button
+                        className="btn btn-secondary"
+                        type="button"
+                        disabled={checkoutBusy || !ownerCode.trim()}
+                        onClick={() => void onRedeemOwnerCode(ownerCode)}
+                      >
+                        {ui.activate}
+                      </button>
+                    </div>
+                  )}
+                  {partyFlash && <p className="party-flash">{partyFlash}</p>}
+                </div>
               )}
               {hasParty && partyPass && (
                 <p className="footer-note" style={{ marginTop: '0.5rem' }}>
                   {ui.partyActive} · {formatExpiry(partyPass.expiresAt, language)}
                 </p>
               )}
-              {partyFlash && <p className="party-flash">{partyFlash}</p>}
             </div>
             <div>
               <label style={{ marginBottom: '0.4rem' }}>{ui.betweenQuestions}</label>
