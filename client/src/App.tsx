@@ -71,16 +71,23 @@ export default function App() {
   async function onCreate(e: FormEvent) {
     e.preventDefault()
     setError('')
+    if (hostPlays && !name.trim()) {
+      setError(ui.somethingWrong)
+      return
+    }
     setBusy(true)
-    const res = await createGame(name, questionCount, hostPlays, advanceMode, language)
+    const displayName = hostPlays ? name.trim() : ''
+    const res = await createGame(displayName, questionCount, hostPlays, advanceMode, language)
     setBusy(false)
     if (res.error || !res.room) {
       setError(res.error || ui.somethingWrong)
       return
     }
+    const sessionName =
+      res.room.players.find((p) => p.id === res.playerId)?.name || displayName || (language === 'en' ? 'Host' : 'Värd')
     setPlayerId(res.playerId)
     setRoom(res.room)
-    saveSession({ code: res.room.code, playerId: res.playerId, name })
+    saveSession({ code: res.room.code, playerId: res.playerId, name: sessionName })
     setScreen('play')
   }
 
@@ -141,17 +148,38 @@ export default function App() {
 
         {screen === 'create' && (
           <form className="card stack" onSubmit={onCreate}>
-            <label>
-              {ui.yourName}
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={language === 'en' ? 'e.g. Alex' : 't.ex. Linus'}
-                maxLength={20}
-                required
-                autoFocus
-              />
-            </label>
+            <div>
+              <label style={{ marginBottom: '0.4rem' }}>{ui.yourRole}</label>
+              <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <button
+                  type="button"
+                  className={`choice ${hostPlays ? 'selected' : ''}`}
+                  onClick={() => setHostPlays(true)}
+                >
+                  {ui.playAlong}
+                </button>
+                <button
+                  type="button"
+                  className={`choice ${!hostPlays ? 'selected' : ''}`}
+                  onClick={() => setHostPlays(false)}
+                >
+                  {ui.hostOnly}
+                </button>
+              </div>
+            </div>
+            {hostPlays && (
+              <label>
+                {ui.yourName}
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={language === 'en' ? 'e.g. Alex' : 't.ex. Linus'}
+                  maxLength={20}
+                  required
+                  autoFocus
+                />
+              </label>
+            )}
             <div>
               <label style={{ marginBottom: '0.4rem' }}>{ui.language}</label>
               <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
@@ -187,25 +215,6 @@ export default function App() {
               </div>
             </div>
             <div>
-              <label style={{ marginBottom: '0.4rem' }}>{ui.yourRole}</label>
-              <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                <button
-                  type="button"
-                  className={`choice ${hostPlays ? 'selected' : ''}`}
-                  onClick={() => setHostPlays(true)}
-                >
-                  {ui.playAlong}
-                </button>
-                <button
-                  type="button"
-                  className={`choice ${!hostPlays ? 'selected' : ''}`}
-                  onClick={() => setHostPlays(false)}
-                >
-                  {ui.hostOnly}
-                </button>
-              </div>
-            </div>
-            <div>
               <label style={{ marginBottom: '0.4rem' }}>{ui.betweenQuestions}</label>
               <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
                 <button
@@ -225,7 +234,7 @@ export default function App() {
               </div>
             </div>
             {error && <p className="error">{error}</p>}
-            <button className="btn btn-primary" type="submit" disabled={busy || !name.trim()}>
+            <button className="btn btn-primary" type="submit" disabled={busy || (hostPlays && !name.trim())}>
               {ui.createGame}
             </button>
             <button className="btn btn-ghost" type="button" onClick={() => setScreen('home')}>
