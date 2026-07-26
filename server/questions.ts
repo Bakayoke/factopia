@@ -2,6 +2,8 @@ import type { Question } from './types.js'
 import { EXTRA_QUESTIONS } from './questions-extra.js'
 import { EN_QUESTIONS } from './questions-en.js'
 import { SV_MORE_QUESTIONS } from './questions-sv-more.js'
+import { BULK_SV_QUESTIONS } from './questions-bulk-sv.js'
+import { BULK_EN_QUESTIONS } from './questions-bulk-en.js'
 
 export type QuizLanguage = 'sv' | 'en'
 
@@ -797,8 +799,13 @@ const BASE_QUESTIONS: Question[] = [
   },
 ]
 
-export const QUESTIONS_SV: Question[] = [...BASE_QUESTIONS, ...EXTRA_QUESTIONS, ...SV_MORE_QUESTIONS]
-export const QUESTIONS_EN: Question[] = [...EN_QUESTIONS]
+export const QUESTIONS_SV: Question[] = [
+  ...BASE_QUESTIONS,
+  ...EXTRA_QUESTIONS,
+  ...SV_MORE_QUESTIONS,
+  ...BULK_SV_QUESTIONS,
+]
+export const QUESTIONS_EN: Question[] = [...EN_QUESTIONS, ...BULK_EN_QUESTIONS]
 /** @deprecated use QUESTIONS_SV / QUESTIONS_EN */
 export const QUESTIONS: Question[] = QUESTIONS_SV
 
