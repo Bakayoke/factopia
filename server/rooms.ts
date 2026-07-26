@@ -203,17 +203,7 @@ export function disconnectSocket(socketId: string): Room | null {
   const player = room.players.find((p) => p.id === binding.playerId)
   if (player) player.connected = false
 
-  if (room.status === 'lobby') {
-    room.players = room.players.filter((p) => p.id !== binding.playerId)
-    if (room.players.length === 0) {
-      rooms.delete(room.code)
-      return null
-    }
-    if (room.hostId === binding.playerId) {
-      room.hostId = room.players[0].id
-    }
-  }
-
+  // Keep lobby rooms + players so mobile WebSocket blips don't wipe the session code
   return room
 }
 

@@ -24,51 +24,88 @@ export function clearSession() {
 
 let socket: Socket | null = null
 
+function socketUrl() {
+  const url = import.meta.env.VITE_SOCKET_URL as string | undefined
+  return url && url.length > 0 ? url : undefined
+}
+
 export function getSocket() {
   if (!socket) {
-    const url = import.meta.env.VITE_SOCKET_URL as string | undefined
-    socket = io(url && url.length > 0 ? url : undefined, {
+    socket = io(socketUrl(), {
       autoConnect: true,
       transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 10,
     })
   }
   return socket
 }
 
+function whenConnected(): Promise<Socket> {
+  const s = getSocket()
+  if (s.connected) return Promise.resolve(s)
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      cleanup()
+      reject(new Error('Kunde inte ansluta till servern. Kolla nätverket och försök igen.'))
+    }, 12_000)
+
+    const onConnect = () => {
+      cleanup()
+      resolve(s)
+    }
+    const onError = (err: Error) => {
+      cleanup()
+      reject(new Error(err?.message || 'Anslutningen misslyckades'))
+    }
+    const cleanup = () => {
+      clearTimeout(timer)
+      s.off('connect', onConnect)
+      s.off('connect_error', onError)
+    }
+
+    s.on('connect', onConnect)
+    s.on('connect_error', onError)
+    if (!s.active) s.connect()
+  })
+}
+
 type Ack<T> = T & { error?: string }
 
+async function emitAck<T>(event: string, data: unknown): Promise<Ack<T>> {
+  try {
+    const s = await whenConnected()
+    return await new Promise<Ack<T>>((resolve) => {
+      s.timeout(10000).emit(event, data, (err: Error | null, res: Ack<T>) => {
+        if (err) resolve({ error: 'Inget svar från servern' } as Ack<T>)
+        else resolve(res ?? ({ error: 'Tomt svar' } as Ack<T>))
+      })
+    })
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Anslutningsfel' } as Ack<T>
+  }
+}
+
 export function createGame(name: string, questionCount: number) {
-  return new Promise<Ack<{ playerId: string; room: PublicRoom }>>((resolve) => {
-    getSocket().emit('create', { name, questionCount }, resolve)
-  })
+  return emitAck<{ playerId: string; room: PublicRoom }>('create', { name, questionCount })
 }
 
 export function joinGame(code: string, name: string) {
-  return new Promise<Ack<{ playerId: string; room: PublicRoom }>>((resolve) => {
-    getSocket().emit('join', { code, name }, resolve)
-  })
+  return emitAck<{ playerId: string; room: PublicRoom }>('join', { code, name })
 }
 
 export function rejoinGame(code: string, playerId: string) {
-  return new Promise<Ack<{ playerId: string; room: PublicRoom }>>((resolve) => {
-    getSocket().emit('rejoin', { code, playerId }, resolve)
-  })
+  return emitAck<{ playerId: string; room: PublicRoom }>('rejoin', { code, playerId })
 }
 
 export function setCount(count: number) {
-  return new Promise<Ack<{ ok?: boolean }>>((resolve) => {
-    getSocket().emit('setCount', { count }, resolve)
-  })
+  return emitAck<{ ok?: boolean }>('setCount', { count })
 }
 
 export function startGame() {
-  return new Promise<Ack<{ ok?: boolean }>>((resolve) => {
-    getSocket().emit('start', {}, resolve)
-  })
+  return emitAck<{ ok?: boolean }>('start', {})
 }
 
 export function submitAnswer(answerIndex: number) {
-  return new Promise<Ack<{ ok?: boolean }>>((resolve) => {
-    getSocket().emit('answer', { answerIndex }, resolve)
-  })
+  return emitAck<{ ok?: boolean }>('answer', { answerIndex })
 }

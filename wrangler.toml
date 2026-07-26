@@ -5,3 +5,8 @@ compatibility_date = "2026-07-26"
 [assets]
 directory = "./client/dist"
 not_found_handling = "single-page-application"
+
+routes = [
+  { pattern = "factopia.net", custom_domain = true },
+  { pattern = "www.factopia.net", custom_domain = true },
+]
