@@ -46,7 +46,7 @@ export function stripeEnvDiagnostics() {
     hint: key
       ? null
       : found.STRIPE_SECRET_KEY
-        ? 'STRIPE_SECRET_KEY finns men börjar inte med sk_ eller rk_. Klistra in Secret key (inte Publishable pk_…).'
+        ? `STRIPE_SECRET_KEY börjar med "${prefixes.STRIPE_SECRET_KEY ?? '?'}" — måste vara sk_live_… eller sk_test_… (Hemlig nyckel). Inte pk_…, mk_… eller whsec_….`
         : 'STRIPE_SECRET_KEY saknas på tjänsten.',
   }
 }
