@@ -33,12 +33,8 @@ export type PartyPass = {
 const passes = new Map<string, PartyPass>()
 
 function configuredPassCodes(): Set<string> {
-  const raw = process.env.PARTY_PASS_CODES
-  if (raw === undefined) {
-    // Local/dev default only when Stripe is not configured
-    if (process.env.STRIPE_SECRET_KEY?.trim()) return new Set()
-    return new Set(['PARTY24'])
-  }
+  // Only this free bypass by default — everyone else pays via Stripe.
+  const raw = process.env.PARTY_PASS_CODES ?? 'LinusÄrBästHundraProcent'
   return new Set(
     raw
       .split(',')
