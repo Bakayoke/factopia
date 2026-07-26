@@ -400,7 +400,7 @@ function QuestionView({
   const me = room.players.find((p) => p.id === playerId)
   const isSpectator = me ? !me.playing : false
   const revealing = room.status === 'reveal'
-  const { remainingMs, ratio, seconds } = useCountdown(
+  const { ratio, seconds } = useCountdown(
     q?.endsAt ?? null,
     revealing ? REVEAL_MS : QUESTION_MS,
   )
