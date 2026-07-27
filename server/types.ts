@@ -39,10 +39,9 @@ export type RoundResult = {
 export type PremiumTier = 'free' | 'party'
 
 export type PremiumLimits = {
+  /** 0 = unlimited */
   maxPlayers: number
   questionCounts: number[]
-  maxCustomQuestions: number
-  canSetTitle: boolean
 }
 
 export type Room = {

@@ -4,7 +4,6 @@ import {
   limitsFor,
   lookupPass,
   redeemPassCode,
-  sanitizeCustomQuestions,
   tierFromExpiry,
   type CustomQuestionInput,
 } from './premium.js'
@@ -121,8 +120,13 @@ export function joinRoom(
   if (!room) return { error: 'Hittade inget spel med den koden' }
   if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
   const maxPlayers = roomLimits(room).maxPlayers
-  if (room.players.length >= maxPlayers) {
-    return { error: `Rummet är fullt (max ${maxPlayers})` }
+  if (maxPlayers > 0 && room.players.length >= maxPlayers) {
+    return {
+      error:
+        maxPlayers <= 8
+          ? `Rummet är fullt (max ${maxPlayers} gratis). Lås upp Party för fler spelare.`
+          : `Rummet är fullt (max ${maxPlayers})`,
+    }
   }
 
   const playerId = crypto.randomUUID()
@@ -248,26 +252,16 @@ export function setRoomTitle(
   if (!room) return { error: 'Rummet finns inte' }
   if (room.hostId !== playerId) return { error: 'Bara värden kan ändra titel' }
   if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
-  if (!roomLimits(room).canSetTitle) return { error: 'Rumtitel kräver Party' }
   room.roomTitle = title.trim().slice(0, 40)
   return room
 }
 
 export function setCustomQuestions(
-  code: string,
-  playerId: string,
-  input: CustomQuestionInput[],
+  _code: string,
+  _playerId: string,
+  _input: CustomQuestionInput[],
 ): Room | { error: string } {
-  const room = rooms.get(code)
-  if (!room) return { error: 'Rummet finns inte' }
-  if (room.hostId !== playerId) return { error: 'Bara värden kan lägga egna frågor' }
-  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
-  const max = roomLimits(room).maxCustomQuestions
-  if (max <= 0) return { error: 'Egna frågor kräver Party' }
-  const sanitized = sanitizeCustomQuestions(input, max)
-  if ('error' in sanitized) return sanitized
-  room.customQuestions = sanitized.questions
-  return room
+  return { error: 'Egna frågor är borttagna — Factopia ger frågorna åt dig' }
 }
 
 export function startGame(code: string, playerId: string): Room | { error: string } {
@@ -282,11 +276,10 @@ export function startGame(code: string, playerId: string): Room | { error: strin
   if (room.premiumExpiresAt && room.premiumExpiresAt <= Date.now()) {
     room.premiumExpiresAt = null
     room.customQuestions = []
-    room.roomTitle = ''
     room.questionCount = clampQuestionCount(room.questionCount, roomLimits(room).questionCounts)
   }
 
-  room.questions = pickQuestions(room.questionCount, room.language, room.customQuestions)
+  room.questions = pickQuestions(room.questionCount, room.language)
   room.currentIndex = -1
   room.players.forEach((p) => {
     p.score = 0

@@ -1,24 +1,19 @@
 export type PremiumTier = 'free' | 'party'
 
 export type PremiumLimits = {
+  /** 0 = unlimited */
   maxPlayers: number
   questionCounts: number[]
-  maxCustomQuestions: number
-  canSetTitle: boolean
 }
 
 export const FREE_LIMITS: PremiumLimits = {
   maxPlayers: 8,
-  questionCounts: [10, 20, 30],
-  maxCustomQuestions: 0,
-  canSetTitle: false,
+  questionCounts: [10, 20, 30, 50],
 }
 
 export const PARTY_LIMITS: PremiumLimits = {
-  maxPlayers: 24,
+  maxPlayers: 0, // unlimited — pay for bigger groups, not question inventing
   questionCounts: [10, 20, 30, 50],
-  maxCustomQuestions: 30,
-  canSetTitle: true,
 }
 
 export const PARTY_PASS_MS = 24 * 60 * 60 * 1000

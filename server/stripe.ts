@@ -119,7 +119,7 @@ export async function createPartyCheckoutSession(opts: {
                 tax_behavior: 'inclusive',
                 product_data: {
                   name: 'Factopia Party — 24 h',
-                  description: 'Fler spelare, 50 frågor, egna frågor och rumstitel.',
+                  description: 'Fler spelare i samma quiz — inga egna frågor behövs.',
                   // Digital service — required when Managed Payments is on
                   tax_code: 'txcd_10000000',
                 },

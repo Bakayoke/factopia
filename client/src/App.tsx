@@ -19,35 +19,24 @@ import {
   saveSession,
   setAdvanceMode,
   setCount,
-  setCustomQuestions,
   setHostPlaying,
   setLanguage,
-  setRoomTitle,
   startGame,
   startPartyCheckout,
   submitAnswer,
   type PartyInfo,
 } from './api'
 import { t } from './i18n'
-import type { AdvanceMode, PublicCustomQuestion, PublicRoom, QuizLanguage } from './types'
+import type { AdvanceMode, PublicRoom, QuizLanguage } from './types'
 import { Confetti, useCountdown } from './ui'
 
 type Screen = 'home' | 'create' | 'join' | 'play'
 
-const FREE_COUNTS = [10, 20, 30]
+const FREE_COUNTS = [10, 20, 30, 50]
 const ALL_COUNTS = [10, 20, 30, 50]
 const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
 const TIP_URL = (import.meta.env.VITE_TIP_URL as string | undefined) || ''
-
-function emptyCustom(): PublicCustomQuestion {
-  return {
-    text: '',
-    options: ['', '', '', ''],
-    correctIndex: 0,
-    category: 'Egna',
-  }
-}
 
 function formatExpiry(ts: number, lang: QuizLanguage) {
   return new Date(ts).toLocaleString(lang === 'en' ? 'en-GB' : 'sv-SE', {
@@ -136,10 +125,6 @@ export default function App() {
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  useEffect(() => {
-    if (questionCount === 50 && !hasParty) setQuestionCount(30)
-  }, [hasParty, questionCount])
 
   async function onBuyParty(roomCode?: string) {
     setError('')
@@ -417,20 +402,11 @@ export default function App() {
                     {n}
                   </button>
                 ))}
-                {!hasParty && (
-                  <button
-                    type="button"
-                    className="choice locked"
-                    onClick={() => setShowOwnerCode(true)}
-                    title={ui.partyPitch}
-                  >
-                    50 <span className="lock-tag">{ui.partyLocked}</span>
-                  </button>
-                )}
               </div>
               {!hasParty && (
                 <div className="party-banner" style={{ marginTop: '0.75rem' }}>
                   <p className="party-pitch">{ui.partyPitch}</p>
+                  <p className="footer-note">{ui.freeTierOk}</p>
                   <p className="party-hint">{ui.buyPartyHint}</p>
                   <button
                     className="btn btn-party"
@@ -667,10 +643,6 @@ function Lobby({
   const [busy, setBusy] = useState(false)
   const [partyCode, setPartyCode] = useState('')
   const [showCode, setShowCode] = useState(false)
-  const [titleDraft, setTitleDraft] = useState(room.roomTitle || '')
-  const [customs, setCustoms] = useState<PublicCustomQuestion[]>(
-    room.customQuestions?.length ? room.customQuestions : [],
-  )
   const [partyMsg, setPartyMsg] = useState('')
   const ui = t(room.language)
   const me = room.players.find((p) => p.id === playerId)
@@ -679,14 +651,8 @@ function Lobby({
   const isParty = room.premiumTier === 'party'
   const counts = room.limits?.questionCounts ?? FREE_COUNTS
   const maxPlayers = room.limits?.maxPlayers ?? 8
-
-  useEffect(() => {
-    setTitleDraft(room.roomTitle || '')
-  }, [room.roomTitle])
-
-  useEffect(() => {
-    if (room.customQuestions) setCustoms(room.customQuestions)
-  }, [room.customQuestions])
+  const playersLabel =
+    maxPlayers <= 0 ? ui.unlimited : String(maxPlayers)
 
   useEffect(() => {
     if (!isHost || isParty) return
@@ -737,21 +703,6 @@ function Lobby({
     setPartyCode('')
   }
 
-  async function onSaveTitle() {
-    const res = await setRoomTitle(titleDraft)
-    if (res.error) onError(res.error)
-  }
-
-  async function onSaveCustoms() {
-    setBusy(true)
-    onError('')
-    const cleaned = customs.filter((q) => q.text.trim() && q.options.every((o) => o.trim()))
-    const res = await setCustomQuestions(cleaned)
-    setBusy(false)
-    if (res.error) onError(res.error)
-    else setPartyMsg(ui.customSaved)
-  }
-
   async function onStart() {
     setBusy(true)
     onError('')
@@ -767,8 +718,6 @@ function Lobby({
         <strong>{room.code}</strong>
       </div>
 
-      {room.roomTitle ? <p className="room-title">{room.roomTitle}</p> : null}
-
       {isHost ? (
         <>
           <div className={`party-banner ${isParty ? 'on' : ''}`}>
@@ -777,10 +726,10 @@ function Lobby({
               <p>
                 {isParty && room.premiumExpiresAt
                   ? `${ui.partyUntil} ${formatExpiry(room.premiumExpiresAt, room.language)}`
-                  : ui.partyPitch}
+                  : ui.freeTierOk}
               </p>
             </div>
-            {!isParty && partyInfo.enabled && (
+            {!isParty && (
               <>
                 <p className="party-hint">{ui.buyPartyHint}</p>
                 <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={onBuyParty}>
@@ -799,7 +748,7 @@ function Lobby({
                       value={partyCode}
                       onChange={(e) => setPartyCode(e.target.value.toUpperCase())}
                       placeholder={ui.partyCode}
-                      maxLength={24}
+                      maxLength={64}
                     />
                     <button className="btn btn-secondary" type="button" onClick={onUnlockParty} disabled={busy}>
                       {ui.activate}
@@ -843,11 +792,6 @@ function Lobby({
                   {n}
                 </button>
               ))}
-              {!isParty && (
-                <button type="button" className="choice locked" disabled>
-                  50 <span className="lock-tag">{ui.partyLocked}</span>
-                </button>
-              )}
             </div>
           </div>
           <div>
@@ -888,85 +832,6 @@ function Lobby({
               </button>
             </div>
           </div>
-
-          {isParty && (
-            <>
-              <label>
-                {ui.roomTitle}
-                <input
-                  value={titleDraft}
-                  onChange={(e) => setTitleDraft(e.target.value)}
-                  onBlur={() => void onSaveTitle()}
-                  placeholder={ui.roomTitlePlaceholder}
-                  maxLength={40}
-                />
-              </label>
-
-              <div className="custom-block">
-                <p className="section-title">{ui.customQuestions}</p>
-                {customs.map((q, qi) => (
-                  <div className="custom-q" key={qi}>
-                    <input
-                      value={q.text}
-                      placeholder={`${ui.questionText} ${qi + 1}`}
-                      onChange={(e) => {
-                        const next = [...customs]
-                        next[qi] = { ...q, text: e.target.value }
-                        setCustoms(next)
-                      }}
-                    />
-                    <div className="custom-opts">
-                      {q.options.map((opt, oi) => (
-                        <label key={oi} className="custom-opt">
-                          <input
-                            type="radio"
-                            name={`correct-${qi}`}
-                            checked={q.correctIndex === oi}
-                            onChange={() => {
-                              const next = [...customs]
-                              next[qi] = { ...q, correctIndex: oi }
-                              setCustoms(next)
-                            }}
-                          />
-                          <input
-                            value={opt}
-                            placeholder={`${ui.option} ${oi + 1}`}
-                            onChange={(e) => {
-                              const nextOpts = [...q.options] as [string, string, string, string]
-                              nextOpts[oi] = e.target.value
-                              const next = [...customs]
-                              next[qi] = { ...q, options: nextOpts }
-                              setCustoms(next)
-                            }}
-                          />
-                        </label>
-                      ))}
-                    </div>
-                    <button
-                      className="btn-tiny"
-                      type="button"
-                      onClick={() => setCustoms(customs.filter((_, i) => i !== qi))}
-                    >
-                      {ui.removeQuestion}
-                    </button>
-                  </div>
-                ))}
-                <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                  <button
-                    className="btn btn-secondary"
-                    type="button"
-                    disabled={customs.length >= (room.limits?.maxCustomQuestions ?? 30)}
-                    onClick={() => setCustoms([...customs, emptyCustom()])}
-                  >
-                    {ui.addQuestion}
-                  </button>
-                  <button className="btn btn-secondary" type="button" onClick={onSaveCustoms} disabled={busy}>
-                    {ui.saveQuestions}
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
         </>
       ) : (
         <p className="waiting">
@@ -978,7 +843,7 @@ function Lobby({
         <p className="meta" style={{ marginBottom: '0.5rem' }}>
           <span>{ui.participants}</span>
           <span>
-            {participants.length}/{maxPlayers}
+            {participants.length}/{playersLabel}
           </span>
         </p>
         {participants.length === 0 ? (
@@ -996,6 +861,11 @@ function Lobby({
         {isHost && !hostPlaying && (
           <p className="footer-note" style={{ marginTop: '0.6rem' }}>
             {ui.hostHidden}
+          </p>
+        )}
+        {isHost && !isParty && maxPlayers > 0 && participants.length >= maxPlayers - 1 && (
+          <p className="footer-note" style={{ marginTop: '0.6rem' }}>
+            {ui.freeTierOk}
           </p>
         )}
       </div>
