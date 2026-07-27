@@ -123,7 +123,7 @@ export function joinRoom(
   if (maxPlayers > 0 && room.players.length >= maxPlayers) {
     return {
       error:
-        maxPlayers <= 8
+        maxPlayers <= 5
           ? `Rummet är fullt (max ${maxPlayers} gratis). Lås upp Party för fler spelare.`
           : `Rummet är fullt (max ${maxPlayers})`,
     }

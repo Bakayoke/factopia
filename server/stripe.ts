@@ -62,8 +62,8 @@ function appBaseUrl(): string {
 }
 
 function partyAmountOre(): number {
-  const n = Number(process.env.STRIPE_PARTY_AMOUNT_ORE ?? '9900')
-  return Number.isFinite(n) && n >= 100 ? Math.round(n) : 9900
+  const n = Number(process.env.STRIPE_PARTY_AMOUNT_ORE ?? '3900')
+  return Number.isFinite(n) && n >= 100 ? Math.round(n) : 3900
 }
 
 function rememberSessionPass(sessionId: string, pass: PartyPass) {
@@ -115,7 +115,7 @@ export async function createPartyCheckoutSession(opts: {
               price_data: {
                 currency: 'sek',
                 unit_amount: partyAmountOre(),
-                // Inclusive: 99 kr is what the customer pays
+                // Inclusive: listed price is what the customer pays
                 tax_behavior: 'inclusive',
                 product_data: {
                   name: 'Factopia Party — 24 h',

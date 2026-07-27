@@ -7,7 +7,7 @@ export type PremiumLimits = {
 }
 
 export const FREE_LIMITS: PremiumLimits = {
-  maxPlayers: 8,
+  maxPlayers: 5, // host + 4
   questionCounts: [10, 20, 30, 50],
 }
 

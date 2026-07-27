@@ -26,7 +26,7 @@ import {
   submitAnswer,
   type PartyInfo,
 } from './api'
-import { t } from './i18n'
+import { detectPreferredLanguage, rememberLanguage, t } from './i18n'
 import type { AdvanceMode, PublicRoom, QuizLanguage } from './types'
 import { Confetti, useCountdown } from './ui'
 
@@ -52,7 +52,7 @@ export default function App() {
   const [questionCount, setQuestionCount] = useState(10)
   const [hostPlays, setHostPlays] = useState(true)
   const [advanceMode, setAdvanceModeLocal] = useState<AdvanceMode>('manual')
-  const [language, setLanguageLocal] = useState<QuizLanguage>('sv')
+  const [language, setLanguageLocal] = useState<QuizLanguage>(() => detectPreferredLanguage())
   const [joinStep, setJoinStep] = useState<'code' | 'name'>('code')
   const [playerId, setPlayerId] = useState<string | null>(null)
   const [room, setRoom] = useState<PublicRoom | null>(null)
@@ -63,8 +63,8 @@ export default function App() {
   const [partyPass, setPartyPass] = useState(() => loadPartyPass())
   const [partyInfo, setPartyInfo] = useState<PartyInfo>({
     enabled: false,
-    amountOre: 9900,
-    amountLabel: '99 kr',
+    amountOre: 3900,
+    amountLabel: '39 kr',
     durationHours: 24,
   })
   const [partyFlash, setPartyFlash] = useState('')
@@ -125,6 +125,11 @@ export default function App() {
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  function pickLanguage(lang: QuizLanguage) {
+    setLanguageLocal(lang)
+    rememberLanguage(lang)
+  }
 
   async function onBuyParty(roomCode?: string) {
     setError('')
@@ -376,14 +381,14 @@ export default function App() {
                 <button
                   type="button"
                   className={`choice ${language === 'sv' ? 'selected' : ''}`}
-                  onClick={() => setLanguageLocal('sv')}
+                  onClick={() => pickLanguage('sv')}
                 >
                   {ui.swedish}
                 </button>
                 <button
                   type="button"
                   className={`choice ${language === 'en' ? 'selected' : ''}`}
-                  onClick={() => setLanguageLocal('en')}
+                  onClick={() => pickLanguage('en')}
                 >
                   {ui.english}
                 </button>
@@ -650,7 +655,7 @@ function Lobby({
   const participants = room.players.filter((p) => p.playing)
   const isParty = room.premiumTier === 'party'
   const counts = room.limits?.questionCounts ?? FREE_COUNTS
-  const maxPlayers = room.limits?.maxPlayers ?? 8
+  const maxPlayers = room.limits?.maxPlayers ?? 5
   const playersLabel =
     maxPlayers <= 0 ? ui.unlimited : String(maxPlayers)
 
@@ -683,6 +688,7 @@ function Lobby({
 
   async function changeLanguage(lang: QuizLanguage) {
     if (!isHost) return
+    rememberLanguage(lang)
     const res = await setLanguage(lang)
     if (res.error) onError(res.error)
   }

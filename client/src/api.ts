@@ -282,7 +282,7 @@ export async function fetchPartyInfo(): Promise<PartyInfo> {
     if (!res.ok) throw new Error('info failed')
     return (await res.json()) as PartyInfo
   } catch {
-    return { enabled: false, amountOre: 9900, amountLabel: '99 kr', durationHours: 24 }
+    return { enabled: false, amountOre: 3900, amountLabel: '39 kr', durationHours: 24 }
   }
 }
 
