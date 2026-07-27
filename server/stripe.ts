@@ -96,7 +96,7 @@ export async function createPartyCheckoutSession(opts: {
     const successUrl = `${appBaseUrl()}/?party_session={CHECKOUT_SESSION_ID}`
     const cancelUrl = `${appBaseUrl()}/?party_cancel=1`
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
       locale,
       success_url: successUrl,
@@ -115,14 +115,26 @@ export async function createPartyCheckoutSession(opts: {
               price_data: {
                 currency: 'sek',
                 unit_amount: partyAmountOre(),
+                // Inclusive: 99 kr is what the customer pays
+                tax_behavior: 'inclusive',
                 product_data: {
                   name: 'Factopia Party — 24 h',
                   description: 'Fler spelare, 50 frågor, egna frågor och rumstitel.',
+                  // Digital service — required when Managed Payments is on
+                  tax_code: 'txcd_10000000',
                 },
               },
             },
           ],
+    }
+
+    // Prefer classic Checkout (you are merchant of record) unless explicitly enabled.
+    const useManaged = process.env.STRIPE_MANAGED_PAYMENTS === 'true'
+    Object.assign(sessionParams, {
+      managed_payments: { enabled: useManaged },
     })
+
+    const session = await stripe.checkout.sessions.create(sessionParams)
 
     if (!session.url) return { error: 'Kunde inte skapa betalning' }
     return { url: session.url, sessionId: session.id }
