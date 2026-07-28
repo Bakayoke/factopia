@@ -77,6 +77,28 @@ function normalizePlan(raw: unknown): PartyPlan {
   return raw === 'week' ? 'week' : 'day'
 }
 
+async function firstPartyCouponId(stripe: Stripe): Promise<string | null> {
+  const id = (process.env.STRIPE_FIRST_PARTY_COUPON ?? 'factopia_first30').trim()
+  if (!id) return null
+  try {
+    await stripe.coupons.retrieve(id)
+    return id
+  } catch {
+    try {
+      await stripe.coupons.create({
+        id,
+        percent_off: 30,
+        duration: 'once',
+        name: 'First Party −30%',
+      })
+      return id
+    } catch (e) {
+      console.error('Could not create first-party coupon', e)
+      return null
+    }
+  }
+}
+
 function rememberSessionPass(sessionId: string, pass: PartyPass, roomCode = '') {
   const entry: ClaimedCheckout = { pass, roomCode: roomCode.trim().toUpperCase() }
   sessionPasses.set(sessionId, entry)
@@ -97,6 +119,7 @@ export async function createPartyCheckoutSession(opts: {
   locale?: string
   roomCode?: string | null
   plan?: PartyPlan | string | null
+  firstTime?: boolean
 }): Promise<{ url: string; sessionId: string } | { error: string }> {
   if (!stripeConfigured()) {
     return { error: 'Stripe är inte konfigurerat ännu' }
@@ -127,6 +150,7 @@ export async function createPartyCheckoutSession(opts: {
         product: 'party_pass',
         roomCode: room,
         plan,
+        firstTime: opts.firstTime ? '1' : '0',
       },
       line_items: priceId
         ? [{ price: priceId, quantity: 1 }]
@@ -155,6 +179,14 @@ export async function createPartyCheckoutSession(opts: {
     Object.assign(sessionParams, {
       managed_payments: { enabled: useManaged },
     })
+
+    if (opts.firstTime) {
+      const coupon = await firstPartyCouponId(stripe)
+      if (coupon) {
+        sessionParams.discounts = [{ coupon }]
+        sessionParams.allow_promotion_codes = false
+      }
+    }
 
     const session = await stripe.checkout.sessions.create(sessionParams)
 
@@ -247,6 +279,7 @@ export function partyCheckoutPublicInfo() {
   const dayOre = partyAmountOre()
   const weekOre = partyWeekAmountOre()
   const theme = weekThemePack()
+  const firstOff = 30
   return {
     enabled: stripeConfigured(),
     amountOre: dayOre,
@@ -256,5 +289,8 @@ export function partyCheckoutPublicInfo() {
     weekAmountLabel: `${Math.round(weekOre / 100)} kr`,
     weekDurationHours: 168,
     weekThemePack: theme,
+    firstPartyPercentOff: firstOff,
+    firstPartyDayLabel: `${Math.round((dayOre * (100 - firstOff)) / 10000)} kr`,
+    firstPartyWeekLabel: `${Math.round((weekOre * (100 - firstOff)) / 10000)} kr`,
   }
 }

@@ -459,6 +459,11 @@ input:focus {
   font-weight: 700;
 }
 
+.players.waitlist li {
+  opacity: 0.85;
+  border: 1px dashed color-mix(in srgb, var(--muted) 40%, transparent);
+}
+
 .players {
   list-style: none;
   margin: 0;

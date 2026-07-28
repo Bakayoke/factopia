@@ -24,6 +24,7 @@ import {
   setPersistHook,
   setPublicLobby,
   listPublicLobbies,
+  unlockRoomWithPass,
   startGame,
   submitAnswer,
   nextQuestion,
@@ -45,6 +46,7 @@ import {
   stripeEnvDiagnostics,
 } from './stripe.js'
 import { buildSnapshot, flushPersist, initPersist, loadSnapshot, scheduleSave } from './persist.js'
+import { funnelSnapshot, trackFunnel, type FunnelEvent } from './metrics.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PORT = Number(process.env.PORT) || 3001
@@ -116,7 +118,10 @@ app.post('/api/party/checkout', async (req, res) => {
   const locale = req.body?.locale === 'en' ? 'en' : 'sv'
   const roomCode = typeof req.body?.roomCode === 'string' ? req.body.roomCode : null
   const plan = req.body?.plan === 'week' ? 'week' : 'day'
-  const result = await createPartyCheckoutSession({ locale, roomCode, plan })
+  const firstTime = Boolean(req.body?.firstTime)
+  trackFunnel('checkout_start', roomCode || plan)
+  if (firstTime) trackFunnel('group_size_upsell', 'first_time')
+  const result = await createPartyCheckoutSession({ locale, roomCode, plan, firstTime })
   if ('error' in result) {
     res.status(400).json(result)
     return
@@ -131,11 +136,29 @@ app.post('/api/party/claim', async (req, res) => {
     res.status(400).json({ error: result.error })
     return
   }
+  trackFunnel('checkout_paid', result.roomCode || undefined)
+  if (result.roomCode && result.token) {
+    const unlocked = unlockRoomWithPass(result.roomCode, result.token)
+    if (!('error' in unlocked)) {
+      broadcastRoom(unlocked.code)
+    }
+  }
   res.json({
     token: result.token,
     expiresAt: result.expiresAt,
     roomCode: result.roomCode || null,
   })
+})
+
+app.post('/api/metrics', (req, res) => {
+  const event = String(req.body?.event ?? '') as FunnelEvent
+  const meta = typeof req.body?.meta === 'string' ? req.body.meta : undefined
+  trackFunnel(event, meta)
+  res.json({ ok: true })
+})
+
+app.get('/api/metrics', (_req, res) => {
+  res.json(funnelSnapshot())
 })
 
 // Serve built client when present (Railway all-in-one). Cloudflare can host UI separately.
@@ -240,7 +263,17 @@ io.on('connection', (socket) => {
   socket.on('join', ({ code, name }, ack) => {
     const result = joinRoom(code, name, socket.id)
     if ('error' in result) {
-      ack?.({ error: result.error })
+      if (result.code === 'ROOM_FULL' && result.roomCode) {
+        trackFunnel('room_full', result.roomCode)
+        trackFunnel('waitlist_join', result.roomCode)
+        broadcastRoom(result.roomCode)
+      }
+      ack?.({
+        error: result.error,
+        code: result.code,
+        roomCode: result.roomCode,
+        waitlistCount: result.waitlistCount,
+      })
       return
     }
     socket.join(result.room.code)
@@ -309,7 +342,10 @@ io.on('connection', (socket) => {
     const binding = getBinding(socket.id)
     if (!binding) return ack?.({ error: 'Inte ansluten' })
     const result = setPublicLobby(binding.code, binding.playerId, Boolean(isPublic))
-    if ('error' in result) return ack?.({ error: result.error })
+    if ('error' in result) {
+      if (Boolean(isPublic)) trackFunnel('public_requires_party', binding.code)
+      return ack?.({ error: result.error })
+    }
     ack?.({ ok: true })
     broadcastRoom(result.code)
   })

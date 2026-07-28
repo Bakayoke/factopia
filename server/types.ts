@@ -65,6 +65,8 @@ export type Room = {
   roomTitle: string
   /** Listed on Find game / open lobbies */
   isPublic: boolean
+  /** People who tried to join while room was full */
+  waitlist: { id: string; name: string; at: number }[]
   premiumExpiresAt: number | null
   /** Recently used question ids — prefer fresh questions across rematches */
   recentQuestionIds: string[]
@@ -108,6 +110,7 @@ export type PublicRoom = {
   limits: PremiumLimits
   roomTitle: string
   isPublic: boolean
+  waitlist: { id: string; name: string; at: number }[]
   /** Only included for the host */
   customQuestions?: PublicCustomQuestion[]
 }

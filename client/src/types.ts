@@ -70,6 +70,7 @@ export type PublicRoom = {
   limits: PremiumLimits
   roomTitle: string
   isPublic?: boolean
+  waitlist?: { id: string; name: string; at: number }[]
   customQuestions?: PublicCustomQuestion[]
 }
 

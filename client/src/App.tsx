@@ -28,6 +28,10 @@ import {
   startGame,
   startPartyCheckout,
   submitAnswer,
+  trackMetric,
+  hasPaidBefore,
+  markPaidBefore,
+  isWeekend,
   type PartyInfo,
 } from './api'
 import { detectPreferredLanguage, rememberLanguage, t } from './i18n'
@@ -41,13 +45,15 @@ import type {
 } from './types'
 import { Confetti, useCountdown } from './ui'
 
-type Screen = 'home' | 'create' | 'join' | 'find' | 'play'
+type Screen = 'home' | 'create' | 'join' | 'find' | 'play' | 'guest-unlock'
 
 const FREE_COUNTS = [10, 20, 30, 50]
 const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
 const TIP_URL = (import.meta.env.VITE_TIP_URL as string | undefined) || ''
 const PENDING_ROOM_KEY = 'factopia-pending-room'
+const RESUME_CHECKOUT_KEY = 'factopia-resume-checkout'
+const PENDING_CREATE_KEY = 'factopia-pending-create'
 
 const PACKS: { id: CategoryPackId; labelKey: keyof ReturnType<typeof t> }[] = [
   { id: 'mixed', labelKey: 'packMixed' },
@@ -108,12 +114,36 @@ export default function App() {
   const [stripeHint, setStripeHint] = useState<string | null>(null)
   const [lobbies, setLobbies] = useState<PublicLobbyCard[]>([])
   const [pendingPack, setPendingPack] = useState<CategoryPackId | null>(null)
+  const [createStep, setCreateStep] = useState<'size' | 'form'>('size')
+  const [groupSize, setGroupSize] = useState<'small' | 'big' | null>(null)
+  const [fullRoomCode, setFullRoomCode] = useState('')
+  const [fullWaitlistCount, setFullWaitlistCount] = useState(0)
+  const [resumeCheckout, setResumeCheckout] = useState<{
+    roomCode?: string
+    plan: PartyPlan
+  } | null>(() => {
+    try {
+      const raw = sessionStorage.getItem(RESUME_CHECKOUT_KEY)
+      return raw ? (JSON.parse(raw) as { roomCode?: string; plan: PartyPlan }) : null
+    } catch {
+      return null
+    }
+  })
 
   const uiLang = room?.language ?? language
   const ui = t(uiLang)
   const hasParty = Boolean(partyPass && partyPass.expiresAt > Date.now())
-  const buyDayLabel = `Party · ${partyInfo.amountLabel} · ${partyInfo.durationHours} h`
-  const buyWeekLabel = `Party · ${partyInfo.weekAmountLabel ?? '99 kr'} · 7 ${uiLang === 'en' ? 'days' : 'dagar'}`
+  const firstTime = !hasPaidBefore()
+  const weekend = isWeekend()
+  const defaultPlan: PartyPlan = weekend ? 'week' : 'day'
+  const dayPrice = firstTime && partyInfo.firstPartyDayLabel
+    ? partyInfo.firstPartyDayLabel
+    : partyInfo.amountLabel
+  const weekPrice = firstTime && partyInfo.firstPartyWeekLabel
+    ? partyInfo.firstPartyWeekLabel
+    : partyInfo.weekAmountLabel ?? '99 kr'
+  const buyDayLabel = `Party · ${dayPrice} · 24 h${firstTime ? ' (−30%)' : ''}`
+  const buyWeekLabel = `Party · ${weekPrice} · 7 ${uiLang === 'en' ? 'days' : 'dagar'}${firstTime ? ' (−30%)' : ''}`
   const weekPack = partyInfo.weekThemePack ?? 'party'
   const weekPackLabel = ui[PACKS.find((p) => p.id === weekPack)?.labelKey ?? 'packMixed']
 
@@ -181,15 +211,24 @@ export default function App() {
       })()
 
     if (cancelled) {
-      setPartyFlash(ui.partyCancelled)
+      setPartyFlash(ui.checkoutCancelledHint)
+      trackMetric('checkout_cancel', pendingRoom || undefined)
       clean()
       if (pendingRoom) {
+        try {
+          sessionStorage.setItem(
+            RESUME_CHECKOUT_KEY,
+            JSON.stringify({ roomCode: pendingRoom, plan: defaultPlan }),
+          )
+        } catch {
+          // ignore
+        }
+        setResumeCheckout({ roomCode: pendingRoom, plan: defaultPlan })
         try {
           sessionStorage.removeItem(PENDING_ROOM_KEY)
         } catch {
           // ignore
         }
-        // Session rejoin effect should restore the lobby if localStorage session exists
       }
       return
     }
@@ -205,12 +244,32 @@ export default function App() {
       const pass = { token: res.token, expiresAt: res.expiresAt }
       savePartyPass(pass)
       setPartyPass(pass)
+      markPaidBefore()
       setPartyFlash(ui.partyUnlocked)
+      setResumeCheckout(null)
+      try {
+        sessionStorage.removeItem(RESUME_CHECKOUT_KEY)
+      } catch {
+        // ignore
+      }
       void fetchPartyInfo().then(setPartyInfo)
 
       const targetRoom = (res.roomCode || pendingRoom || '').toUpperCase()
       try {
         sessionStorage.removeItem(PENDING_ROOM_KEY)
+      } catch {
+        // ignore
+      }
+
+      // Pending create after group-size upsell
+      try {
+        const pendingCreate = sessionStorage.getItem(PENDING_CREATE_KEY)
+        if (pendingCreate) {
+          sessionStorage.removeItem(PENDING_CREATE_KEY)
+          setGroupSize('big')
+          setCreateStep('form')
+          setScreen('create')
+        }
       } catch {
         // ignore
       }
@@ -226,6 +285,12 @@ export default function App() {
           setScreen('play')
           await applyStoredPartyToken()
         }
+      } else if (targetRoom && !session) {
+        // Guest paid to unlock — go join with code
+        setCode(targetRoom)
+        setJoinStep('name')
+        setScreen('join')
+        setPartyFlash(ui.partyUnlocked)
       } else if (session) {
         await applyStoredPartyToken()
       }
@@ -233,17 +298,27 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function onBuyParty(roomCode?: string, plan: PartyPlan = 'day') {
+  async function onBuyParty(roomCode?: string, plan: PartyPlan = defaultPlan) {
     setError('')
     setCheckoutBusy(true)
     if (roomCode) {
       try {
         sessionStorage.setItem(PENDING_ROOM_KEY, roomCode.toUpperCase())
+        sessionStorage.setItem(RESUME_CHECKOUT_KEY, JSON.stringify({ roomCode, plan }))
+      } catch {
+        // ignore
+      }
+    } else {
+      try {
+        sessionStorage.setItem(RESUME_CHECKOUT_KEY, JSON.stringify({ plan }))
       } catch {
         // ignore
       }
     }
-    const res = await startPartyCheckout(uiLang, roomCode, plan)
+    if (roomCode && !loadSession()) {
+      void trackMetric('guest_unlock_click', roomCode)
+    }
+    const res = await startPartyCheckout(uiLang, roomCode, plan, firstTime)
     if (res.error || !res.url) {
       setCheckoutBusy(false)
       const hint = stripeHint || (await fetchStripeHint())
@@ -348,6 +423,13 @@ export default function App() {
     setBusy(true)
     const res = await joinGame(code, name)
     setBusy(false)
+    if (res.code === 'ROOM_FULL' || (res.error && res.error.toLowerCase().includes('fullt'))) {
+      const roomCode = (res.roomCode || code).toUpperCase()
+      setFullRoomCode(roomCode)
+      setFullWaitlistCount(res.waitlistCount ?? 1)
+      setScreen('guest-unlock')
+      return
+    }
     if (res.error || !res.room) {
       setError(res.error || ui.somethingWrong)
       return
@@ -393,7 +475,7 @@ export default function App() {
 
         {screen === 'home' && (
           <div className="card home-actions">
-            <button className="btn btn-primary" type="button" onClick={() => setScreen('create')}>
+            <button className="btn btn-primary" type="button" onClick={() => { setCreateStep('size'); setGroupSize(null); setScreen('create') }}>
               {ui.startNew}
             </button>
             <div className="divider">{ui.or}</div>
@@ -413,6 +495,8 @@ export default function App() {
                 type="button"
                 onClick={() => {
                   setPendingPack(weekPack)
+                  setCreateStep('size')
+                  setGroupSize(null)
                   setScreen('create')
                 }}
               >
@@ -431,24 +515,62 @@ export default function App() {
               ) : (
                 <>
                   <p className="party-hint">{ui.buyPartyHint}</p>
+                  <p className="footer-note">{ui.priceAnchorDay}</p>
+                  <p className="footer-note">{ui.priceAnchorWeek}</p>
+                  {firstTime && <p className="party-flash">{ui.firstPartyDeal}</p>}
                   <div className="party-plans">
-                    <button
-                      className="btn btn-party"
-                      type="button"
-                      disabled={checkoutBusy}
-                      onClick={() => void onBuyParty(undefined, 'day')}
-                    >
-                      {checkoutBusy ? ui.buyPartyBusy : buyDayLabel}
-                    </button>
-                    <button
-                      className="btn btn-secondary"
-                      type="button"
-                      disabled={checkoutBusy}
-                      onClick={() => void onBuyParty(undefined, 'week')}
-                    >
-                      {buyWeekLabel}
-                    </button>
+                    {weekend ? (
+                      <>
+                        <button
+                          className="btn btn-party"
+                          type="button"
+                          disabled={checkoutBusy}
+                          onClick={() => void onBuyParty(undefined, 'week')}
+                        >
+                          {checkoutBusy ? ui.buyPartyBusy : buyWeekLabel}
+                        </button>
+                        <button
+                          className="btn btn-secondary"
+                          type="button"
+                          disabled={checkoutBusy}
+                          onClick={() => void onBuyParty(undefined, 'day')}
+                        >
+                          {buyDayLabel}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="btn btn-party"
+                          type="button"
+                          disabled={checkoutBusy}
+                          onClick={() => void onBuyParty(undefined, 'day')}
+                        >
+                          {checkoutBusy ? ui.buyPartyBusy : buyDayLabel}
+                        </button>
+                        <button
+                          className="btn btn-secondary"
+                          type="button"
+                          disabled={checkoutBusy}
+                          onClick={() => void onBuyParty(undefined, 'week')}
+                        >
+                          {buyWeekLabel}
+                        </button>
+                      </>
+                    )}
                   </div>
+                  {resumeCheckout && (
+                    <button
+                      className="btn btn-accent"
+                      type="button"
+                      disabled={checkoutBusy}
+                      onClick={() =>
+                        void onBuyParty(resumeCheckout.roomCode, resumeCheckout.plan || defaultPlan)
+                      }
+                    >
+                      {ui.resumeCheckout}
+                    </button>
+                  )}
                   <button className="btn-tiny" type="button" onClick={() => setShowOwnerCode((v) => !v)}>
                     {showOwnerCode ? ui.hideCode : ui.haveCode}
                   </button>
@@ -544,6 +666,80 @@ export default function App() {
 
         {screen === 'create' && (
           <form className="card stack" onSubmit={onCreate}>
+            {createStep === 'size' ? (
+              <>
+                <p className="section-title">{ui.howMany}</p>
+                <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                  <button
+                    type="button"
+                    className={`choice ${groupSize === 'small' ? 'selected' : ''}`}
+                    onClick={() => {
+                      setGroupSize('small')
+                      setCreateStep('form')
+                    }}
+                  >
+                    {ui.groupSmall}
+                  </button>
+                  <button
+                    type="button"
+                    className={`choice ${groupSize === 'big' ? 'selected' : ''}`}
+                    onClick={() => {
+                      setGroupSize('big')
+                      void trackMetric('group_size_upsell', 'big')
+                    }}
+                  >
+                    {ui.groupBig}
+                  </button>
+                </div>
+                {groupSize === 'big' && !hasParty && (
+                  <>
+                    <p className="party-hint">{ui.groupBigHint}</p>
+                    <p className="footer-note">{ui.priceAnchorDay}</p>
+                    {firstTime && <p className="party-flash">{ui.firstPartyDeal}</p>}
+                    <div className="party-plans">
+                      <button
+                        className="btn btn-party"
+                        type="button"
+                        disabled={checkoutBusy}
+                        onClick={() => {
+                          try {
+                            sessionStorage.setItem(PENDING_CREATE_KEY, '1')
+                          } catch {
+                            // ignore
+                          }
+                          void onBuyParty(undefined, defaultPlan)
+                        }}
+                      >
+                        {ui.unlockForGroup}
+                      </button>
+                    </div>
+                    <button
+                      className="btn btn-ghost"
+                      type="button"
+                      onClick={() => setCreateStep('form')}
+                    >
+                      {ui.createFastHint}
+                    </button>
+                  </>
+                )}
+                {groupSize === 'big' && hasParty && (
+                  <button className="btn btn-primary" type="button" onClick={() => setCreateStep('form')}>
+                    {ui.createGame}
+                  </button>
+                )}
+                <button
+                  className="btn btn-ghost"
+                  type="button"
+                  onClick={() => {
+                    setGroupSize(null)
+                    setScreen('home')
+                  }}
+                >
+                  {ui.back}
+                </button>
+              </>
+            ) : (
+              <>
             <p className="footer-note">{ui.createFastHint}</p>
             <div>
               <label style={{ marginBottom: '0.4rem' }}>{ui.yourRole}</label>
@@ -581,10 +777,60 @@ export default function App() {
             <button className="btn btn-primary" type="submit" disabled={busy || (hostPlays && !name.trim())}>
               {ui.createGame}
             </button>
-            <button className="btn btn-ghost" type="button" onClick={() => setScreen('home')}>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => {
+                setCreateStep('size')
+                setGroupSize(null)
+              }}
+            >
               {ui.back}
             </button>
+              </>
+            )}
           </form>
+        )}
+
+        {screen === 'guest-unlock' && (
+          <div className="card stack">
+            <p className="section-title">{ui.guestUnlockTitle}</p>
+            <p className="party-pitch">{ui.guestUnlockBody}</p>
+            <p className="footer-note">
+              {ui.codeLabel}: <strong style={{ letterSpacing: '0.15em' }}>{fullRoomCode}</strong>
+              {fullWaitlistCount > 0 ? ` · ${fullWaitlistCount} ${ui.waitingToJoin.toLowerCase()}` : ''}
+            </p>
+            <p className="footer-note">{ui.priceAnchorDay}</p>
+            {firstTime && <p className="party-flash">{ui.firstPartyDeal}</p>}
+            <div className="party-plans">
+              <button
+                className="btn btn-party"
+                type="button"
+                disabled={checkoutBusy}
+                onClick={() => void onBuyParty(fullRoomCode, defaultPlan)}
+              >
+                {checkoutBusy ? ui.buyPartyBusy : ui.unlockForEveryone}
+              </button>
+              <button
+                className="btn btn-secondary"
+                type="button"
+                disabled={checkoutBusy}
+                onClick={() => void onBuyParty(fullRoomCode, weekend ? 'day' : 'week')}
+              >
+                {weekend ? buyDayLabel : buyWeekLabel}
+              </button>
+            </div>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => {
+                setJoinStep('name')
+                setScreen('join')
+              }}
+            >
+              {ui.back}
+            </button>
+          </div>
         )}
 
         {screen === 'join' && (
@@ -798,6 +1044,7 @@ function Lobby({
   const seatsLeft = maxPlayers > 0 ? Math.max(0, maxPlayers - room.players.length) : null
   const almostFull = !isParty && maxPlayers > 0 && seatsLeft !== null && seatsLeft <= 1
   const isFull = !isParty && maxPlayers > 0 && seatsLeft === 0
+  const waitlist = room.waitlist ?? []
 
   useEffect(() => {
     if (!isHost || isParty) return
@@ -874,7 +1121,10 @@ function Lobby({
   async function changePublic(next: boolean) {
     if (!isHost) return
     const res = await setPublicLobby(next)
-    if (res.error) onError(res.error)
+    if (res.error) {
+      onError(res.error.includes('Party') ? ui.publicNeedsParty : res.error)
+      return
+    }
   }
 
   async function onUnlockParty() {
@@ -943,22 +1193,23 @@ function Lobby({
             {!isParty && (
               <>
                 <p className="party-hint">{almostFull || isFull ? (isFull ? ui.roomFullUpsell : ui.roomAlmostFull) : ui.buyPartyHint}</p>
+                <p className="footer-note">{ui.priceAnchorDay}</p>
                 <div className={`party-plans${almostFull || isFull ? ' urgent' : ''}`}>
                   <button
                     className="btn btn-party"
                     type="button"
                     disabled={checkoutBusy}
-                    onClick={() => onBuyParty('day')}
+                    onClick={() => onBuyParty(isWeekend() ? 'week' : 'day')}
                   >
-                    {checkoutBusy ? ui.buyPartyBusy : buyDayLabel}
+                    {checkoutBusy ? ui.buyPartyBusy : isWeekend() ? buyWeekLabel : buyDayLabel}
                   </button>
                   <button
                     className="btn btn-secondary"
                     type="button"
                     disabled={checkoutBusy}
-                    onClick={() => onBuyParty('week')}
+                    onClick={() => onBuyParty(isWeekend() ? 'day' : 'week')}
                   >
-                    {buyWeekLabel}
+                    {isWeekend() ? buyDayLabel : buyWeekLabel}
                   </button>
                 </div>
               </>
@@ -1134,6 +1385,30 @@ function Lobby({
                 </li>
               ))}
             </ul>
+          </>
+        )}
+        {isHost && waitlist.length > 0 && (
+          <>
+            <p className="meta" style={{ margin: '0.75rem 0 0.5rem' }}>
+              <span>{ui.waitingToJoin}</span>
+              <span>{waitlist.length}</span>
+            </p>
+            <ul className="players waitlist">
+              {waitlist.map((w) => (
+                <li key={w.id}>
+                  <span>{w.name}</span>
+                  <span className="you">🔒</span>
+                </li>
+              ))}
+            </ul>
+            {!isParty && (
+              <div className="party-banner urgent-inline">
+                <p className="party-hint">{ui.roomFullUpsell}</p>
+                <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={() => onBuyParty(isWeekend() ? 'week' : 'day')}>
+                  {isWeekend() ? buyWeekLabel : buyDayLabel}
+                </button>
+              </div>
+            )}
           </>
         )}
         {isHost && !hostPlaying && !tvMode && (

@@ -111,6 +111,7 @@ export function createRoom(
     customQuestions: [],
     roomTitle: '',
     isPublic: false,
+    waitlist: [],
     premiumExpiresAt,
     recentQuestionIds: [],
     currentIndex: -1,
@@ -133,9 +134,16 @@ export function joinRoom(
   code: string,
   name: string,
   socketId: string,
-): { room: Room; playerId: string } | { error: string } {
+):
+  | { room: Room; playerId: string }
+  | {
+      error: string
+      code?: 'ROOM_FULL' | 'NOT_FOUND' | 'STARTED'
+      roomCode?: string
+      waitlistCount?: number
+    } {
   const room = rooms.get(code.toUpperCase().trim())
-  if (!room) return { error: 'Hittade inget spel med den koden' }
+  if (!room) return { error: 'Hittade inget spel med den koden', code: 'NOT_FOUND' }
 
   // Allow lobby + in-progress + finished (spectate / wait for rematch)
   if (
@@ -144,16 +152,34 @@ export function joinRoom(
     room.status !== 'reveal' &&
     room.status !== 'finished'
   ) {
-    return { error: 'Spelet har redan startat' }
+    return { error: 'Spelet har redan startat', code: 'STARTED' }
   }
+
+  const displayName =
+    name.trim().slice(0, 20) || (room.language === 'en' ? 'Player' : 'Spelare')
 
   const maxPlayers = roomLimits(room).maxPlayers
   if (maxPlayers > 0 && room.players.length >= maxPlayers) {
+    const existing = room.waitlist.find(
+      (w) => w.name.toLowerCase() === displayName.toLowerCase(),
+    )
+    if (!existing) {
+      room.waitlist.push({
+        id: crypto.randomUUID(),
+        name: displayName,
+        at: Date.now(),
+      })
+      room.waitlist = room.waitlist.slice(-24)
+    }
+    touch(room)
     return {
       error:
         maxPlayers <= 5
           ? `Rummet är fullt (max ${maxPlayers} gratis). Lås upp Party för fler spelare.`
           : `Rummet är fullt (max ${maxPlayers})`,
+      code: 'ROOM_FULL',
+      roomCode: room.code,
+      waitlistCount: room.waitlist.length,
     }
   }
 
@@ -162,11 +188,13 @@ export function joinRoom(
   const playing = room.status === 'lobby' || room.status === 'finished'
   room.players.push({
     id: playerId,
-    name: name.trim().slice(0, 20) || (room.language === 'en' ? 'Player' : 'Spelare'),
+    name: displayName,
     score: 0,
     connected: true,
     playing,
   })
+  // Clear from waitlist if they got in
+  room.waitlist = room.waitlist.filter((w) => w.name.toLowerCase() !== displayName.toLowerCase())
   socketToPlayer.set(socketId, { code: room.code, playerId })
   touch(room)
   return { room, playerId }
@@ -261,7 +289,33 @@ export function setPublicLobby(
   if (!room) return { error: 'Rummet finns inte' }
   if (room.hostId !== playerId) return { error: 'Bara värden kan ändra detta' }
   if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+  if (isPublic && tierFromExpiry(room.premiumExpiresAt) !== 'party') {
+    return { error: 'Party krävs för öppna rum (Hitta spel)' }
+  }
   room.isPublic = Boolean(isPublic)
+  touch(room)
+  return room
+}
+
+/** Apply a purchased Party pass to a room (host or guest checkout). */
+export function unlockRoomWithPass(
+  code: string,
+  token: string,
+): Room | { error: string } {
+  const room = rooms.get(code.toUpperCase().trim())
+  if (!room) return { error: 'Rummet finns inte' }
+  const pass = lookupPass(token)
+  if (!pass) return { error: 'Party-passet är ogiltigt eller har gått ut' }
+  room.premiumExpiresAt = pass.expiresAt
+  touch(room)
+  return room
+}
+
+export function clearWaitlist(code: string, playerId: string): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan rensa' }
+  room.waitlist = []
   touch(room)
   return room
 }
@@ -288,6 +342,7 @@ export function listPublicLobbies(opts?: {
 
   for (const room of rooms.values()) {
     if (!room.isPublic || room.status !== 'lobby') continue
+    if (tierFromExpiry(room.premiumExpiresAt) !== 'party') continue
     if (lang && room.language !== lang) continue
     // Drop stale lobbies with no connected players
     if (!room.players.some((p) => p.connected)) continue
@@ -404,6 +459,7 @@ export function startGame(code: string, playerId: string): Room | { error: strin
   if (room.premiumExpiresAt && room.premiumExpiresAt <= Date.now()) {
     room.premiumExpiresAt = null
     room.customQuestions = []
+    room.isPublic = false
     room.questionCount = clampQuestionCount(room.questionCount, roomLimits(room).questionCounts)
   }
 
@@ -654,6 +710,7 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
     limits,
     roomTitle: room.roomTitle,
     isPublic: Boolean(room.isPublic),
+    waitlist: room.waitlist ?? [],
     customQuestions: isHost
       ? room.customQuestions.map((cq) => ({
           text: cq.text,
@@ -681,6 +738,7 @@ export function hydrateRooms(saved: Room[]) {
       ...raw,
       categoryPack: normalizePackId(raw.categoryPack),
       isPublic: Boolean(raw.isPublic),
+      waitlist: Array.isArray(raw.waitlist) ? raw.waitlist : [],
       recentQuestionIds: Array.isArray(raw.recentQuestionIds) ? raw.recentQuestionIds : [],
       players: (raw.players ?? []).map((p) => ({ ...p, connected: false })),
       answers: {},

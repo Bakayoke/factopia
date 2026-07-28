@@ -124,6 +124,21 @@ const sv = {
   shareResults: 'Dela resultat',
   resultsCopied: 'Resultat kopierat!',
   hostThis: 'Bjud in till nästa omgång',
+  priceAnchorDay: '39 kr ≈ en läsk — hela gänget hela kvällen.',
+  priceAnchorWeek: '99 kr / 7 dagar ≈ 14 kr per kväll.',
+  firstPartyDeal: 'Första gången: −30%',
+  howMany: 'Hur många är ni?',
+  groupSmall: 'Upp till 5',
+  groupBig: '6 eller fler',
+  groupBigHint: 'Gratis räcker till 5. För större gäng: lås upp Party först.',
+  unlockForGroup: 'Lås upp Party och skapa rum',
+  guestUnlockTitle: 'Rummet är fullt',
+  guestUnlockBody: 'Lås upp Party så alla får plats — även du.',
+  unlockForEveryone: 'Lås upp för alla',
+  waitingToJoin: 'Vill in',
+  resumeCheckout: 'Fortsätt köpet',
+  checkoutCancelledHint: 'Köp avbrutet — du kan fortsätta när du vill.',
+  publicNeedsParty: 'Öppna rum kräver Party (syns under Hitta spel).',
 }
 
 const en: typeof sv = {
@@ -250,6 +265,21 @@ const en: typeof sv = {
   shareResults: 'Share results',
   resultsCopied: 'Results copied!',
   hostThis: 'Invite for the next round',
+  priceAnchorDay: '39 kr ≈ a soda — the whole crew all night.',
+  priceAnchorWeek: '99 kr / 7 days ≈ 14 kr per night.',
+  firstPartyDeal: 'First time: −30%',
+  howMany: 'How many people?',
+  groupSmall: 'Up to 5',
+  groupBig: '6 or more',
+  groupBigHint: 'Free covers 5. Bigger group? Unlock Party first.',
+  unlockForGroup: 'Unlock Party and create room',
+  guestUnlockTitle: 'Room is full',
+  guestUnlockBody: 'Unlock Party so everyone fits — including you.',
+  unlockForEveryone: 'Unlock for everyone',
+  waitingToJoin: 'Waiting to join',
+  resumeCheckout: 'Continue checkout',
+  checkoutCancelledHint: 'Checkout cancelled — continue whenever you want.',
+  publicNeedsParty: 'Open rooms require Party (listed under Find a game).',
 }
 
 export type UiStrings = typeof sv

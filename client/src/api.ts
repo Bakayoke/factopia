@@ -208,7 +208,13 @@ export function createGame(
 }
 
 export function joinGame(code: string, name: string) {
-  return emitAck<{ playerId: string; room: PublicRoom }>('join', { code, name })
+  return emitAck<{
+    playerId: string
+    room: PublicRoom
+    code?: string
+    roomCode?: string
+    waitlistCount?: number
+  }>('join', { code, name })
 }
 
 export function rejoinGame(code: string, playerId: string) {
@@ -299,6 +305,9 @@ export type PartyInfo = {
   weekAmountLabel?: string
   weekDurationHours?: number
   weekThemePack?: CategoryPackId
+  firstPartyPercentOff?: number
+  firstPartyDayLabel?: string
+  firstPartyWeekLabel?: string
 }
 
 export async function fetchPartyInfo(): Promise<PartyInfo> {
@@ -359,12 +368,18 @@ export async function startPartyCheckout(
   locale: 'sv' | 'en',
   roomCode?: string,
   plan: PartyPlan = 'day',
+  firstTime = false,
 ) {
   try {
     const res = await fetch(`${apiBase()}/api/party/checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ locale, roomCode: roomCode ?? null, plan }),
+      body: JSON.stringify({
+        locale,
+        roomCode: roomCode ?? null,
+        plan,
+        firstTime,
+      }),
     })
     const data = (await res.json()) as { url?: string; error?: string }
     if (!res.ok || !data.url) return { error: data.error || 'Kunde inte starta köp' }
@@ -372,6 +387,50 @@ export async function startPartyCheckout(
   } catch {
     return { error: 'Kunde inte nå betalningen' }
   }
+}
+
+export async function trackMetric(
+  event:
+    | 'room_full'
+    | 'waitlist_join'
+    | 'checkout_start'
+    | 'checkout_cancel'
+    | 'checkout_paid'
+    | 'guest_unlock_click'
+    | 'group_size_upsell'
+    | 'public_requires_party',
+  meta?: string,
+) {
+  try {
+    await fetch(`${apiBase()}/api/metrics`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event, meta }),
+    })
+  } catch {
+    // ignore
+  }
+}
+
+export function hasPaidBefore(): boolean {
+  try {
+    return localStorage.getItem('factopia-has-paid') === '1'
+  } catch {
+    return false
+  }
+}
+
+export function markPaidBefore() {
+  try {
+    localStorage.setItem('factopia-has-paid', '1')
+  } catch {
+    // ignore
+  }
+}
+
+export function isWeekend(date = new Date()) {
+  const day = date.getDay()
+  return day === 0 || day === 5 || day === 6
 }
 
 export async function claimPartySession(sessionId: string) {
