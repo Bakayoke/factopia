@@ -10,14 +10,18 @@ import {
   disconnectSocket,
   getBinding,
   getRoom,
+  hydrateRooms,
   joinRoom,
   onQuestionTimeout,
   onRevealTimeout,
+  pruneIdleRooms,
   reconnectSocket,
   setQuestionCount,
   setHostPlaying,
   setAdvanceMode,
   setLanguage,
+  setCategoryPack,
+  setPersistHook,
   startGame,
   submitAnswer,
   nextQuestion,
@@ -29,7 +33,7 @@ import {
   setRoomTitle,
   setCustomQuestions,
 } from './rooms.js'
-import { redeemPassCode } from './premium.js'
+import { allPasses, redeemPassCode, restorePasses, setPassPersistHook } from './premium.js'
 import {
   claimPartyCheckoutSession,
   createPartyCheckoutSession,
@@ -38,6 +42,7 @@ import {
   stripeConfigured,
   stripeEnvDiagnostics,
 } from './stripe.js'
+import { buildSnapshot, flushPersist, initPersist, loadSnapshot, scheduleSave } from './persist.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PORT = Number(process.env.PORT) || 3001
@@ -277,6 +282,15 @@ io.on('connection', (socket) => {
     broadcastRoom(result.code)
   })
 
+  socket.on('setCategoryPack', ({ pack }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = setCategoryPack(binding.code, binding.playerId, String(pack ?? 'mixed'))
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
   socket.on('start', (_data, ack) => {
     const binding = getBinding(socket.id)
     if (!binding) return ack?.({ error: 'Inte ansluten' })
@@ -337,11 +351,46 @@ setInterval(() => {
   }
 }, 250)
 
-httpServer.listen(PORT, () => {
-  const diag = stripeEnvDiagnostics()
-  console.log(`Factopia kör på port ${PORT}`)
-  console.log(`Tillåtna origins: ${allowedOrigins.join(', ')}`)
-  console.log(
-    `Stripe: ${diag.configured ? `ok (${diag.keyPrefix})` : 'saknas'} | envPresent=${JSON.stringify(diag.envPresent)}`,
-  )
-})
+setInterval(() => {
+  pruneIdleRooms()
+}, 60_000)
+
+async function boot() {
+  const persist = await initPersist()
+  const persistNow = () => scheduleSave(buildSnapshot(allPasses().values(), allRooms().values()))
+  setPersistHook(persistNow)
+  setPassPersistHook(persistNow)
+
+  const snapshot = await loadSnapshot()
+  if (snapshot) {
+    restorePasses(snapshot.passes)
+    hydrateRooms(snapshot.rooms)
+    console.log(
+      `Persist restore: ${snapshot.passes.length} passes, ${snapshot.rooms.length} rooms (${persist.backend})`,
+    )
+  } else if (persist.backend) {
+    console.log(`Persist ready (${persist.backend}) — empty state`)
+  } else {
+    console.log(
+      'Persist: memory only. Set REDIS_URL or FACTOPIA_DATA_DIR to keep Party/rooms across restarts.',
+    )
+  }
+
+  process.on('SIGTERM', () => {
+    void flushPersist().finally(() => process.exit(0))
+  })
+  process.on('SIGINT', () => {
+    void flushPersist().finally(() => process.exit(0))
+  })
+
+  httpServer.listen(PORT, () => {
+    const diag = stripeEnvDiagnostics()
+    console.log(`Factopia kör på port ${PORT}`)
+    console.log(`Tillåtna origins: ${allowedOrigins.join(', ')}`)
+    console.log(
+      `Stripe: ${diag.configured ? `ok (${diag.keyPrefix})` : 'saknas'} | envPresent=${JSON.stringify(diag.envPresent)}`,
+    )
+  })
+}
+
+void boot()

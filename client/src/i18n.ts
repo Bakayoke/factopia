@@ -94,6 +94,19 @@ const sv = {
   waitingRematch: 'Väntar på att värden startar om…',
   leaveRoom: 'Lämna rummet',
   createFastHint: 'Kod direkt — ställ in resten i lobbyn.',
+  vibe: 'Kvällens vibe',
+  packMixed: 'Blandat',
+  packWorld: 'Världen',
+  packBrain: 'Hjärna',
+  packHistorySport: 'Historia & sport',
+  packParty: 'Party / pop',
+  packFood: 'Mat & kultur',
+  tvMode: 'TV-läge',
+  tvModeOn: 'TV-läge på',
+  tvModeOff: 'TV-läge av',
+  spectating: 'Du tittar med — du är med nästa omgång.',
+  spectators: 'Tittar med',
+  watching: 'tittar',
 }
 
 const en: typeof sv = {
@@ -190,6 +203,19 @@ const en: typeof sv = {
   waitingRematch: 'Waiting for the host to start again…',
   leaveRoom: 'Leave room',
   createFastHint: 'Code first — tweak settings in the lobby.',
+  vibe: 'Tonight’s vibe',
+  packMixed: 'Mixed',
+  packWorld: 'World',
+  packBrain: 'Brainy',
+  packHistorySport: 'History & sports',
+  packParty: 'Party / pop',
+  packFood: 'Food & culture',
+  tvMode: 'TV mode',
+  tvModeOn: 'TV mode on',
+  tvModeOff: 'TV mode off',
+  spectating: 'You’re watching — you’ll play next round.',
+  spectators: 'Watching',
+  watching: 'watching',
 }
 
 export type UiStrings = typeof sv

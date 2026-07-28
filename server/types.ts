@@ -18,6 +18,13 @@ export type Player = {
 export type RoomStatus = 'lobby' | 'question' | 'reveal' | 'finished'
 export type AdvanceMode = 'auto' | 'manual'
 export type QuizLanguage = 'sv' | 'en'
+export type CategoryPackId =
+  | 'mixed'
+  | 'world'
+  | 'brain'
+  | 'historySport'
+  | 'party'
+  | 'food'
 
 export type PublicQuestion = {
   index: number
@@ -51,6 +58,7 @@ export type Room = {
   questionCount: number
   advanceMode: AdvanceMode
   language: QuizLanguage
+  categoryPack: CategoryPackId
   status: RoomStatus
   questions: Question[]
   customQuestions: Question[]
@@ -65,6 +73,8 @@ export type Room = {
   endsAt: number
   revealCorrectIndex: number | null
   lastRound: RoundResult[] | null
+  /** Last activity — used when pruning persisted rooms */
+  updatedAt: number
 }
 
 export type PublicCustomQuestion = {
@@ -81,6 +91,7 @@ export type PublicRoom = {
   questionCount: number
   advanceMode: AdvanceMode
   language: QuizLanguage
+  categoryPack: CategoryPackId
   status: RoomStatus
   currentIndex: number
   totalQuestions: number

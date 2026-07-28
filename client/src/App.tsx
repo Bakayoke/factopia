@@ -19,6 +19,7 @@ import {
   savePartyPass,
   saveSession,
   setAdvanceMode,
+  setCategoryPack,
   setCount,
   setHostPlaying,
   setLanguage,
@@ -28,7 +29,7 @@ import {
   type PartyInfo,
 } from './api'
 import { detectPreferredLanguage, rememberLanguage, t } from './i18n'
-import type { AdvanceMode, PublicRoom, QuizLanguage } from './types'
+import type { AdvanceMode, CategoryPackId, PublicRoom, QuizLanguage } from './types'
 import { Confetti, useCountdown } from './ui'
 
 type Screen = 'home' | 'create' | 'join' | 'play'
@@ -38,6 +39,15 @@ const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
 const TIP_URL = (import.meta.env.VITE_TIP_URL as string | undefined) || ''
 const PENDING_ROOM_KEY = 'factopia-pending-room'
+
+const PACKS: { id: CategoryPackId; labelKey: keyof ReturnType<typeof t> }[] = [
+  { id: 'mixed', labelKey: 'packMixed' },
+  { id: 'world', labelKey: 'packWorld' },
+  { id: 'brain', labelKey: 'packBrain' },
+  { id: 'historySport', labelKey: 'packHistorySport' },
+  { id: 'party', labelKey: 'packParty' },
+  { id: 'food', labelKey: 'packFood' },
+]
 
 function joinUrl(code: string) {
   const url = new URL(window.location.origin)
@@ -557,6 +567,7 @@ function PlayView({
   checkoutBusy: boolean
 }) {
   const isHost = room.hostId === playerId
+  const [tvMode, setTvMode] = useState(false)
 
   if (room.status === 'lobby') {
     return (
@@ -572,6 +583,8 @@ function PlayView({
         buyLabel={buyLabel}
         onBuyParty={onBuyParty}
         checkoutBusy={checkoutBusy}
+        tvMode={tvMode}
+        onToggleTv={() => setTvMode((v) => !v)}
       />
     )
   }
@@ -592,7 +605,17 @@ function PlayView({
     )
   }
 
-  return <QuestionView room={room} playerId={playerId} isHost={isHost} onError={onError} onLeave={onLeave} />
+  return (
+    <QuestionView
+      room={room}
+      playerId={playerId}
+      isHost={isHost}
+      onError={onError}
+      onLeave={onLeave}
+      tvMode={tvMode}
+      onToggleTv={() => setTvMode((v) => !v)}
+    />
+  )
 }
 
 function Lobby({
@@ -607,6 +630,8 @@ function Lobby({
   buyLabel,
   onBuyParty,
   checkoutBusy,
+  tvMode,
+  onToggleTv,
 }: {
   room: PublicRoom
   playerId: string
@@ -619,6 +644,8 @@ function Lobby({
   buyLabel: string
   onBuyParty: () => void
   checkoutBusy: boolean
+  tvMode: boolean
+  onToggleTv: () => void
 }) {
   const [busy, setBusy] = useState(false)
   const [partyCode, setPartyCode] = useState('')
@@ -629,12 +656,14 @@ function Lobby({
   const me = room.players.find((p) => p.id === playerId)
   const hostPlaying = me?.playing ?? true
   const participants = room.players.filter((p) => p.playing)
+  const spectators = room.players.filter((p) => !p.playing)
   const isParty = room.premiumTier === 'party'
   const counts = room.limits?.questionCounts ?? FREE_COUNTS
   const maxPlayers = room.limits?.maxPlayers ?? 5
   const playersLabel =
     maxPlayers <= 0 ? ui.unlimited : String(maxPlayers)
   const invite = joinUrl(room.code)
+  const pack = room.categoryPack ?? 'mixed'
 
   useEffect(() => {
     if (!isHost || isParty) return
@@ -702,6 +731,12 @@ function Lobby({
     if (res.error) onError(res.error)
   }
 
+  async function changePack(next: CategoryPackId) {
+    if (!isHost) return
+    const res = await setCategoryPack(next)
+    if (res.error) onError(res.error)
+  }
+
   async function onUnlockParty() {
     if (!partyCode.trim()) return
     setBusy(true)
@@ -727,26 +762,34 @@ function Lobby({
   }
 
   return (
-    <div className="card stack">
+    <div className={`card stack${tvMode ? ' tv-mode' : ''}`}>
       <div className="code-display">
         <span>{ui.gameCode}</span>
         <strong>{room.code}</strong>
-        <p className="invite-hint">{ui.inviteHint}</p>
-        <div className="invite-actions">
-          <button className="btn btn-secondary" type="button" onClick={() => void copyInvite()}>
-            {shareFlash || ui.copyCode}
-          </button>
-          <button className="btn btn-accent" type="button" onClick={() => void shareInvite()}>
-            {ui.shareInvite}
-          </button>
-        </div>
+        {!tvMode && <p className="invite-hint">{ui.inviteHint}</p>}
+        {!tvMode && (
+          <div className="invite-actions">
+            <button className="btn btn-secondary" type="button" onClick={() => void copyInvite()}>
+              {shareFlash || ui.copyCode}
+            </button>
+            <button className="btn btn-accent" type="button" onClick={() => void shareInvite()}>
+              {ui.shareInvite}
+            </button>
+          </div>
+        )}
         <div className="invite-qr">
-          <img src={qrUrl(invite)} alt={ui.scanToJoin} width={180} height={180} />
+          <img src={qrUrl(invite)} alt={ui.scanToJoin} width={tvMode ? 260 : 180} height={tvMode ? 260 : 180} />
           <span>{ui.scanToJoin}</span>
         </div>
       </div>
 
-      {isHost ? (
+      {isHost && (
+        <button className="btn-tiny" type="button" onClick={onToggleTv}>
+          {tvMode ? ui.tvModeOff : ui.tvModeOn}
+        </button>
+      )}
+
+      {isHost && !tvMode ? (
         <>
           <div className={`party-banner ${isParty ? 'on' : ''}`}>
             <div>
@@ -808,6 +851,21 @@ function Lobby({
             </div>
           </div>
           <div>
+            <label style={{ marginBottom: '0.4rem' }}>{ui.vibe}</label>
+            <div className="choice-row pack-row">
+              {PACKS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={`choice ${pack === p.id ? 'selected' : ''}`}
+                  onClick={() => void changePack(p.id)}
+                >
+                  {ui[p.labelKey]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
             <label style={{ marginBottom: '0.4rem' }}>{ui.questionCount}</label>
             <div className="choice-row">
               {counts.map((n) => (
@@ -862,9 +920,11 @@ function Lobby({
           </div>
         </>
       ) : (
-        <p className="waiting">
-          {room.questionCount} {ui.waitingStart}
-        </p>
+        !isHost && (
+          <p className="waiting">
+            {room.questionCount} {ui.waitingStart}
+          </p>
+        )
       )}
 
       <div>
@@ -877,7 +937,7 @@ function Lobby({
         {participants.length === 0 ? (
           <p className="waiting">{ui.noPlayers}</p>
         ) : (
-          <ul className="players">
+          <ul className={`players${tvMode ? ' tv-players' : ''}`}>
             {participants.map((p) => (
               <li key={p.id}>
                 <span>{p.name}</span>
@@ -886,12 +946,28 @@ function Lobby({
             ))}
           </ul>
         )}
-        {isHost && !hostPlaying && (
+        {spectators.length > 0 && (
+          <>
+            <p className="meta" style={{ margin: '0.75rem 0 0.5rem' }}>
+              <span>{ui.spectators}</span>
+              <span>{spectators.length}</span>
+            </p>
+            <ul className="players">
+              {spectators.map((p) => (
+                <li key={p.id}>
+                  <span>{p.name}</span>
+                  <span className="you">{ui.watching}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {isHost && !hostPlaying && !tvMode && (
           <p className="footer-note" style={{ marginTop: '0.6rem' }}>
             {ui.hostHidden}
           </p>
         )}
-        {isHost && !isParty && maxPlayers > 0 && participants.length >= maxPlayers - 1 && (
+        {isHost && !isParty && maxPlayers > 0 && participants.length >= maxPlayers - 1 && !tvMode && (
           <p className="footer-note" style={{ marginTop: '0.6rem' }}>
             {ui.freeTierOk}
           </p>
@@ -906,9 +982,11 @@ function Lobby({
           {ui.startQuiz}
         </button>
       )}
-      <button className="btn btn-ghost" type="button" onClick={onLeave}>
-        {ui.endQuiz}
-      </button>
+      {!tvMode && (
+        <button className="btn btn-ghost" type="button" onClick={onLeave}>
+          {ui.endQuiz}
+        </button>
+      )}
     </div>
   )
 }
@@ -919,12 +997,16 @@ function QuestionView({
   isHost,
   onError,
   onLeave,
+  tvMode,
+  onToggleTv,
 }: {
   room: PublicRoom
   playerId: string
   isHost: boolean
   onError: (msg: string) => void
   onLeave: () => void
+  tvMode: boolean
+  onToggleTv: () => void
 }) {
   const ui = t(room.language)
   const q = room.question
@@ -967,7 +1049,12 @@ function QuestionView({
     room.revealCorrectIndex !== null ? q.options[room.revealCorrectIndex] : null
 
   return (
-    <div className="card stack">
+    <div className={`card stack${tvMode ? ' tv-mode' : ''}`}>
+      {isHost && (
+        <button className="btn-tiny" type="button" onClick={onToggleTv}>
+          {tvMode ? ui.tvModeOff : ui.tvModeOn}
+        </button>
+      )}
       <div className="meta">
         <span className="category">{q.category}</span>
         <span>
@@ -995,9 +1082,11 @@ function QuestionView({
         </div>
       )}
 
-      {isSpectator && !revealing && <p className="waiting">{ui.hosting}</p>}
+      {isSpectator && !revealing && (
+        <p className="waiting">{isHost ? ui.hosting : ui.spectating}</p>
+      )}
 
-      {!revealing && (
+      {!revealing && !(tvMode && isSpectator) && (
         <div className="answers">
           {q.options.map((opt, i) => {
             let cls = 'answer'

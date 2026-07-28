@@ -1,5 +1,12 @@
 import { io, Socket } from 'socket.io-client'
-import type { AdvanceMode, PartyPassLocal, PublicCustomQuestion, PublicRoom, QuizLanguage } from './types'
+import type {
+  AdvanceMode,
+  CategoryPackId,
+  PartyPassLocal,
+  PublicCustomQuestion,
+  PublicRoom,
+  QuizLanguage,
+} from './types'
 
 const SESSION_KEY = 'factopia-session'
 const PARTY_PASS_KEY = 'factopia-party-pass'
@@ -220,6 +227,10 @@ export function setAdvanceMode(mode: AdvanceMode) {
 
 export function setLanguage(language: QuizLanguage) {
   return emitAck<{ ok?: boolean }>('setLanguage', { language })
+}
+
+export function setCategoryPack(pack: CategoryPackId) {
+  return emitAck<{ ok?: boolean }>('setCategoryPack', { pack })
 }
 
 export function redeemParty(code: string) {

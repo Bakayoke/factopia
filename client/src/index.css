@@ -363,6 +363,35 @@ input:focus {
   letter-spacing: 0.06em;
 }
 
+.pack-row {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+
+.tv-mode .code-display strong {
+  font-size: clamp(3.2rem, 18vw, 5.5rem);
+}
+
+.tv-mode .invite-qr img {
+  width: min(280px, 55vw);
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.tv-mode .question-text {
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  line-height: 1.25;
+}
+
+.tv-mode .tv-players li,
+.tv-mode .players li {
+  font-size: 1.15rem;
+  padding: 0.9rem 1.1rem;
+}
+
+.tv-mode .correct-banner strong {
+  font-size: 1.35rem;
+}
+
 .players {
   list-style: none;
   margin: 0;

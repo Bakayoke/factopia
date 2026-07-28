@@ -24,8 +24,18 @@ export type PartyPass = {
   expiresAt: number
 }
 
-/** In-memory passes. Survives per server process. */
+/** In-memory passes. Also mirrored to Redis/file when persist is configured. */
 const passes = new Map<string, PartyPass>()
+
+let onPersist: (() => void) | null = null
+
+export function setPassPersistHook(fn: (() => void) | null) {
+  onPersist = fn
+}
+
+function touchPasses() {
+  onPersist?.()
+}
 
 function configuredPassCodes(): Set<string> {
   // Only this free bypass by default — everyone else pays via Stripe.
@@ -57,7 +67,20 @@ export function issuePartyPass(): PartyPass {
     expiresAt: Date.now() + PARTY_PASS_MS,
   }
   passes.set(pass.token, pass)
+  touchPasses()
   return pass
+}
+
+export function restorePasses(list: PartyPass[]) {
+  const now = Date.now()
+  for (const pass of list) {
+    if (!pass?.token || !pass.expiresAt || pass.expiresAt <= now) continue
+    passes.set(pass.token, pass)
+  }
+}
+
+export function allPasses() {
+  return passes
 }
 
 export function redeemPassCode(code: string): PartyPass | { error: string } {
@@ -75,6 +98,7 @@ export function lookupPass(token: string | null | undefined): PartyPass | null {
   if (!pass) return null
   if (pass.expiresAt <= Date.now()) {
     passes.delete(token)
+    touchPasses()
     return null
   }
   return pass

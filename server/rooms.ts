@@ -1,4 +1,5 @@
 import { customAlphabet } from 'nanoid'
+import { categoriesForPack, normalizePackId, type CategoryPackId } from './packs.js'
 import { pickQuestions } from './questions.js'
 import {
   limitsFor,
@@ -21,10 +22,22 @@ const makeCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ', 4)
 const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
 const DISCONNECT_GRACE_MS = 20_000
+const ROOM_IDLE_MS = 12 * 60 * 60 * 1000
 
 const rooms = new Map<string, Room>()
 const socketToPlayer = new Map<string, { code: string; playerId: string }>()
 const disconnectTimers = new Map<string, ReturnType<typeof setTimeout>>()
+
+let onPersist: (() => void) | null = null
+
+export function setPersistHook(fn: (() => void) | null) {
+  onPersist = fn
+}
+
+function touch(room?: Room) {
+  if (room) room.updatedAt = Date.now()
+  onPersist?.()
+}
 
 function playerKey(code: string, playerId: string) {
   return `${code}:${playerId}`
@@ -92,6 +105,7 @@ export function createRoom(
     questionCount: count,
     advanceMode: advanceMode === 'manual' ? 'manual' : 'auto',
     language: language === 'en' ? 'en' : 'sv',
+    categoryPack: 'mixed',
     status: 'lobby',
     questions: [],
     customQuestions: [],
@@ -105,10 +119,12 @@ export function createRoom(
     endsAt: 0,
     revealCorrectIndex: null,
     lastRound: null,
+    updatedAt: Date.now(),
   }
 
   rooms.set(code, room)
   socketToPlayer.set(socketId, { code, playerId })
+  touch(room)
   return { room, playerId }
 }
 
@@ -119,7 +135,17 @@ export function joinRoom(
 ): { room: Room; playerId: string } | { error: string } {
   const room = rooms.get(code.toUpperCase().trim())
   if (!room) return { error: 'Hittade inget spel med den koden' }
-  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+
+  // Allow lobby + in-progress + finished (spectate / wait for rematch)
+  if (
+    room.status !== 'lobby' &&
+    room.status !== 'question' &&
+    room.status !== 'reveal' &&
+    room.status !== 'finished'
+  ) {
+    return { error: 'Spelet har redan startat' }
+  }
+
   const maxPlayers = roomLimits(room).maxPlayers
   if (maxPlayers > 0 && room.players.length >= maxPlayers) {
     return {
@@ -131,14 +157,17 @@ export function joinRoom(
   }
 
   const playerId = crypto.randomUUID()
+  // Mid-game joiners watch; finished/lobby joiners play (ready for rematch)
+  const playing = room.status === 'lobby' || room.status === 'finished'
   room.players.push({
     id: playerId,
     name: name.trim().slice(0, 20) || (room.language === 'en' ? 'Player' : 'Spelare'),
     score: 0,
     connected: true,
-    playing: true,
+    playing,
   })
   socketToPlayer.set(socketId, { code: room.code, playerId })
+  touch(room)
   return { room, playerId }
 }
 
@@ -160,6 +189,7 @@ export function setQuestionCount(code: string, playerId: string, count: number):
     return { error: 'Ogiltigt antal frågor (Party krävs för 50)' }
   }
   room.questionCount = count
+  touch(room)
   return room
 }
 
@@ -175,6 +205,7 @@ export function setHostPlaying(
   const host = room.players.find((p) => p.id === playerId)
   if (!host) return { error: 'Värden hittades inte' }
   host.playing = playing
+  touch(room)
   return room
 }
 
@@ -188,6 +219,7 @@ export function setAdvanceMode(
   if (room.hostId !== playerId) return { error: 'Bara värden kan ändra detta' }
   if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
   room.advanceMode = mode === 'manual' ? 'manual' : 'auto'
+  touch(room)
   return room
 }
 
@@ -201,6 +233,21 @@ export function setLanguage(
   if (room.hostId !== playerId) return { error: 'Bara värden kan ändra detta' }
   if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
   room.language = language === 'en' ? 'en' : 'sv'
+  touch(room)
+  return room
+}
+
+export function setCategoryPack(
+  code: string,
+  playerId: string,
+  packId: CategoryPackId | string,
+): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan ändra tema' }
+  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+  room.categoryPack = normalizePackId(packId)
+  touch(room)
   return room
 }
 
@@ -222,6 +269,7 @@ export function activatePartyPass(
   if (!limits.questionCounts.includes(room.questionCount)) {
     room.questionCount = limits.questionCounts[0] ?? 10
   }
+  touch(room)
   return { room, pass: { token: redeemed.token, expiresAt: redeemed.expiresAt } }
 }
 
@@ -241,6 +289,7 @@ export function applyPartyToken(
   if (!limits.questionCounts.includes(room.questionCount)) {
     room.questionCount = limits.questionCounts[0] ?? 10
   }
+  touch(room)
   return room
 }
 
@@ -254,6 +303,7 @@ export function setRoomTitle(
   if (room.hostId !== playerId) return { error: 'Bara värden kan ändra titel' }
   if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
   room.roomTitle = title.trim().slice(0, 40)
+  touch(room)
   return room
 }
 
@@ -281,8 +331,10 @@ export function startGame(code: string, playerId: string): Room | { error: strin
   }
 
   const exclude = new Set(room.recentQuestionIds)
+  const categories = categoriesForPack(room.categoryPack, room.language)
   room.questions = pickQuestions(room.questionCount, room.language, room.customQuestions, {
     excludeIds: exclude,
+    categories,
   })
   room.recentQuestionIds = [
     ...room.recentQuestionIds,
@@ -293,6 +345,7 @@ export function startGame(code: string, playerId: string): Room | { error: strin
     p.score = 0
   })
   advanceToQuestion(room)
+  touch(room)
   return room
 }
 
@@ -314,7 +367,10 @@ export function rematch(code: string, playerId: string): Room | { error: string 
   room.lastRound = null
   room.players.forEach((p) => {
     p.score = 0
+    // Late spectators become players for the next round (host keeps their preference)
+    if (p.id !== room.hostId) p.playing = true
   })
+  touch(room)
   return room
 }
 
@@ -414,6 +470,7 @@ export function endGame(code: string, playerId: string): Room | { error: string 
   room.questionStartedAt = 0
   room.revealCorrectIndex = null
   room.lastRound = null
+  touch(room)
   return room
 }
 
@@ -505,6 +562,7 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
     questionCount: room.questionCount,
     advanceMode: room.advanceMode,
     language: room.language,
+    categoryPack: room.categoryPack ?? 'mixed',
     status: room.status as RoomStatus,
     currentIndex: room.currentIndex,
     totalQuestions: room.questions.length || room.questionCount,
@@ -531,6 +589,48 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
 
 export function allRooms() {
   return rooms
+}
+
+export function hydrateRooms(saved: Room[]) {
+  const now = Date.now()
+  for (const raw of saved) {
+    if (!raw?.code || rooms.has(raw.code)) continue
+    if (raw.updatedAt && now - raw.updatedAt > ROOM_IDLE_MS) {
+      // Keep if party still active
+      if (!raw.premiumExpiresAt || raw.premiumExpiresAt <= now) continue
+    }
+    const room: Room = {
+      ...raw,
+      categoryPack: normalizePackId(raw.categoryPack),
+      recentQuestionIds: Array.isArray(raw.recentQuestionIds) ? raw.recentQuestionIds : [],
+      players: (raw.players ?? []).map((p) => ({ ...p, connected: false })),
+      answers: {},
+      answerTimes: {},
+      // Mid-question rooms resume safer from lobby if timers are stale
+      status:
+        raw.status === 'question' || raw.status === 'reveal' ? 'lobby' : raw.status,
+      questions: raw.status === 'question' || raw.status === 'reveal' ? [] : raw.questions ?? [],
+      currentIndex: -1,
+      endsAt: 0,
+      questionStartedAt: 0,
+      revealCorrectIndex: null,
+      lastRound: null,
+      updatedAt: raw.updatedAt ?? now,
+    }
+    rooms.set(room.code, room)
+  }
+}
+
+export function pruneIdleRooms() {
+  const now = Date.now()
+  for (const [code, room] of rooms) {
+    const idle = now - (room.updatedAt || 0) > ROOM_IDLE_MS
+    const partyLive = Boolean(room.premiumExpiresAt && room.premiumExpiresAt > now)
+    const anyoneConnected = room.players.some((p) => p.connected)
+    if (idle && !partyLive && !anyoneConnected) {
+      rooms.delete(code)
+    }
+  }
 }
 
 export { QUESTION_MS, REVEAL_MS }

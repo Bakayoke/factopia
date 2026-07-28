@@ -906,20 +906,36 @@ export function pickQuestions(
   count: number,
   language: QuizLanguage = 'sv',
   custom: Question[] = [],
-  opts: { excludeIds?: Set<string> } = {},
+  opts: { excludeIds?: Set<string>; categories?: string[] | null } = {},
 ): Question[] {
   const customs = shuffle(custom).slice(0, Math.max(0, count)).map(withShuffledOptions)
   const need = Math.max(0, count - customs.length)
   if (need === 0) return shuffle(customs)
 
   const raw = language === 'en' ? QUESTIONS_EN : QUESTIONS_SV
-  const pool = dedupePool(raw.filter((q) => !isMathish(q)))
+  const categorySet =
+    opts.categories && opts.categories.length > 0
+      ? new Set(opts.categories.map((c) => c.toLowerCase()))
+      : null
+
+  let pool = dedupePool(
+    raw.filter((q) => {
+      if (isMathish(q)) return false
+      if (!categorySet) return true
+      return categorySet.has(q.category.toLowerCase())
+    }),
+  )
+
+  // If a pack is too thin, fall back to the full (non-math) pool
+  if (pool.length < need) {
+    pool = dedupePool(raw.filter((q) => !isMathish(q)))
+  }
+
   const exclude = opts.excludeIds ?? new Set<string>()
   const fresh = pool.filter((q) => !exclude.has(q.id))
   const primary = fresh.length >= need ? fresh : pool
   let selected = pickDiverse(primary, Math.min(need, primary.length))
 
-  // If we preferred fresh but still short, top up from the full pool
   if (selected.length < need) {
     const have = new Set(selected.map((q) => q.id))
     const filler = pickDiverse(

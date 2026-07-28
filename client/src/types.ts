@@ -10,6 +10,13 @@ export type RoomStatus = 'lobby' | 'question' | 'reveal' | 'finished'
 export type AdvanceMode = 'auto' | 'manual'
 export type QuizLanguage = 'sv' | 'en'
 export type PremiumTier = 'free' | 'party'
+export type CategoryPackId =
+  | 'mixed'
+  | 'world'
+  | 'brain'
+  | 'historySport'
+  | 'party'
+  | 'food'
 
 export type PremiumLimits = {
   /** 0 = unlimited */
@@ -48,6 +55,7 @@ export type PublicRoom = {
   questionCount: number
   advanceMode: AdvanceMode
   language: QuizLanguage
+  categoryPack?: CategoryPackId
   status: RoomStatus
   currentIndex: number
   totalQuestions: number
