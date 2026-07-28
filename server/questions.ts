@@ -926,7 +926,25 @@ export function pickQuestions(
     }),
   )
 
-  // If a pack is too thin, fall back to the full (non-math) pool
+  // Prefer pack categories; if thin, top up with Allmänt/General before full fallback
+  if (categorySet && pool.length < Math.max(need * 3, 40)) {
+    const soft = language === 'en' ? ['general', 'culture'] : ['allmänt', 'kultur']
+    const extra = dedupePool(
+      raw.filter((q) => {
+        if (isMathish(q)) return false
+        if (categorySet.has(q.category.toLowerCase())) return false
+        return soft.includes(q.category.toLowerCase())
+      }),
+    )
+    const seen = new Set(pool.map((q) => q.id))
+    for (const q of extra) {
+      if (seen.has(q.id)) continue
+      pool.push(q)
+      seen.add(q.id)
+    }
+  }
+
+  // If still too thin, fall back to the full (non-math) pool
   if (pool.length < need) {
     pool = dedupePool(raw.filter((q) => !isMathish(q)))
   }

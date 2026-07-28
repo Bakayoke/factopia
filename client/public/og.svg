@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a5c4a"/>
+      <stop offset="55%" stop-color="#0f2f3a"/>
+      <stop offset="100%" stop-color="#f0b429"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <circle cx="980" cy="120" r="160" fill="#ffffff22"/>
+  <circle cx="160" cy="520" r="120" fill="#ffffff18"/>
+  <text x="80" y="250" font-family="Georgia, serif" font-size="96" font-weight="700" fill="#fff">Factopia</text>
+  <text x="80" y="340" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#ffe8a3">Partyquiz på 10 sekunder</text>
+  <text x="80" y="420" font-family="Arial, sans-serif" font-size="28" fill="#e8fff6">Starta · dela kod · spela med gänget</text>
+  <text x="80" y="540" font-family="Arial, sans-serif" font-size="24" fill="#fff" opacity="0.85">factopia.net</text>
+</svg>

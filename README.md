@@ -26,6 +26,18 @@ npm run dev
 
 ## Produktion
 
+### Railway (API + sockets) — Redis rekommenderas
+
+1. Skapa tjänst från GitHub-repot (Node start: `npm start`).
+2. **Lägg till Redis-plugin** i samma projekt.
+3. Koppla `REDIS_URL` till API-tjänsten (Railway gör det oftast auto).
+4. Sätt även:
+   - `PUBLIC_APP_URL=https://factopia.net`
+   - `STRIPE_SECRET_KEY=sk_live_…`
+5. Verifiera: `GET /api/health` → `persist.configured: true`.
+
+Utan Redis försvinner Party-pass och rum vid restart. Alternativ: volume + `FACTOPIA_DATA_DIR=/data`.
+
 ### Cloudflare (frontend + auto-build från GitHub)
 
 Build command i Cloudflare:

@@ -44,6 +44,7 @@ import type {
   QuizLanguage,
 } from './types'
 import { Confetti, useCountdown } from './ui'
+import { renderResultsImage } from './shareCard'
 
 type Screen = 'home' | 'create' | 'join' | 'find' | 'play' | 'guest-unlock'
 
@@ -467,10 +468,14 @@ export default function App() {
         <header className="brand">
           <h1>Factopia</h1>
           <p>{ui.tagline}</p>
+          {screen === 'home' && <p className="landing-pitch">{ui.landingPitch}</p>}
         </header>
 
         {!connected && screen === 'play' && (
           <p className="reconnect-banner">{ui.reconnecting}</p>
+        )}
+        {connected && partyFlash && screen === 'play' && (
+          <p className="party-unlock-banner">{partyFlash}</p>
         )}
 
         {screen === 'home' && (
@@ -940,10 +945,40 @@ function PlayView({
   checkoutBusy: boolean
 }) {
   const isHost = room.hostId === playerId
+  const ui = t(room.language)
   const [tvMode, setTvMode] = useState(false)
+  const [wasHost, setWasHost] = useState(isHost)
+  const [hadParty, setHadParty] = useState(room.premiumTier === 'party')
+  const [localFlash, setLocalFlash] = useState('')
+
+  useEffect(() => {
+    if (isHost && !wasHost) {
+      setLocalFlash(ui.youAreHostNow)
+      window.setTimeout(() => setLocalFlash(''), 5000)
+    }
+    setWasHost(isHost)
+  }, [isHost, wasHost, ui.youAreHostNow])
+
+  useEffect(() => {
+    const isParty = room.premiumTier === 'party'
+    if (isParty && !hadParty) {
+      setLocalFlash(ui.partyUnlockedBanner)
+      window.setTimeout(() => setLocalFlash(''), 6000)
+    }
+    setHadParty(isParty)
+  }, [room.premiumTier, hadParty, ui.partyUnlockedBanner])
+
+  const hostPlayer = room.players.find((p) => p.id === room.hostId)
+  const hostAway = Boolean(hostPlayer && !hostPlayer.connected)
 
   if (room.status === 'lobby') {
     return (
+      <>
+        {(localFlash || hostAway) && (
+          <p className={`party-unlock-banner${hostAway && !localFlash ? ' warn' : ''}`}>
+            {localFlash || ui.hostAway}
+          </p>
+        )}
       <Lobby
         room={room}
         playerId={playerId}
@@ -960,11 +995,14 @@ function PlayView({
         tvMode={tvMode}
         onToggleTv={() => setTvMode((v) => !v)}
       />
+      </>
     )
   }
 
   if (room.status === 'finished') {
     return (
+      <>
+        {localFlash && <p className="party-unlock-banner">{localFlash}</p>}
       <WinnerView
         room={room}
         playerId={playerId}
@@ -977,10 +1015,17 @@ function PlayView({
         onBuyParty={onBuyParty}
         checkoutBusy={checkoutBusy}
       />
+      </>
     )
   }
 
   return (
+    <>
+      {(localFlash || hostAway) && (
+        <p className={`party-unlock-banner${hostAway && !localFlash ? ' warn' : ''}`}>
+          {localFlash || ui.hostAway}
+        </p>
+      )}
     <QuestionView
       room={room}
       playerId={playerId}
@@ -990,6 +1035,7 @@ function PlayView({
       tvMode={tvMode}
       onToggleTv={() => setTvMode((v) => !v)}
     />
+    </>
   )
 }
 
@@ -1186,10 +1232,23 @@ function Lobby({
               <strong>{isParty ? ui.partyActive : ui.party}</strong>
               <p>
                 {isParty && room.premiumExpiresAt
-                  ? `${ui.partyUntil} ${formatExpiry(room.premiumExpiresAt, room.language)}`
+                  ? `${ui.partyActiveUntil} ${formatExpiry(room.premiumExpiresAt, room.language)}`
                   : ui.freeTierOk}
               </p>
             </div>
+            {isParty && room.premiumExpiresAt && room.premiumExpiresAt - Date.now() < 2 * 60 * 60 * 1000 && (
+              <div className="party-expiring">
+                <p className="party-hint">{ui.partyExpiringSoon}</p>
+                <button
+                  className="btn btn-party"
+                  type="button"
+                  disabled={checkoutBusy}
+                  onClick={() => onBuyParty('week')}
+                >
+                  {ui.renewParty}
+                </button>
+              </div>
+            )}
             {!isParty && (
               <>
                 <p className="party-hint">{almostFull || isFull ? (isFull ? ui.roomFullUpsell : ui.roomAlmostFull) : ui.buyPartyHint}</p>
@@ -1538,7 +1597,8 @@ function QuestionView({
         <p className="waiting">{isHost ? ui.hosting : ui.spectating}</p>
       )}
 
-      {!revealing && !(tvMode && isSpectator) && (
+      {/* TV mode: hide options until reveal (anti-spoiler for the big screen) */}
+      {!revealing && !tvMode && (
         <div className="answers">
           {q.options.map((opt, i) => {
             let cls = 'answer'
@@ -1558,11 +1618,17 @@ function QuestionView({
         </div>
       )}
 
-      {room.yourAnswer !== null && !revealing && !isSpectator && (
+      {tvMode && !revealing && (
+        <p className="waiting tv-wait">
+          {seconds}s · {room.answeredCount}/{room.playingCount} {ui.answered}
+        </p>
+      )}
+
+      {room.yourAnswer !== null && !revealing && !isSpectator && !tvMode && (
         <p className="waiting">{ui.answerSent}</p>
       )}
 
-      {revealing && room.lastRound && (
+      {revealing && room.lastRound && !tvMode && (
         <>
           <p className="section-title">{ui.thisRound}</p>
           <ul className="round-results">
@@ -1699,6 +1765,45 @@ function WinnerView({
     }
   }
 
+  async function shareImage() {
+    const invite = `${window.location.origin}/?join=${room.code}`
+    const blob = await renderResultsImage({
+      title: winner ? `${ui.winnerIs} ${winner.name}` : ui.standings,
+      subtitle: `${winner?.score ?? 0} ${ui.points}`,
+      rows: ranked.map((p, i) => ({
+        rank: i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`,
+        name: p.name,
+        score: `${p.score}`,
+      })),
+      footer: invite,
+    })
+    if (!blob) {
+      onError(ui.somethingWrong)
+      return
+    }
+    const file = new File([blob], 'factopia-resultat.png', { type: 'image/png' })
+    try {
+      if (typeof navigator.share === 'function' && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Factopia',
+          text: room.language === 'en' ? 'We played Factopia!' : 'Vi körde Factopia!',
+        })
+        return
+      }
+    } catch {
+      // fall through to download
+    }
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'factopia-resultat.png'
+    a.click()
+    URL.revokeObjectURL(url)
+    setShareFlash(ui.resultsCopied)
+    window.setTimeout(() => setShareFlash(''), 2000)
+  }
+
   return (
     <div className="card winner-screen">
       <Confetti />
@@ -1730,9 +1835,14 @@ function WinnerView({
         ))}
       </ol>
 
-      <button className="btn btn-accent" type="button" onClick={() => void shareResults()}>
-        {shareFlash || ui.shareResults}
-      </button>
+      <div className="party-plans">
+        <button className="btn btn-accent" type="button" onClick={() => void shareResults()}>
+          {shareFlash || ui.shareResults}
+        </button>
+        <button className="btn btn-secondary" type="button" onClick={() => void shareImage()}>
+          {ui.shareImage}
+        </button>
+      </div>
 
       {isHost ? (
         <button className="btn btn-primary" type="button" disabled={busy} onClick={() => void onRematch()}>

@@ -45,7 +45,7 @@ import {
   stripeConfigured,
   stripeEnvDiagnostics,
 } from './stripe.js'
-import { buildSnapshot, flushPersist, initPersist, loadSnapshot, scheduleSave } from './persist.js'
+import { buildSnapshot, flushPersist, initPersist, loadSnapshot, persistDiagnostics, scheduleSave } from './persist.js'
 import { funnelSnapshot, trackFunnel, type FunnelEvent } from './metrics.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -96,6 +96,7 @@ app.get('/api/health', (_req, res) => {
     name: 'factopia',
     stripe: diag.configured,
     stripeDiag: diag,
+    persist: persistDiagnostics(),
   })
 })
 
@@ -412,7 +413,8 @@ setInterval(() => {
 
 setInterval(() => {
   pruneIdleRooms()
-}, 60_000)
+  scheduleSave(buildSnapshot(allPasses().values(), allRooms().values()))
+}, 30_000)
 
 async function boot() {
   const persist = await initPersist()
@@ -444,10 +446,14 @@ async function boot() {
 
   httpServer.listen(PORT, () => {
     const diag = stripeEnvDiagnostics()
+    const pdiag = persistDiagnostics()
     console.log(`Factopia kör på port ${PORT}`)
     console.log(`Tillåtna origins: ${allowedOrigins.join(', ')}`)
     console.log(
       `Stripe: ${diag.configured ? `ok (${diag.keyPrefix})` : 'saknas'} | envPresent=${JSON.stringify(diag.envPresent)}`,
+    )
+    console.log(
+      `Persist: ${pdiag.configured ? pdiag.backend : 'memory only'}${pdiag.hint ? ` | ${pdiag.hint}` : ''}`,
     )
   })
 }

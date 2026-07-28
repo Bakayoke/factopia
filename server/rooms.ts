@@ -19,9 +19,10 @@ import type {
 } from './types.js'
 
 const makeCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ', 4)
+const DISCONNECT_GRACE_MS = 60_000
+const HOST_TRANSFER_AFTER_MS = 90_000
 const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
-const DISCONNECT_GRACE_MS = 20_000
 const ROOM_IDLE_MS = 12 * 60 * 60 * 1000
 
 const rooms = new Map<string, Room>()
@@ -644,6 +645,22 @@ export function disconnectSocket(
     }
     const player = current.players.find((p) => p.id === binding.playerId)
     if (player) player.connected = false
+
+    // If host is gone, transfer after a bit more wait so the night can continue
+    if (current.hostId === binding.playerId) {
+      setTimeout(() => {
+        const room = rooms.get(binding.code)
+        if (!room || room.hostId !== binding.playerId) return
+        const host = room.players.find((p) => p.id === binding.playerId)
+        if (host?.connected) return
+        const nextHost = room.players.find((p) => p.connected && p.id !== binding.playerId)
+        if (!nextHost) return
+        room.hostId = nextHost.id
+        touch(room)
+        onSettled?.(room)
+      }, Math.max(0, HOST_TRANSFER_AFTER_MS - DISCONNECT_GRACE_MS))
+    }
+
     onSettled?.(current)
   }, DISCONNECT_GRACE_MS)
   disconnectTimers.set(playerKey(binding.code, binding.playerId), timer)

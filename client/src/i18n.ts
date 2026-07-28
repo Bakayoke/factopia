@@ -1,11 +1,12 @@
 import type { QuizLanguage } from './types'
 
 const sv = {
-  tagline: 'Partyquiz för hela gänget',
+  tagline: 'Partyquiz på 10 sekunder',
   startNew: 'Starta nytt spel',
   or: 'eller',
   joinWithCode: 'Gå med med kod',
   footer: 'Dela koden — svara — fira vinnaren',
+  landingPitch: 'Inga frågor att hitta på. Starta, dela, spela.',
   yourName: 'Ditt namn',
   questionCount: 'Antal frågor',
   yourRole: 'Din roll',
@@ -139,14 +140,23 @@ const sv = {
   resumeCheckout: 'Fortsätt köpet',
   checkoutCancelledHint: 'Köp avbrutet — du kan fortsätta när du vill.',
   publicNeedsParty: 'Öppna rum kräver Party (syns under Hitta spel).',
+  partyUnlockedBanner: 'Party upplåst — fler kan gå med nu!',
+  partyActiveUntil: 'Party aktivt till',
+  partyExpiringSoon: 'Party går snart ut',
+  renewParty: 'Förläng med 7 dagar',
+  shareImage: 'Dela bild',
+  youAreHostNow: 'Du är värd nu — den förra kopplades bort.',
+  hostAway: 'Värden är tillfälligt borta…',
+  connectedOk: 'Ansluten igen',
 }
 
 const en: typeof sv = {
-  tagline: 'Party quiz for the whole crew',
+  tagline: 'Party quiz in 10 seconds',
   startNew: 'Start new game',
   or: 'or',
   joinWithCode: 'Join with code',
   footer: 'Share the code — answer — crown the winner',
+  landingPitch: 'No question-writing. Start, share, play.',
   yourName: 'Your name',
   questionCount: 'Number of questions',
   yourRole: 'Your role',
@@ -280,6 +290,14 @@ const en: typeof sv = {
   resumeCheckout: 'Continue checkout',
   checkoutCancelledHint: 'Checkout cancelled — continue whenever you want.',
   publicNeedsParty: 'Open rooms require Party (listed under Find a game).',
+  partyUnlockedBanner: 'Party unlocked — more people can join now!',
+  partyActiveUntil: 'Party active until',
+  partyExpiringSoon: 'Party expires soon',
+  renewParty: 'Extend with 7 days',
+  shareImage: 'Share image',
+  youAreHostNow: 'You’re the host now — the previous host disconnected.',
+  hostAway: 'Host is temporarily away…',
+  connectedOk: 'Connected again',
 }
 
 export type UiStrings = typeof sv

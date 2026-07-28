@@ -172,6 +172,35 @@ button {
   font-size: 1.05rem;
 }
 
+.landing-pitch {
+  margin-top: 0.25rem !important;
+  font-size: 0.95rem !important;
+  opacity: 0.9;
+}
+
+.party-unlock-banner {
+  margin: 0 0 0.75rem;
+  text-align: center;
+  font-weight: 800;
+  padding: 0.65rem 0.9rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 28%, var(--surface));
+}
+
+.party-unlock-banner.warn {
+  background: color-mix(in srgb, var(--sun) 35%, var(--surface));
+}
+
+.party-expiring {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.tv-mode .tv-wait {
+  font-size: 1.25rem;
+}
+
 .card {
   background: var(--surface);
   border-radius: 28px;
