@@ -24,7 +24,6 @@ import {
   setPersistHook,
   setPublicLobby,
   listPublicLobbies,
-  pickPublicLobby,
   startGame,
   submitAnswer,
   nextQuestion,
