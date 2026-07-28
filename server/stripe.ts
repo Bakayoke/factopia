@@ -1,7 +1,8 @@
 import Stripe from 'stripe'
 import { issuePartyPass, type PartyPass } from './premium.js'
 
-const sessionPasses = new Map<string, PartyPass>()
+type ClaimedCheckout = { pass: PartyPass; roomCode: string }
+const sessionPasses = new Map<string, ClaimedCheckout>()
 
 const STRIPE_KEY_ENVS = [
   'STRIPE_SECRET_KEY',
@@ -66,19 +67,20 @@ function partyAmountOre(): number {
   return Number.isFinite(n) && n >= 100 ? Math.round(n) : 3900
 }
 
-function rememberSessionPass(sessionId: string, pass: PartyPass) {
-  sessionPasses.set(sessionId, pass)
-  return pass
+function rememberSessionPass(sessionId: string, pass: PartyPass, roomCode = '') {
+  const entry: ClaimedCheckout = { pass, roomCode: roomCode.trim().toUpperCase() }
+  sessionPasses.set(sessionId, entry)
+  return entry
 }
 
-export function getPassForCheckoutSession(sessionId: string): PartyPass | null {
-  const pass = sessionPasses.get(sessionId)
-  if (!pass) return null
-  if (pass.expiresAt <= Date.now()) {
+export function getPassForCheckoutSession(sessionId: string): ClaimedCheckout | null {
+  const entry = sessionPasses.get(sessionId)
+  if (!entry) return null
+  if (entry.pass.expiresAt <= Date.now()) {
     sessionPasses.delete(sessionId)
     return null
   }
-  return pass
+  return entry
 }
 
 export async function createPartyCheckoutSession(opts: {
@@ -93,8 +95,10 @@ export async function createPartyCheckoutSession(opts: {
     const stripe = getStripe()
     const priceId = process.env.STRIPE_PARTY_PRICE_ID?.trim()
     const locale = opts.locale === 'en' ? 'en' : 'sv'
-    const successUrl = `${appBaseUrl()}/?party_session={CHECKOUT_SESSION_ID}`
-    const cancelUrl = `${appBaseUrl()}/?party_cancel=1`
+    const room = (opts.roomCode ?? '').trim().toUpperCase()
+    const roomQuery = room ? `&room=${encodeURIComponent(room)}` : ''
+    const successUrl = `${appBaseUrl()}/?party_session={CHECKOUT_SESSION_ID}${roomQuery}`
+    const cancelUrl = `${appBaseUrl()}/?party_cancel=1${roomQuery}`
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
@@ -105,7 +109,7 @@ export async function createPartyCheckoutSession(opts: {
       billing_address_collection: 'auto',
       metadata: {
         product: 'party_pass',
-        roomCode: opts.roomCode ?? '',
+        roomCode: room,
       },
       line_items: priceId
         ? [{ price: priceId, quantity: 1 }]
@@ -162,11 +166,11 @@ export async function createPartyCheckoutSession(opts: {
 
 export async function claimPartyCheckoutSession(
   sessionId: string,
-): Promise<PartyPass | { error: string }> {
+): Promise<(PartyPass & { roomCode?: string }) | { error: string }> {
   if (!sessionId?.startsWith('cs_')) return { error: 'Ogiltig betalningssession' }
 
   const cached = getPassForCheckoutSession(sessionId)
-  if (cached) return cached
+  if (cached) return { ...cached.pass, roomCode: cached.roomCode || undefined }
 
   if (!stripeConfigured()) return { error: 'Stripe är inte konfigurerat' }
 
@@ -180,8 +184,10 @@ export async function claimPartyCheckoutSession(
       return { error: 'Betalningen är inte klar ännu' }
     }
 
+    const roomCode = String(session.metadata?.roomCode ?? '').trim().toUpperCase()
     const pass = issuePartyPass()
-    return rememberSessionPass(sessionId, pass)
+    const remembered = rememberSessionPass(sessionId, pass, roomCode)
+    return { ...remembered.pass, roomCode: remembered.roomCode || undefined }
   } catch (e) {
     console.error('Stripe claim error', e)
     return { error: 'Kunde inte hämta Party efter betalning' }
@@ -204,7 +210,8 @@ export async function handleStripeWebhook(
       const session = event.data.object as Stripe.Checkout.Session
       if (session.metadata?.product === 'party_pass' && session.payment_status === 'paid') {
         if (!getPassForCheckoutSession(session.id)) {
-          rememberSessionPass(session.id, issuePartyPass())
+          const roomCode = String(session.metadata?.roomCode ?? '')
+          rememberSessionPass(session.id, issuePartyPass(), roomCode)
         }
       }
     }

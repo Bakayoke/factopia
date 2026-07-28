@@ -86,6 +86,14 @@ const sv = {
     'Fel nyckel i Railway: du har pk_… (Publishable). Byt till sk_… (Secret key) från Stripe → API keys.',
   freeTierOk: 'Gratis: upp till 5 spelare (host + 4). Party: fler spelare.',
   unlimited: 'obegränsat',
+  copyCode: 'Kopiera kod',
+  copied: 'Kopierad!',
+  shareInvite: 'Dela länk',
+  inviteHint: 'Skicka länken — vänner öppnar och går med direkt.',
+  scanToJoin: 'Skanna för att gå med',
+  waitingRematch: 'Väntar på att värden startar om…',
+  leaveRoom: 'Lämna rummet',
+  createFastHint: 'Kod direkt — ställ in resten i lobbyn.',
 }
 
 const en: typeof sv = {
@@ -174,6 +182,14 @@ const en: typeof sv = {
     'Wrong key in Railway: you have pk_… (Publishable). Replace with sk_… (Secret key) from Stripe → API keys.',
   freeTierOk: 'Free: up to 5 players (host + 4). Party: more players.',
   unlimited: 'unlimited',
+  copyCode: 'Copy code',
+  copied: 'Copied!',
+  shareInvite: 'Share link',
+  inviteHint: 'Send the link — friends open and join right away.',
+  scanToJoin: 'Scan to join',
+  waitingRematch: 'Waiting for the host to start again…',
+  leaveRoom: 'Leave room',
+  createFastHint: 'Code first — tweak settings in the lobby.',
 }
 
 export type UiStrings = typeof sv

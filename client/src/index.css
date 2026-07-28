@@ -325,6 +325,44 @@ input:focus {
   color: var(--text);
 }
 
+.invite-hint {
+  margin: 0.65rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.invite-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.invite-qr {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.invite-qr img {
+  width: 180px;
+  height: 180px;
+  border-radius: 16px;
+  background: #fff;
+  padding: 0.4rem;
+}
+
+.invite-qr span {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .players {
   list-style: none;
   margin: 0;

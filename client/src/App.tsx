@@ -15,6 +15,7 @@ import {
   loadSession,
   nextQuestion,
   redeemParty,
+  rematchGame,
   savePartyPass,
   saveSession,
   setAdvanceMode,
@@ -33,10 +34,20 @@ import { Confetti, useCountdown } from './ui'
 type Screen = 'home' | 'create' | 'join' | 'play'
 
 const FREE_COUNTS = [10, 20, 30, 50]
-const ALL_COUNTS = [10, 20, 30, 50]
 const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
 const TIP_URL = (import.meta.env.VITE_TIP_URL as string | undefined) || ''
+const PENDING_ROOM_KEY = 'factopia-pending-room'
+
+function joinUrl(code: string) {
+  const url = new URL(window.location.origin)
+  url.searchParams.set('join', code.toUpperCase())
+  return url.toString()
+}
+
+function qrUrl(data: string) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=${encodeURIComponent(data)}`
+}
 
 function formatExpiry(ts: number, lang: QuizLanguage) {
   return new Date(ts).toLocaleString(lang === 'en' ? 'en-GB' : 'sv-SE', {
@@ -49,10 +60,10 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
-  const [questionCount, setQuestionCount] = useState(10)
+  const [questionCount] = useState(10)
   const [hostPlays, setHostPlays] = useState(true)
-  const [advanceMode, setAdvanceModeLocal] = useState<AdvanceMode>('manual')
-  const [language, setLanguageLocal] = useState<QuizLanguage>(() => detectPreferredLanguage())
+  const [advanceMode] = useState<AdvanceMode>('auto')
+  const [language] = useState<QuizLanguage>(() => detectPreferredLanguage())
   const [joinStep, setJoinStep] = useState<'code' | 'name'>('code')
   const [playerId, setPlayerId] = useState<string | null>(null)
   const [room, setRoom] = useState<PublicRoom | null>(null)
@@ -76,7 +87,6 @@ export default function App() {
   const uiLang = room?.language ?? language
   const ui = t(uiLang)
   const hasParty = Boolean(partyPass && partyPass.expiresAt > Date.now())
-  const createCounts = hasParty ? ALL_COUNTS : FREE_COUNTS
   const buyLabel = `Party · ${partyInfo.amountLabel} · ${partyInfo.durationHours} h`
 
   useEffect(() => {
@@ -90,27 +100,60 @@ export default function App() {
     void fetchStripeHint().then(setStripeHint)
   }, [])
 
+  // Deep link: /?join=ABCD
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const joinCode = params.get('join')?.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4)
+    if (!joinCode || joinCode.length < 4) return
+    setCode(joinCode)
+    setJoinStep('name')
+    setScreen('join')
+    const url = new URL(window.location.href)
+    url.searchParams.delete('join')
+    window.history.replaceState({}, '', url.pathname + url.search)
+  }, [])
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const sessionId = params.get('party_session')
     const cancelled = params.get('party_cancel')
+    const roomFromUrl = params.get('room')?.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4)
     if (!sessionId && !cancelled) return
 
     const clean = () => {
       const url = new URL(window.location.href)
       url.searchParams.delete('party_session')
       url.searchParams.delete('party_cancel')
+      url.searchParams.delete('room')
       window.history.replaceState({}, '', url.pathname + url.search)
     }
+
+    const pendingRoom =
+      roomFromUrl ||
+      (() => {
+        try {
+          return sessionStorage.getItem(PENDING_ROOM_KEY) || ''
+        } catch {
+          return ''
+        }
+      })()
 
     if (cancelled) {
       setPartyFlash(ui.partyCancelled)
       clean()
+      if (pendingRoom) {
+        try {
+          sessionStorage.removeItem(PENDING_ROOM_KEY)
+        } catch {
+          // ignore
+        }
+        // Session rejoin effect should restore the lobby if localStorage session exists
+      }
       return
     }
 
     setCheckoutBusy(true)
-    void claimPartySession(sessionId!).then((res) => {
+    void claimPartySession(sessionId!).then(async (res) => {
       setCheckoutBusy(false)
       clean()
       if (res.error || !res.token || !res.expiresAt) {
@@ -122,18 +165,42 @@ export default function App() {
       setPartyPass(pass)
       setPartyFlash(ui.partyUnlocked)
       void fetchPartyInfo().then(setPartyInfo)
+
+      const targetRoom = (res.roomCode || pendingRoom || '').toUpperCase()
+      try {
+        sessionStorage.removeItem(PENDING_ROOM_KEY)
+      } catch {
+        // ignore
+      }
+
+      const session = loadSession()
+      if (targetRoom && session?.code === targetRoom) {
+        setBusy(true)
+        const bound = await ensureSessionBound(5)
+        setBusy(false)
+        if (bound && !bound.error && bound.room) {
+          setPlayerId(bound.playerId)
+          setRoom(bound.room)
+          setScreen('play')
+          await applyStoredPartyToken()
+        }
+      } else if (session) {
+        await applyStoredPartyToken()
+      }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function pickLanguage(lang: QuizLanguage) {
-    setLanguageLocal(lang)
-    rememberLanguage(lang)
-  }
-
   async function onBuyParty(roomCode?: string) {
     setError('')
     setCheckoutBusy(true)
+    if (roomCode) {
+      try {
+        sessionStorage.setItem(PENDING_ROOM_KEY, roomCode.toUpperCase())
+      } catch {
+        // ignore
+      }
+    }
     const res = await startPartyCheckout(uiLang, roomCode)
     if (res.error || !res.url) {
       setCheckoutBusy(false)
@@ -343,6 +410,7 @@ export default function App() {
 
         {screen === 'create' && (
           <form className="card stack" onSubmit={onCreate}>
+            <p className="footer-note">{ui.createFastHint}</p>
             <div>
               <label style={{ marginBottom: '0.4rem' }}>{ui.yourRole}</label>
               <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
@@ -375,101 +443,6 @@ export default function App() {
                 />
               </label>
             )}
-            <div>
-              <label style={{ marginBottom: '0.4rem' }}>{ui.language}</label>
-              <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                <button
-                  type="button"
-                  className={`choice ${language === 'sv' ? 'selected' : ''}`}
-                  onClick={() => pickLanguage('sv')}
-                >
-                  {ui.swedish}
-                </button>
-                <button
-                  type="button"
-                  className={`choice ${language === 'en' ? 'selected' : ''}`}
-                  onClick={() => pickLanguage('en')}
-                >
-                  {ui.english}
-                </button>
-              </div>
-            </div>
-            <div>
-              <label style={{ marginBottom: '0.4rem' }}>{ui.questionCount}</label>
-              <div className="choice-row">
-                {createCounts.map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    className={`choice ${questionCount === n ? 'selected' : ''}`}
-                    onClick={() => setQuestionCount(n)}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
-              {!hasParty && (
-                <div className="party-banner" style={{ marginTop: '0.75rem' }}>
-                  <p className="party-pitch">{ui.partyPitch}</p>
-                  <p className="footer-note">{ui.freeTierOk}</p>
-                  <p className="party-hint">{ui.buyPartyHint}</p>
-                  <button
-                    className="btn btn-party"
-                    type="button"
-                    disabled={checkoutBusy}
-                    onClick={() => void onBuyParty()}
-                  >
-                    {checkoutBusy ? ui.buyPartyBusy : buyLabel}
-                  </button>
-                  <button className="btn-tiny" type="button" onClick={() => setShowOwnerCode((v) => !v)}>
-                    {showOwnerCode ? ui.hideCode : ui.haveCode}
-                  </button>
-                  {showOwnerCode && (
-                    <div className="party-redeem">
-                      <input
-                        value={ownerCode}
-                        onChange={(e) => setOwnerCode(e.target.value)}
-                        placeholder={ui.partyCode}
-                        maxLength={64}
-                      />
-                      <button
-                        className="btn btn-secondary"
-                        type="button"
-                        disabled={checkoutBusy || !ownerCode.trim()}
-                        onClick={() => void onRedeemOwnerCode(ownerCode)}
-                      >
-                        {ui.activate}
-                      </button>
-                    </div>
-                  )}
-                  {partyFlash && <p className="party-flash">{partyFlash}</p>}
-                </div>
-              )}
-              {hasParty && partyPass && (
-                <p className="footer-note" style={{ marginTop: '0.5rem' }}>
-                  {ui.partyActive} · {formatExpiry(partyPass.expiresAt, language)}
-                </p>
-              )}
-            </div>
-            <div>
-              <label style={{ marginBottom: '0.4rem' }}>{ui.betweenQuestions}</label>
-              <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                <button
-                  type="button"
-                  className={`choice ${advanceMode === 'manual' ? 'selected' : ''}`}
-                  onClick={() => setAdvanceModeLocal('manual')}
-                >
-                  {ui.clickNext}
-                </button>
-                <button
-                  type="button"
-                  className={`choice ${advanceMode === 'auto' ? 'selected' : ''}`}
-                  onClick={() => setAdvanceModeLocal('auto')}
-                >
-                  {ui.auto}
-                </button>
-              </div>
-            </div>
             {error && <p className="error">{error}</p>}
             <button className="btn btn-primary" type="submit" disabled={busy || (hostPlays && !name.trim())}>
               {ui.createGame}
@@ -608,7 +581,9 @@ function PlayView({
       <WinnerView
         room={room}
         playerId={playerId}
+        isHost={isHost}
         onLeave={onLeave}
+        onError={onError}
         partyInfo={partyInfo}
         buyLabel={buyLabel}
         onBuyParty={onBuyParty}
@@ -649,6 +624,7 @@ function Lobby({
   const [partyCode, setPartyCode] = useState('')
   const [showCode, setShowCode] = useState(false)
   const [partyMsg, setPartyMsg] = useState('')
+  const [shareFlash, setShareFlash] = useState('')
   const ui = t(room.language)
   const me = room.players.find((p) => p.id === playerId)
   const hostPlaying = me?.playing ?? true
@@ -658,6 +634,7 @@ function Lobby({
   const maxPlayers = room.limits?.maxPlayers ?? 5
   const playersLabel =
     maxPlayers <= 0 ? ui.unlimited : String(maxPlayers)
+  const invite = joinUrl(room.code)
 
   useEffect(() => {
     if (!isHost || isParty) return
@@ -667,6 +644,38 @@ function Lobby({
       if (res.error) return
     })
   }, [isHost, isParty, room.code])
+
+  async function copyInvite() {
+    try {
+      await navigator.clipboard.writeText(invite)
+      setShareFlash(ui.copied)
+      window.setTimeout(() => setShareFlash(''), 2000)
+    } catch {
+      try {
+        await navigator.clipboard.writeText(room.code)
+        setShareFlash(ui.copied)
+        window.setTimeout(() => setShareFlash(''), 2000)
+      } catch {
+        onError(ui.somethingWrong)
+      }
+    }
+  }
+
+  async function shareInvite() {
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: 'Factopia',
+          text: room.language === 'en' ? `Join my Factopia quiz: ${room.code}` : `Gå med i mitt Factopia-quiz: ${room.code}`,
+          url: invite,
+        })
+        return
+      } catch {
+        // fall through to copy
+      }
+    }
+    await copyInvite()
+  }
 
   async function changeCount(n: number) {
     if (!isHost) return
@@ -722,6 +731,19 @@ function Lobby({
       <div className="code-display">
         <span>{ui.gameCode}</span>
         <strong>{room.code}</strong>
+        <p className="invite-hint">{ui.inviteHint}</p>
+        <div className="invite-actions">
+          <button className="btn btn-secondary" type="button" onClick={() => void copyInvite()}>
+            {shareFlash || ui.copyCode}
+          </button>
+          <button className="btn btn-accent" type="button" onClick={() => void shareInvite()}>
+            {ui.shareInvite}
+          </button>
+        </div>
+        <div className="invite-qr">
+          <img src={qrUrl(invite)} alt={ui.scanToJoin} width={180} height={180} />
+          <span>{ui.scanToJoin}</span>
+        </div>
       </div>
 
       {isHost ? (
@@ -1075,7 +1097,9 @@ function QuestionView({
 function WinnerView({
   room,
   playerId,
+  isHost,
   onLeave,
+  onError,
   partyInfo,
   buyLabel,
   onBuyParty,
@@ -1083,7 +1107,9 @@ function WinnerView({
 }: {
   room: PublicRoom
   playerId: string
+  isHost: boolean
   onLeave: () => void
+  onError: (msg: string) => void
   partyInfo: PartyInfo
   buyLabel: string
   onBuyParty: () => void
@@ -1095,6 +1121,15 @@ function WinnerView({
   const isYou = winner?.id === playerId
   const me = room.players.find((p) => p.id === playerId)
   const hostedOnly = me && !me.playing
+  const [busy, setBusy] = useState(false)
+
+  async function onRematch() {
+    setBusy(true)
+    onError('')
+    const res = await rematchGame()
+    setBusy(false)
+    if (res.error) onError(res.error)
+  }
 
   return (
     <div className="card winner-screen">
@@ -1127,17 +1162,24 @@ function WinnerView({
         ))}
       </ol>
 
-      <button className="btn btn-primary" type="button" onClick={onLeave}>
-        {ui.playAgain}
-      </button>
-      {room.premiumTier !== 'party' && room.hostId === playerId && partyInfo.enabled && (
+      {isHost ? (
+        <button className="btn btn-primary" type="button" disabled={busy} onClick={() => void onRematch()}>
+          {ui.playAgain}
+        </button>
+      ) : (
+        <p className="waiting">{ui.waitingRematch}</p>
+      )}
+      {room.premiumTier !== 'party' && isHost && partyInfo.enabled && (
         <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={onBuyParty}>
           {checkoutBusy ? ui.buyPartyBusy : buyLabel}
         </button>
       )}
-      {room.premiumTier !== 'party' && room.hostId === playerId && !partyInfo.enabled && (
+      {room.premiumTier !== 'party' && isHost && !partyInfo.enabled && (
         <p className="footer-note">{ui.buyPartySoon}</p>
       )}
+      <button className="btn btn-ghost" type="button" onClick={onLeave}>
+        {ui.leaveRoom}
+      </button>
     </div>
   )
 }

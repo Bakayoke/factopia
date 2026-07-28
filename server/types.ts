@@ -56,6 +56,8 @@ export type Room = {
   customQuestions: Question[]
   roomTitle: string
   premiumExpiresAt: number | null
+  /** Recently used question ids — prefer fresh questions across rematches */
+  recentQuestionIds: string[]
   currentIndex: number
   answers: Record<string, number>
   answerTimes: Record<string, number>

@@ -906,6 +906,7 @@ export function pickQuestions(
   count: number,
   language: QuizLanguage = 'sv',
   custom: Question[] = [],
+  opts: { excludeIds?: Set<string> } = {},
 ): Question[] {
   const customs = shuffle(custom).slice(0, Math.max(0, count)).map(withShuffledOptions)
   const need = Math.max(0, count - customs.length)
@@ -913,6 +914,20 @@ export function pickQuestions(
 
   const raw = language === 'en' ? QUESTIONS_EN : QUESTIONS_SV
   const pool = dedupePool(raw.filter((q) => !isMathish(q)))
-  const selected = pickDiverse(pool, Math.min(need, pool.length)).map(withShuffledOptions)
-  return shuffle([...customs, ...selected])
+  const exclude = opts.excludeIds ?? new Set<string>()
+  const fresh = pool.filter((q) => !exclude.has(q.id))
+  const primary = fresh.length >= need ? fresh : pool
+  let selected = pickDiverse(primary, Math.min(need, primary.length))
+
+  // If we preferred fresh but still short, top up from the full pool
+  if (selected.length < need) {
+    const have = new Set(selected.map((q) => q.id))
+    const filler = pickDiverse(
+      pool.filter((q) => !have.has(q.id)),
+      need - selected.length,
+    )
+    selected = [...selected, ...filler]
+  }
+
+  return shuffle([...customs, ...selected.map(withShuffledOptions)])
 }

@@ -97,6 +97,7 @@ export function createRoom(
     customQuestions: [],
     roomTitle: '',
     premiumExpiresAt,
+    recentQuestionIds: [],
     currentIndex: -1,
     answers: {},
     answerTimes: {},
@@ -279,12 +280,41 @@ export function startGame(code: string, playerId: string): Room | { error: strin
     room.questionCount = clampQuestionCount(room.questionCount, roomLimits(room).questionCounts)
   }
 
-  room.questions = pickQuestions(room.questionCount, room.language)
+  const exclude = new Set(room.recentQuestionIds)
+  room.questions = pickQuestions(room.questionCount, room.language, room.customQuestions, {
+    excludeIds: exclude,
+  })
+  room.recentQuestionIds = [
+    ...room.recentQuestionIds,
+    ...room.questions.map((q) => q.id),
+  ].slice(-200)
   room.currentIndex = -1
   room.players.forEach((p) => {
     p.score = 0
   })
   advanceToQuestion(room)
+  return room
+}
+
+/** Reset finished game back to lobby so the same group can rematch. */
+export function rematch(code: string, playerId: string): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan starta om' }
+  if (room.status !== 'finished') return { error: 'Spelet är inte klart ännu' }
+
+  room.status = 'lobby'
+  room.questions = []
+  room.currentIndex = -1
+  room.answers = {}
+  room.answerTimes = {}
+  room.questionStartedAt = 0
+  room.endsAt = 0
+  room.revealCorrectIndex = null
+  room.lastRound = null
+  room.players.forEach((p) => {
+    p.score = 0
+  })
   return room
 }
 

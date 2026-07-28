@@ -250,6 +250,10 @@ export function startGame() {
   return emitAck<{ ok?: boolean }>('start', {})
 }
 
+export function rematchGame() {
+  return emitAck<{ ok?: boolean }>('rematch', {})
+}
+
 export function nextQuestion() {
   return emitAck<{ ok?: boolean }>('next', {})
 }
@@ -324,11 +328,20 @@ export async function claimPartySession(sessionId: string) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId }),
     })
-    const data = (await res.json()) as { token?: string; expiresAt?: number; error?: string }
+    const data = (await res.json()) as {
+      token?: string
+      expiresAt?: number
+      roomCode?: string | null
+      error?: string
+    }
     if (!res.ok || !data.token || !data.expiresAt) {
       return { error: data.error || 'Kunde inte hämta Party' }
     }
-    return { token: data.token, expiresAt: data.expiresAt }
+    return {
+      token: data.token,
+      expiresAt: data.expiresAt,
+      roomCode: data.roomCode || undefined,
+    }
   } catch {
     return { error: 'Kunde inte hämta Party' }
   }

@@ -22,6 +22,7 @@ import {
   submitAnswer,
   nextQuestion,
   endGame,
+  rematch,
   toPublicRoom,
   activatePartyPass,
   applyPartyToken,
@@ -111,7 +112,11 @@ app.post('/api/party/claim', async (req, res) => {
     res.status(400).json({ error: result.error })
     return
   }
-  res.json({ token: result.token, expiresAt: result.expiresAt })
+  res.json({
+    token: result.token,
+    expiresAt: result.expiresAt,
+    roomCode: result.roomCode || null,
+  })
 })
 
 // Serve built client when present (Railway all-in-one). Cloudflare can host UI separately.
@@ -294,6 +299,15 @@ io.on('connection', (socket) => {
     const binding = getBinding(socket.id)
     if (!binding) return ack?.({ error: 'Inte ansluten' })
     const result = endGame(binding.code, binding.playerId)
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
+  socket.on('rematch', (_data, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = rematch(binding.code, binding.playerId)
     if ('error' in result) return ack?.({ error: result.error })
     ack?.({ ok: true })
     broadcastRoom(result.code)
