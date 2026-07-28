@@ -22,6 +22,9 @@ import {
   setLanguage,
   setCategoryPack,
   setPersistHook,
+  setPublicLobby,
+  listPublicLobbies,
+  pickPublicLobby,
   startGame,
   submitAnswer,
   nextQuestion,
@@ -99,10 +102,22 @@ app.get('/api/party/info', (_req, res) => {
   res.json(partyCheckoutPublicInfo())
 })
 
+app.get('/api/lobbies', (req, res) => {
+  const lang = req.query.lang === 'en' ? 'en' : req.query.lang === 'sv' ? 'sv' : null
+  const lobbies = listPublicLobbies({ language: lang, limit: 24 })
+  const theme = partyCheckoutPublicInfo().weekThemePack
+  res.json({
+    lobbies,
+    onlineRooms: lobbies.length,
+    weekThemePack: theme,
+  })
+})
+
 app.post('/api/party/checkout', async (req, res) => {
   const locale = req.body?.locale === 'en' ? 'en' : 'sv'
   const roomCode = typeof req.body?.roomCode === 'string' ? req.body.roomCode : null
-  const result = await createPartyCheckoutSession({ locale, roomCode })
+  const plan = req.body?.plan === 'week' ? 'week' : 'day'
+  const result = await createPartyCheckoutSession({ locale, roomCode, plan })
   if ('error' in result) {
     res.status(400).json(result)
     return
@@ -286,6 +301,15 @@ io.on('connection', (socket) => {
     const binding = getBinding(socket.id)
     if (!binding) return ack?.({ error: 'Inte ansluten' })
     const result = setCategoryPack(binding.code, binding.playerId, String(pack ?? 'mixed'))
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
+  socket.on('setPublicLobby', ({ isPublic }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = setPublicLobby(binding.code, binding.playerId, Boolean(isPublic))
     if ('error' in result) return ack?.({ error: result.error })
     ack?.({ ok: true })
     broadcastRoom(result.code)

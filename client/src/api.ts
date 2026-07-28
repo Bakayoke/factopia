@@ -3,7 +3,9 @@ import type {
   AdvanceMode,
   CategoryPackId,
   PartyPassLocal,
+  PartyPlan,
   PublicCustomQuestion,
+  PublicLobbyCard,
   PublicRoom,
   QuizLanguage,
 } from './types'
@@ -233,6 +235,10 @@ export function setCategoryPack(pack: CategoryPackId) {
   return emitAck<{ ok?: boolean }>('setCategoryPack', { pack })
 }
 
+export function setPublicLobby(isPublic: boolean) {
+  return emitAck<{ ok?: boolean }>('setPublicLobby', { isPublic })
+}
+
 export function redeemParty(code: string) {
   return emitAck<{ token: string; expiresAt: number }>('redeemParty', { code })
 }
@@ -289,6 +295,10 @@ export type PartyInfo = {
   amountOre: number
   amountLabel: string
   durationHours: number
+  weekAmountOre?: number
+  weekAmountLabel?: string
+  weekDurationHours?: number
+  weekThemePack?: CategoryPackId
 }
 
 export async function fetchPartyInfo(): Promise<PartyInfo> {
@@ -297,7 +307,35 @@ export async function fetchPartyInfo(): Promise<PartyInfo> {
     if (!res.ok) throw new Error('info failed')
     return (await res.json()) as PartyInfo
   } catch {
-    return { enabled: false, amountOre: 3900, amountLabel: '39 kr', durationHours: 24 }
+    return {
+      enabled: false,
+      amountOre: 3900,
+      amountLabel: '39 kr',
+      durationHours: 24,
+      weekAmountOre: 9900,
+      weekAmountLabel: '99 kr',
+      weekDurationHours: 168,
+      weekThemePack: 'party',
+    }
+  }
+}
+
+export async function fetchLobbies(lang?: QuizLanguage): Promise<{
+  lobbies: PublicLobbyCard[]
+  onlineRooms: number
+  weekThemePack?: CategoryPackId
+}> {
+  try {
+    const q = lang ? `?lang=${lang}` : ''
+    const res = await fetch(`${apiBase()}/api/lobbies${q}`)
+    if (!res.ok) throw new Error('lobbies failed')
+    return (await res.json()) as {
+      lobbies: PublicLobbyCard[]
+      onlineRooms: number
+      weekThemePack?: CategoryPackId
+    }
+  } catch {
+    return { lobbies: [], onlineRooms: 0 }
   }
 }
 
@@ -317,12 +355,16 @@ export async function fetchStripeHint(): Promise<string | null> {
   }
 }
 
-export async function startPartyCheckout(locale: 'sv' | 'en', roomCode?: string) {
+export async function startPartyCheckout(
+  locale: 'sv' | 'en',
+  roomCode?: string,
+  plan: PartyPlan = 'day',
+) {
   try {
     const res = await fetch(`${apiBase()}/api/party/checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ locale, roomCode: roomCode ?? null }),
+      body: JSON.stringify({ locale, roomCode: roomCode ?? null, plan }),
     })
     const data = (await res.json()) as { url?: string; error?: string }
     if (!res.ok || !data.url) return { error: data.error || 'Kunde inte starta köp' }

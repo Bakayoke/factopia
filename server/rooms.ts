@@ -110,6 +110,7 @@ export function createRoom(
     questions: [],
     customQuestions: [],
     roomTitle: '',
+    isPublic: false,
     premiumExpiresAt,
     recentQuestionIds: [],
     currentIndex: -1,
@@ -249,6 +250,82 @@ export function setCategoryPack(
   room.categoryPack = normalizePackId(packId)
   touch(room)
   return room
+}
+
+export function setPublicLobby(
+  code: string,
+  playerId: string,
+  isPublic: boolean,
+): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan ändra detta' }
+  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+  room.isPublic = Boolean(isPublic)
+  touch(room)
+  return room
+}
+
+export type PublicLobbyCard = {
+  code: string
+  language: QuizLanguage
+  categoryPack: CategoryPackId
+  playerCount: number
+  maxPlayers: number
+  seatsLeft: number | null
+  questionCount: number
+  party: boolean
+}
+
+export function listPublicLobbies(opts?: {
+  language?: QuizLanguage | null
+  limit?: number
+}): PublicLobbyCard[] {
+  const lang = opts?.language
+  const limit = opts?.limit ?? 20
+  const now = Date.now()
+  const cards: PublicLobbyCard[] = []
+
+  for (const room of rooms.values()) {
+    if (!room.isPublic || room.status !== 'lobby') continue
+    if (lang && room.language !== lang) continue
+    // Drop stale lobbies with no connected players
+    if (!room.players.some((p) => p.connected)) continue
+    if (now - (room.updatedAt || 0) > 30 * 60 * 1000) continue
+
+    const limits = roomLimits(room)
+    const max = limits.maxPlayers
+    const count = room.players.length
+    if (max > 0 && count >= max) continue
+
+    cards.push({
+      code: room.code,
+      language: room.language,
+      categoryPack: room.categoryPack ?? 'mixed',
+      playerCount: count,
+      maxPlayers: max,
+      seatsLeft: max > 0 ? max - count : null,
+      questionCount: room.questionCount,
+      party: tierFromExpiry(room.premiumExpiresAt) === 'party',
+    })
+  }
+
+  cards.sort((a, b) => {
+    // Prefer rooms with some people already, then more seats
+    const aFill = a.playerCount
+    const bFill = b.playerCount
+    if (bFill !== aFill) return bFill - aFill
+    const aSeats = a.seatsLeft ?? 99
+    const bSeats = b.seatsLeft ?? 99
+    return bSeats - aSeats
+  })
+
+  return cards.slice(0, limit)
+}
+
+/** Pick a public lobby to join, or null if none. */
+export function pickPublicLobby(language?: QuizLanguage | null): PublicLobbyCard | null {
+  return listPublicLobbies({ language: language ?? null, limit: 1 })[0] ?? null
 }
 
 export function activatePartyPass(
@@ -576,6 +653,7 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
     premiumExpiresAt: room.premiumExpiresAt,
     limits,
     roomTitle: room.roomTitle,
+    isPublic: Boolean(room.isPublic),
     customQuestions: isHost
       ? room.customQuestions.map((cq) => ({
           text: cq.text,
@@ -602,6 +680,7 @@ export function hydrateRooms(saved: Room[]) {
     const room: Room = {
       ...raw,
       categoryPack: normalizePackId(raw.categoryPack),
+      isPublic: Boolean(raw.isPublic),
       recentQuestionIds: Array.isArray(raw.recentQuestionIds) ? raw.recentQuestionIds : [],
       players: (raw.players ?? []).map((p) => ({ ...p, connected: false })),
       answers: {},

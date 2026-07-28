@@ -392,6 +392,73 @@ input:focus {
   font-size: 1.35rem;
 }
 
+.week-theme {
+  margin-top: 0.5rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg));
+  text-align: center;
+}
+
+.week-theme-name {
+  margin: 0.2rem 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.party-plans {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.party-plans.urgent .btn-party,
+.urgent-inline {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--sun) 70%, transparent);
+}
+
+.urgent-inline {
+  margin-top: 0.75rem;
+  padding: 0.85rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--sun) 22%, var(--bg));
+}
+
+.lobby-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.lobby-card {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  background: var(--bg);
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font: inherit;
+}
+
+.lobby-card strong {
+  letter-spacing: 0.18em;
+  font-size: 1.15rem;
+}
+
+.lobby-meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
 .players {
   list-style: none;
   margin: 0;

@@ -63,6 +63,8 @@ export type Room = {
   questions: Question[]
   customQuestions: Question[]
   roomTitle: string
+  /** Listed on Find game / open lobbies */
+  isPublic: boolean
   premiumExpiresAt: number | null
   /** Recently used question ids — prefer fresh questions across rematches */
   recentQuestionIds: string[]
@@ -105,6 +107,7 @@ export type PublicRoom = {
   premiumExpiresAt: number | null
   limits: PremiumLimits
   roomTitle: string
+  isPublic: boolean
   /** Only included for the host */
   customQuestions?: PublicCustomQuestion[]
 }

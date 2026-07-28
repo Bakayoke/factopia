@@ -55,3 +55,14 @@ export function categoriesForPack(packId: CategoryPackId, language: QuizLanguage
   const pack = CATEGORY_PACKS[normalizePackId(packId)]
   return language === 'en' ? pack.categoriesEn : pack.categoriesSv
 }
+
+/** Stable weekly theme from ISO week number. */
+export function weekThemePack(date = new Date()): CategoryPackId {
+  const themes: CategoryPackId[] = ['party', 'world', 'brain', 'historySport', 'food', 'mixed']
+  const utc = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  const dayNum = utc.getUTCDay() || 7
+  utc.setUTCDate(utc.getUTCDate() + 4 - dayNum)
+  const yearStart = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1))
+  const week = Math.ceil(((utc.getTime() - yearStart.getTime()) / 86400000 + 1) / 7)
+  return themes[week % themes.length]!
+}

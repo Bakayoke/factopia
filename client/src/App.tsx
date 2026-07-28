@@ -9,6 +9,7 @@ import {
   endGame,
   ensureSessionBound,
   fetchPartyInfo,
+  fetchLobbies,
   fetchStripeHint,
   joinGame,
   loadPartyPass,
@@ -23,16 +24,24 @@ import {
   setCount,
   setHostPlaying,
   setLanguage,
+  setPublicLobby,
   startGame,
   startPartyCheckout,
   submitAnswer,
   type PartyInfo,
 } from './api'
 import { detectPreferredLanguage, rememberLanguage, t } from './i18n'
-import type { AdvanceMode, CategoryPackId, PublicRoom, QuizLanguage } from './types'
+import type {
+  AdvanceMode,
+  CategoryPackId,
+  PartyPlan,
+  PublicLobbyCard,
+  PublicRoom,
+  QuizLanguage,
+} from './types'
 import { Confetti, useCountdown } from './ui'
 
-type Screen = 'home' | 'create' | 'join' | 'play'
+type Screen = 'home' | 'create' | 'join' | 'find' | 'play'
 
 const FREE_COUNTS = [10, 20, 30, 50]
 const QUESTION_MS = 20_000
@@ -87,17 +96,26 @@ export default function App() {
     amountOre: 3900,
     amountLabel: '39 kr',
     durationHours: 24,
+    weekAmountOre: 9900,
+    weekAmountLabel: '99 kr',
+    weekDurationHours: 168,
+    weekThemePack: 'party',
   })
   const [partyFlash, setPartyFlash] = useState('')
   const [checkoutBusy, setCheckoutBusy] = useState(false)
   const [ownerCode, setOwnerCode] = useState('')
   const [showOwnerCode, setShowOwnerCode] = useState(false)
   const [stripeHint, setStripeHint] = useState<string | null>(null)
+  const [lobbies, setLobbies] = useState<PublicLobbyCard[]>([])
+  const [pendingPack, setPendingPack] = useState<CategoryPackId | null>(null)
 
   const uiLang = room?.language ?? language
   const ui = t(uiLang)
   const hasParty = Boolean(partyPass && partyPass.expiresAt > Date.now())
-  const buyLabel = `Party · ${partyInfo.amountLabel} · ${partyInfo.durationHours} h`
+  const buyDayLabel = `Party · ${partyInfo.amountLabel} · ${partyInfo.durationHours} h`
+  const buyWeekLabel = `Party · ${partyInfo.weekAmountLabel ?? '99 kr'} · 7 ${uiLang === 'en' ? 'days' : 'dagar'}`
+  const weekPack = partyInfo.weekThemePack ?? 'party'
+  const weekPackLabel = ui[PACKS.find((p) => p.id === weekPack)?.labelKey ?? 'packMixed']
 
   useEffect(() => {
     const onFs = () => setIsFullscreen(Boolean(document.fullscreenElement))
@@ -109,6 +127,20 @@ export default function App() {
     void fetchPartyInfo().then(setPartyInfo)
     void fetchStripeHint().then(setStripeHint)
   }, [])
+
+  useEffect(() => {
+    if (screen !== 'home' && screen !== 'find') return
+    void fetchLobbies(language).then((res) => {
+      setLobbies(res.lobbies)
+      if (res.weekThemePack) {
+        setPartyInfo((prev) => ({ ...prev, weekThemePack: res.weekThemePack }))
+      }
+    })
+    const id = window.setInterval(() => {
+      void fetchLobbies(language).then((res) => setLobbies(res.lobbies))
+    }, 12_000)
+    return () => window.clearInterval(id)
+  }, [screen, language])
 
   // Deep link: /?join=ABCD
   useEffect(() => {
@@ -201,7 +233,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function onBuyParty(roomCode?: string) {
+  async function onBuyParty(roomCode?: string, plan: PartyPlan = 'day') {
     setError('')
     setCheckoutBusy(true)
     if (roomCode) {
@@ -211,7 +243,7 @@ export default function App() {
         // ignore
       }
     }
-    const res = await startPartyCheckout(uiLang, roomCode)
+    const res = await startPartyCheckout(uiLang, roomCode, plan)
     if (res.error || !res.url) {
       setCheckoutBusy(false)
       const hint = stripeHint || (await fetchStripeHint())
@@ -298,6 +330,10 @@ export default function App() {
     setPlayerId(res.playerId)
     setRoom(res.room)
     saveSession({ code: res.room.code, playerId: res.playerId, name: sessionName })
+    if (pendingPack) {
+      await setCategoryPack(pendingPack)
+      setPendingPack(null)
+    }
     setScreen('play')
   }
 
@@ -364,6 +400,26 @@ export default function App() {
             <button className="btn btn-secondary" type="button" onClick={() => { setJoinStep('code'); setScreen('join') }}>
               {ui.joinWithCode}
             </button>
+            <button className="btn btn-accent" type="button" onClick={() => setScreen('find')}>
+              {ui.findGame}
+              {lobbies.length > 0 ? ` · ${lobbies.length}` : ''}
+            </button>
+
+            <div className="week-theme">
+              <p className="section-title">{ui.weekTheme}</p>
+              <p className="week-theme-name">{weekPackLabel}</p>
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={() => {
+                  setPendingPack(weekPack)
+                  setScreen('create')
+                }}
+              >
+                {ui.playWeekTheme}
+              </button>
+            </div>
+
             <div className="party-home">
               <p className="section-title">{ui.party}</p>
               <p className="party-pitch">{ui.partyPitch}</p>
@@ -375,14 +431,24 @@ export default function App() {
               ) : (
                 <>
                   <p className="party-hint">{ui.buyPartyHint}</p>
-                  <button
-                    className="btn btn-party"
-                    type="button"
-                    disabled={checkoutBusy}
-                    onClick={() => void onBuyParty()}
-                  >
-                    {checkoutBusy ? ui.buyPartyBusy : buyLabel}
-                  </button>
+                  <div className="party-plans">
+                    <button
+                      className="btn btn-party"
+                      type="button"
+                      disabled={checkoutBusy}
+                      onClick={() => void onBuyParty(undefined, 'day')}
+                    >
+                      {checkoutBusy ? ui.buyPartyBusy : buyDayLabel}
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      type="button"
+                      disabled={checkoutBusy}
+                      onClick={() => void onBuyParty(undefined, 'week')}
+                    >
+                      {buyWeekLabel}
+                    </button>
+                  </div>
                   <button className="btn-tiny" type="button" onClick={() => setShowOwnerCode((v) => !v)}>
                     {showOwnerCode ? ui.hideCode : ui.haveCode}
                   </button>
@@ -415,6 +481,64 @@ export default function App() {
               )}
             </div>
             <p className="footer-note">{ui.footer}</p>
+          </div>
+        )}
+
+        {screen === 'find' && (
+          <div className="card stack">
+            <p className="section-title">{ui.openLobbies}</p>
+            {lobbies.length === 0 ? (
+              <p className="waiting">{ui.noOpenLobbies}</p>
+            ) : (
+              <ul className="lobby-list">
+                {lobbies.map((lobby) => {
+                  const packLabel =
+                    ui[PACKS.find((p) => p.id === lobby.categoryPack)?.labelKey ?? 'packMixed']
+                  const seats =
+                    lobby.seatsLeft == null
+                      ? ui.unlimited
+                      : `${lobby.seatsLeft} ${ui.seatsLeft}`
+                  return (
+                    <li key={lobby.code}>
+                      <button
+                        type="button"
+                        className="lobby-card"
+                        onClick={() => {
+                          setCode(lobby.code)
+                          setJoinStep('name')
+                          setScreen('join')
+                        }}
+                      >
+                        <strong>{lobby.code}</strong>
+                        <span>
+                          {packLabel} · {lobby.playerCount} {ui.participants.toLowerCase()} · {seats}
+                        </span>
+                        <span className="lobby-meta">
+                          {lobby.language.toUpperCase()}
+                          {lobby.party ? ' · Party' : ''} · {lobby.questionCount}q
+                        </span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+            {lobbies[0] && (
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() => {
+                  setCode(lobbies[0]!.code)
+                  setJoinStep('name')
+                  setScreen('join')
+                }}
+              >
+                {ui.quickJoin}
+              </button>
+            )}
+            <button className="btn btn-ghost" type="button" onClick={() => setScreen('home')}>
+              {ui.back}
+            </button>
           </div>
         )}
 
@@ -533,8 +657,9 @@ export default function App() {
               setPartyPass(pass)
             }}
             partyInfo={partyInfo}
-            buyLabel={buyLabel}
-            onBuyParty={() => void onBuyParty(room.code)}
+            buyDayLabel={buyDayLabel}
+            buyWeekLabel={buyWeekLabel}
+            onBuyParty={(plan) => void onBuyParty(room.code, plan)}
             checkoutBusy={checkoutBusy}
           />
         )}
@@ -551,7 +676,8 @@ function PlayView({
   error,
   onPartyPass,
   partyInfo,
-  buyLabel,
+  buyDayLabel,
+  buyWeekLabel,
   onBuyParty,
   checkoutBusy,
 }: {
@@ -562,8 +688,9 @@ function PlayView({
   error: string
   onPartyPass: (pass: { token: string; expiresAt: number }) => void
   partyInfo: PartyInfo
-  buyLabel: string
-  onBuyParty: () => void
+  buyDayLabel: string
+  buyWeekLabel: string
+  onBuyParty: (plan?: PartyPlan) => void
   checkoutBusy: boolean
 }) {
   const isHost = room.hostId === playerId
@@ -580,7 +707,8 @@ function PlayView({
         onLeave={onLeave}
         onPartyPass={onPartyPass}
         partyInfo={partyInfo}
-        buyLabel={buyLabel}
+        buyDayLabel={buyDayLabel}
+        buyWeekLabel={buyWeekLabel}
         onBuyParty={onBuyParty}
         checkoutBusy={checkoutBusy}
         tvMode={tvMode}
@@ -598,7 +726,8 @@ function PlayView({
         onLeave={onLeave}
         onError={onError}
         partyInfo={partyInfo}
-        buyLabel={buyLabel}
+        buyDayLabel={buyDayLabel}
+        buyWeekLabel={buyWeekLabel}
         onBuyParty={onBuyParty}
         checkoutBusy={checkoutBusy}
       />
@@ -627,7 +756,8 @@ function Lobby({
   onLeave,
   onPartyPass,
   partyInfo,
-  buyLabel,
+  buyDayLabel,
+  buyWeekLabel,
   onBuyParty,
   checkoutBusy,
   tvMode,
@@ -641,8 +771,9 @@ function Lobby({
   onLeave: () => void
   onPartyPass: (pass: { token: string; expiresAt: number }) => void
   partyInfo: PartyInfo
-  buyLabel: string
-  onBuyParty: () => void
+  buyDayLabel: string
+  buyWeekLabel: string
+  onBuyParty: (plan?: PartyPlan) => void
   checkoutBusy: boolean
   tvMode: boolean
   onToggleTv: () => void
@@ -664,6 +795,9 @@ function Lobby({
     maxPlayers <= 0 ? ui.unlimited : String(maxPlayers)
   const invite = joinUrl(room.code)
   const pack = room.categoryPack ?? 'mixed'
+  const seatsLeft = maxPlayers > 0 ? Math.max(0, maxPlayers - room.players.length) : null
+  const almostFull = !isParty && maxPlayers > 0 && seatsLeft !== null && seatsLeft <= 1
+  const isFull = !isParty && maxPlayers > 0 && seatsLeft === 0
 
   useEffect(() => {
     if (!isHost || isParty) return
@@ -737,6 +871,12 @@ function Lobby({
     if (res.error) onError(res.error)
   }
 
+  async function changePublic(next: boolean) {
+    if (!isHost) return
+    const res = await setPublicLobby(next)
+    if (res.error) onError(res.error)
+  }
+
   async function onUnlockParty() {
     if (!partyCode.trim()) return
     setBusy(true)
@@ -802,10 +942,25 @@ function Lobby({
             </div>
             {!isParty && (
               <>
-                <p className="party-hint">{ui.buyPartyHint}</p>
-                <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={onBuyParty}>
-                  {checkoutBusy ? ui.buyPartyBusy : buyLabel}
-                </button>
+                <p className="party-hint">{almostFull || isFull ? (isFull ? ui.roomFullUpsell : ui.roomAlmostFull) : ui.buyPartyHint}</p>
+                <div className={`party-plans${almostFull || isFull ? ' urgent' : ''}`}>
+                  <button
+                    className="btn btn-party"
+                    type="button"
+                    disabled={checkoutBusy}
+                    onClick={() => onBuyParty('day')}
+                  >
+                    {checkoutBusy ? ui.buyPartyBusy : buyDayLabel}
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    type="button"
+                    disabled={checkoutBusy}
+                    onClick={() => onBuyParty('week')}
+                  >
+                    {buyWeekLabel}
+                  </button>
+                </div>
               </>
             )}
             {!isParty && (
@@ -863,6 +1018,25 @@ function Lobby({
                   {ui[p.labelKey]}
                 </button>
               ))}
+            </div>
+          </div>
+          <div>
+            <label style={{ marginBottom: '0.4rem' }}>{ui.makePublic}</label>
+            <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <button
+                type="button"
+                className={`choice ${room.isPublic ? 'selected' : ''}`}
+                onClick={() => void changePublic(true)}
+              >
+                {ui.publicOn}
+              </button>
+              <button
+                type="button"
+                className={`choice ${!room.isPublic ? 'selected' : ''}`}
+                onClick={() => void changePublic(false)}
+              >
+                {ui.publicOff}
+              </button>
             </div>
           </div>
           <div>
@@ -967,10 +1141,13 @@ function Lobby({
             {ui.hostHidden}
           </p>
         )}
-        {isHost && !isParty && maxPlayers > 0 && participants.length >= maxPlayers - 1 && !tvMode && (
-          <p className="footer-note" style={{ marginTop: '0.6rem' }}>
-            {ui.freeTierOk}
-          </p>
+        {isHost && !isParty && maxPlayers > 0 && almostFull && !tvMode && (
+          <div className="party-banner urgent-inline">
+            <p className="party-hint">{isFull ? ui.roomFullUpsell : ui.roomAlmostFull}</p>
+            <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={() => onBuyParty('day')}>
+              {buyDayLabel}
+            </button>
+          </div>
         )}
       </div>
 
@@ -1190,7 +1367,8 @@ function WinnerView({
   onLeave,
   onError,
   partyInfo,
-  buyLabel,
+  buyDayLabel,
+  buyWeekLabel,
   onBuyParty,
   checkoutBusy,
 }: {
@@ -1200,8 +1378,9 @@ function WinnerView({
   onLeave: () => void
   onError: (msg: string) => void
   partyInfo: PartyInfo
-  buyLabel: string
-  onBuyParty: () => void
+  buyDayLabel: string
+  buyWeekLabel: string
+  onBuyParty: (plan?: PartyPlan) => void
   checkoutBusy: boolean
 }) {
   const ui = t(room.language)
@@ -1211,6 +1390,7 @@ function WinnerView({
   const me = room.players.find((p) => p.id === playerId)
   const hostedOnly = me && !me.playing
   const [busy, setBusy] = useState(false)
+  const [shareFlash, setShareFlash] = useState('')
 
   async function onRematch() {
     setBusy(true)
@@ -1218,6 +1398,30 @@ function WinnerView({
     const res = await rematchGame()
     setBusy(false)
     if (res.error) onError(res.error)
+  }
+
+  async function shareResults() {
+    const lines = ranked.map((p, i) => `${i + 1}. ${p.name} — ${p.score}`)
+    const invite = `${window.location.origin}/?join=${room.code}`
+    const text =
+      room.language === 'en'
+        ? `Factopia results\n${lines.join('\n')}\n\nPlay again: ${invite}`
+        : `Factopia-resultat\n${lines.join('\n')}\n\nSpela igen: ${invite}`
+    try {
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ title: 'Factopia', text, url: invite })
+        return
+      }
+    } catch {
+      // fall through
+    }
+    try {
+      await navigator.clipboard.writeText(text)
+      setShareFlash(ui.resultsCopied)
+      window.setTimeout(() => setShareFlash(''), 2000)
+    } catch {
+      onError(ui.somethingWrong)
+    }
   }
 
   return (
@@ -1251,6 +1455,10 @@ function WinnerView({
         ))}
       </ol>
 
+      <button className="btn btn-accent" type="button" onClick={() => void shareResults()}>
+        {shareFlash || ui.shareResults}
+      </button>
+
       {isHost ? (
         <button className="btn btn-primary" type="button" disabled={busy} onClick={() => void onRematch()}>
           {ui.playAgain}
@@ -1259,9 +1467,14 @@ function WinnerView({
         <p className="waiting">{ui.waitingRematch}</p>
       )}
       {room.premiumTier !== 'party' && isHost && partyInfo.enabled && (
-        <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={onBuyParty}>
-          {checkoutBusy ? ui.buyPartyBusy : buyLabel}
-        </button>
+        <div className="party-plans">
+          <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={() => onBuyParty('day')}>
+            {checkoutBusy ? ui.buyPartyBusy : buyDayLabel}
+          </button>
+          <button className="btn btn-secondary" type="button" disabled={checkoutBusy} onClick={() => onBuyParty('week')}>
+            {buyWeekLabel}
+          </button>
+        </div>
       )}
       {room.premiumTier !== 'party' && isHost && !partyInfo.enabled && (
         <p className="footer-note">{ui.buyPartySoon}</p>

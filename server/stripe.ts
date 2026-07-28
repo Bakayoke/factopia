@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
-import { issuePartyPass, type PartyPass } from './premium.js'
+import { issuePartyPass, type PartyPass, type PartyPlan } from './premium.js'
+import { weekThemePack } from './packs.js'
 
 type ClaimedCheckout = { pass: PartyPass; roomCode: string }
 const sessionPasses = new Map<string, ClaimedCheckout>()
@@ -67,6 +68,15 @@ function partyAmountOre(): number {
   return Number.isFinite(n) && n >= 100 ? Math.round(n) : 3900
 }
 
+function partyWeekAmountOre(): number {
+  const n = Number(process.env.STRIPE_PARTY_WEEK_AMOUNT_ORE ?? '9900')
+  return Number.isFinite(n) && n >= 100 ? Math.round(n) : 9900
+}
+
+function normalizePlan(raw: unknown): PartyPlan {
+  return raw === 'week' ? 'week' : 'day'
+}
+
 function rememberSessionPass(sessionId: string, pass: PartyPass, roomCode = '') {
   const entry: ClaimedCheckout = { pass, roomCode: roomCode.trim().toUpperCase() }
   sessionPasses.set(sessionId, entry)
@@ -86,6 +96,7 @@ export function getPassForCheckoutSession(sessionId: string): ClaimedCheckout | 
 export async function createPartyCheckoutSession(opts: {
   locale?: string
   roomCode?: string | null
+  plan?: PartyPlan | string | null
 }): Promise<{ url: string; sessionId: string } | { error: string }> {
   if (!stripeConfigured()) {
     return { error: 'Stripe är inte konfigurerat ännu' }
@@ -93,12 +104,17 @@ export async function createPartyCheckoutSession(opts: {
 
   try {
     const stripe = getStripe()
-    const priceId = process.env.STRIPE_PARTY_PRICE_ID?.trim()
+    const plan = normalizePlan(opts.plan)
+    const priceId =
+      plan === 'week'
+        ? process.env.STRIPE_PARTY_WEEK_PRICE_ID?.trim()
+        : process.env.STRIPE_PARTY_PRICE_ID?.trim()
     const locale = opts.locale === 'en' ? 'en' : 'sv'
     const room = (opts.roomCode ?? '').trim().toUpperCase()
     const roomQuery = room ? `&room=${encodeURIComponent(room)}` : ''
     const successUrl = `${appBaseUrl()}/?party_session={CHECKOUT_SESSION_ID}${roomQuery}`
     const cancelUrl = `${appBaseUrl()}/?party_cancel=1${roomQuery}`
+    const amount = plan === 'week' ? partyWeekAmountOre() : partyAmountOre()
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
@@ -110,6 +126,7 @@ export async function createPartyCheckoutSession(opts: {
       metadata: {
         product: 'party_pass',
         roomCode: room,
+        plan,
       },
       line_items: priceId
         ? [{ price: priceId, quantity: 1 }]
@@ -118,13 +135,14 @@ export async function createPartyCheckoutSession(opts: {
               quantity: 1,
               price_data: {
                 currency: 'sek',
-                unit_amount: partyAmountOre(),
-                // Inclusive: listed price is what the customer pays
+                unit_amount: amount,
                 tax_behavior: 'inclusive',
                 product_data: {
-                  name: 'Factopia Party — 24 h',
-                  description: 'Fler spelare i samma quiz — inga egna frågor behövs.',
-                  // Digital service — required when Managed Payments is on
+                  name: plan === 'week' ? 'Factopia Party — 7 dagar' : 'Factopia Party — 24 h',
+                  description:
+                    plan === 'week'
+                      ? 'Obegränsat antal spelare i en vecka — perfekt för återkommande quiz.'
+                      : 'Fler spelare i samma quiz — inga egna frågor behövs.',
                   tax_code: 'txcd_10000000',
                 },
               },
@@ -185,7 +203,8 @@ export async function claimPartyCheckoutSession(
     }
 
     const roomCode = String(session.metadata?.roomCode ?? '').trim().toUpperCase()
-    const pass = issuePartyPass()
+    const plan = normalizePlan(session.metadata?.plan)
+    const pass = issuePartyPass(plan)
     const remembered = rememberSessionPass(sessionId, pass, roomCode)
     return { ...remembered.pass, roomCode: remembered.roomCode || undefined }
   } catch (e) {
@@ -211,7 +230,8 @@ export async function handleStripeWebhook(
       if (session.metadata?.product === 'party_pass' && session.payment_status === 'paid') {
         if (!getPassForCheckoutSession(session.id)) {
           const roomCode = String(session.metadata?.roomCode ?? '')
-          rememberSessionPass(session.id, issuePartyPass(), roomCode)
+          const plan = normalizePlan(session.metadata?.plan)
+          rememberSessionPass(session.id, issuePartyPass(plan), roomCode)
         }
       }
     }
@@ -224,10 +244,17 @@ export async function handleStripeWebhook(
 }
 
 export function partyCheckoutPublicInfo() {
+  const dayOre = partyAmountOre()
+  const weekOre = partyWeekAmountOre()
+  const theme = weekThemePack()
   return {
     enabled: stripeConfigured(),
-    amountOre: partyAmountOre(),
-    amountLabel: `${Math.round(partyAmountOre() / 100)} kr`,
+    amountOre: dayOre,
+    amountLabel: `${Math.round(dayOre / 100)} kr`,
     durationHours: 24,
+    weekAmountOre: weekOre,
+    weekAmountLabel: `${Math.round(weekOre / 100)} kr`,
+    weekDurationHours: 168,
+    weekThemePack: theme,
   }
 }

@@ -17,11 +17,15 @@ export const PARTY_LIMITS: PremiumLimits = {
 }
 
 export const PARTY_PASS_MS = 24 * 60 * 60 * 1000
+export const PARTY_WEEK_MS = 7 * 24 * 60 * 60 * 1000
+
+export type PartyPlan = 'day' | 'week'
 
 export type PartyPass = {
   token: string
   tier: 'party'
   expiresAt: number
+  plan?: PartyPlan
 }
 
 /** In-memory passes. Also mirrored to Redis/file when persist is configured. */
@@ -60,11 +64,13 @@ export function tierFromExpiry(expiresAt: number | null | undefined): PremiumTie
   return isPartyActive(expiresAt) ? 'party' : 'free'
 }
 
-export function issuePartyPass(): PartyPass {
+export function issuePartyPass(plan: PartyPlan = 'day'): PartyPass {
+  const duration = plan === 'week' ? PARTY_WEEK_MS : PARTY_PASS_MS
   const pass: PartyPass = {
     token: crypto.randomUUID(),
     tier: 'party',
-    expiresAt: Date.now() + PARTY_PASS_MS,
+    expiresAt: Date.now() + duration,
+    plan,
   }
   passes.set(pass.token, pass)
   touchPasses()

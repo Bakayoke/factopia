@@ -69,8 +69,22 @@ export type PublicRoom = {
   premiumExpiresAt: number | null
   limits: PremiumLimits
   roomTitle: string
+  isPublic?: boolean
   customQuestions?: PublicCustomQuestion[]
 }
+
+export type PublicLobbyCard = {
+  code: string
+  language: QuizLanguage
+  categoryPack: CategoryPackId
+  playerCount: number
+  maxPlayers: number
+  seatsLeft: number | null
+  questionCount: number
+  party: boolean
+}
+
+export type PartyPlan = 'day' | 'week'
 
 export type PartyPassLocal = {
   token: string
