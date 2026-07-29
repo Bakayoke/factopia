@@ -1,6 +1,7 @@
 import { customAlphabet } from 'nanoid'
 import { categoriesForPack, normalizePackId, type CategoryPackId } from './packs.js'
 import { pickQuestions } from './questions.js'
+import { trackFunnel } from './metrics.js'
 import {
   limitsFor,
   lookupPass,
@@ -480,6 +481,7 @@ export function startGame(code: string, playerId: string): Room | { error: strin
   })
   advanceToQuestion(room)
   touch(room)
+  trackFunnel('game_start', code)
   return room
 }
 
@@ -518,6 +520,7 @@ function advanceToQuestion(room: Room) {
   if (room.currentIndex >= room.questions.length) {
     room.status = 'finished'
     room.endsAt = 0
+    trackFunnel('game_finished', room.code)
     return
   }
 
@@ -605,6 +608,7 @@ export function endGame(code: string, playerId: string): Room | { error: string 
   room.revealCorrectIndex = null
   room.lastRound = null
   touch(room)
+  trackFunnel('game_finished', code)
   return room
 }
 
@@ -741,6 +745,21 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
 
 export function allRooms() {
   return rooms
+}
+
+/** Live rooms with at least one connected player — for landing social proof. */
+export function liveActivity() {
+  let liveRooms = 0
+  let livePlayers = 0
+  let openLobbies = 0
+  for (const room of rooms.values()) {
+    const connected = room.players.filter((p) => p.connected).length
+    if (connected === 0) continue
+    liveRooms += 1
+    livePlayers += connected
+    if (room.status === 'lobby') openLobbies += 1
+  }
+  return { liveRooms, livePlayers, openLobbies }
 }
 
 export function hydrateRooms(saved: Room[]) {

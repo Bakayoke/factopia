@@ -178,6 +178,37 @@ button {
   opacity: 0.9;
 }
 
+.social-proof {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem 0.75rem;
+  margin: 0 0 0.85rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--accent-deep);
+  text-align: center;
+}
+
+.social-proof span:not(:last-child)::after {
+  content: '·';
+  margin-left: 0.75rem;
+  opacity: 0.55;
+}
+
+.share-nudge {
+  animation: pop-in 0.45s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.viral-share {
+  margin-top: 0.35rem;
+}
+
 .party-unlock-banner {
   margin: 0 0 0.75rem;
   text-align: center;

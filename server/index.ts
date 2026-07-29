@@ -12,6 +12,7 @@ import {
   getRoom,
   hydrateRooms,
   joinRoom,
+  liveActivity,
   onQuestionTimeout,
   onRevealTimeout,
   pruneIdleRooms,
@@ -46,7 +47,7 @@ import {
   stripeEnvDiagnostics,
 } from './stripe.js'
 import { buildSnapshot, flushPersist, initPersist, loadSnapshot, persistDiagnostics, scheduleSave } from './persist.js'
-import { funnelSnapshot, trackFunnel, type FunnelEvent } from './metrics.js'
+import { funnelSnapshot, publicActivity, trackFunnel, type FunnelEvent } from './metrics.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PORT = Number(process.env.PORT) || 3001
@@ -108,10 +109,12 @@ app.get('/api/lobbies', (req, res) => {
   const lang = req.query.lang === 'en' ? 'en' : req.query.lang === 'sv' ? 'sv' : null
   const lobbies = listPublicLobbies({ language: lang, limit: 24 })
   const theme = partyCheckoutPublicInfo().weekThemePack
+  const live = liveActivity()
   res.json({
     lobbies,
     onlineRooms: lobbies.length,
     weekThemePack: theme,
+    activity: publicActivity(live),
   })
 })
 

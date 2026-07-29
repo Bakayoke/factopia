@@ -4,6 +4,7 @@ export async function renderResultsImage(opts: {
   subtitle: string
   rows: { rank: string; name: string; score: string }[]
   footer: string
+  cta?: string
 }): Promise<Blob | null> {
   const w = 1080
   const h = 1350
@@ -54,7 +55,11 @@ export async function renderResultsImage(opts: {
 
   ctx.fillStyle = 'rgba(255,255,255,0.9)'
   ctx.font = '700 28px Nunito, sans-serif'
-  ctx.fillText(opts.footer.slice(0, 60), 72, h - 80)
+  ctx.fillText(opts.footer.slice(0, 52), 72, h - 120)
+
+  ctx.fillStyle = '#ffe8a3'
+  ctx.font = '800 34px Nunito, sans-serif'
+  ctx.fillText((opts.cta || 'factopia.net').slice(0, 42), 72, h - 70)
 
   return await new Promise((resolve) => {
     canvas.toBlob((b) => resolve(b), 'image/png')

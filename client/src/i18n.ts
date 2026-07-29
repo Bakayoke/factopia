@@ -6,7 +6,7 @@ const sv = {
   or: 'eller',
   joinWithCode: 'Gå med med kod',
   footer: 'Dela koden — svara — fira vinnaren',
-  landingPitch: 'Inga frågor att hitta på. Starta, dela, spela.',
+  landingPitch: 'Starta, dela QR, kör. Inga frågor att skriva.',
   yourName: 'Ditt namn',
   questionCount: 'Antal frågor',
   yourRole: 'Din roll',
@@ -163,6 +163,19 @@ const sv = {
   unlockForEveryone: 'Lås upp för alla',
   partyUnlockedSeats: 'Party upplåst — väntande kan gå med nu!',
   moreSettings: 'Fler val (språk, roll, tempo)',
+  socialProofTonight: '{n} quiz ikväll',
+  socialProofLive: '{n} spelar just nu',
+  socialProofOpen: '{n} öppna rum',
+  socialProofEmpty: 'Bli kvällens första host',
+  playerJoinedFlash: '{name} gick med!',
+  playersNowShare: '{n} anslutna — dela länken igen så fler hittar in',
+  challengeShare: 'Dela & utmana',
+  shareViralHint: 'Skryt lite — bjud in fler till nästa runda',
+  inviteMoreRematch: 'Bjud in fler till omstart',
+  shareChallengeText:
+    'Vi körde Factopia! 🏆\n{lines}\n\nUtmana oss — gå med här:\n{invite}',
+  imageShareText: 'Vi körde Factopia — vågar du slå oss? {invite}',
+  shareImageCta: 'factopia.net · utmana dina vänner',
 }
 
 const en: typeof sv = {
@@ -171,7 +184,7 @@ const en: typeof sv = {
   or: 'or',
   joinWithCode: 'Join with code',
   footer: 'Share the code — answer — crown the winner',
-  landingPitch: 'No question-writing. Start, share, play.',
+  landingPitch: 'Start, share QR, play. No questions to write.',
   yourName: 'Your name',
   questionCount: 'Number of questions',
   yourRole: 'Your role',
@@ -328,6 +341,19 @@ const en: typeof sv = {
   unlockForEveryone: 'Unlock for everyone',
   partyUnlockedSeats: 'Party unlocked — waiting players can join now!',
   moreSettings: 'More options (language, role, pace)',
+  socialProofTonight: '{n} quizzes tonight',
+  socialProofLive: '{n} playing now',
+  socialProofOpen: '{n} open rooms',
+  socialProofEmpty: 'Be tonight’s first host',
+  playerJoinedFlash: '{name} joined!',
+  playersNowShare: '{n} joined — share the link again so more can find you',
+  challengeShare: 'Share & challenge',
+  shareViralHint: 'Brag a little — invite more to the next round',
+  inviteMoreRematch: 'Invite more to rematch',
+  shareChallengeText:
+    'We played Factopia! 🏆\n{lines}\n\nChallenge us — join here:\n{invite}',
+  imageShareText: 'We played Factopia — can you beat us? {invite}',
+  shareImageCta: 'factopia.net · challenge your friends',
 }
 
 export type UiStrings = typeof sv

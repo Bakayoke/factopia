@@ -333,6 +333,12 @@ export async function fetchLobbies(lang?: QuizLanguage): Promise<{
   lobbies: PublicLobbyCard[]
   onlineRooms: number
   weekThemePack?: CategoryPackId
+  activity?: {
+    gamesTonight: number
+    liveRooms: number
+    livePlayers: number
+    openLobbies: number
+  }
 }> {
   try {
     const q = lang ? `?lang=${lang}` : ''
@@ -342,6 +348,12 @@ export async function fetchLobbies(lang?: QuizLanguage): Promise<{
       lobbies: PublicLobbyCard[]
       onlineRooms: number
       weekThemePack?: CategoryPackId
+      activity?: {
+        gamesTonight: number
+        liveRooms: number
+        livePlayers: number
+        openLobbies: number
+      }
     }
   } catch {
     return { lobbies: [], onlineRooms: 0 }
@@ -398,7 +410,10 @@ export async function trackMetric(
     | 'checkout_paid'
     | 'guest_unlock_click'
     | 'group_size_upsell'
-    | 'public_requires_party',
+    | 'public_requires_party'
+    | 'game_start'
+    | 'game_finished'
+    | 'share_results',
   meta?: string,
 ) {
   try {

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import {
   activateParty,
   applyStoredPartyToken,
@@ -114,6 +114,12 @@ export default function App() {
   const [showOwnerCode, setShowOwnerCode] = useState(false)
   const [stripeHint, setStripeHint] = useState<string | null>(null)
   const [lobbies, setLobbies] = useState<PublicLobbyCard[]>([])
+  const [activity, setActivity] = useState({
+    gamesTonight: 0,
+    liveRooms: 0,
+    livePlayers: 0,
+    openLobbies: 0,
+  })
   const [pendingPack, setPendingPack] = useState<CategoryPackId | null>(null)
   const [createStep, setCreateStep] = useState<'size' | 'form'>('size')
   const [groupSize, setGroupSize] = useState<'small' | 'big' | null>(null)
@@ -162,14 +168,16 @@ export default function App() {
 
   useEffect(() => {
     if (screen !== 'home' && screen !== 'find') return
-    void fetchLobbies(language).then((res) => {
+    const applyLobbies = (res: Awaited<ReturnType<typeof fetchLobbies>>) => {
       setLobbies(res.lobbies)
+      if (res.activity) setActivity(res.activity)
       if (res.weekThemePack) {
         setPartyInfo((prev) => ({ ...prev, weekThemePack: res.weekThemePack }))
       }
-    })
+    }
+    void fetchLobbies(language).then(applyLobbies)
     const id = window.setInterval(() => {
-      void fetchLobbies(language).then((res) => setLobbies(res.lobbies))
+      void fetchLobbies(language).then(applyLobbies)
     }, 12_000)
     return () => window.clearInterval(id)
   }, [screen, language])
@@ -482,6 +490,23 @@ export default function App() {
 
         {screen === 'home' && (
           <div className="card home-actions">
+            <div className="social-proof" aria-live="polite">
+              {activity.gamesTonight > 0 || activity.livePlayers > 0 ? (
+                <>
+                  {activity.gamesTonight > 0 && (
+                    <span>{ui.socialProofTonight.replace('{n}', String(activity.gamesTonight))}</span>
+                  )}
+                  {activity.livePlayers > 0 && (
+                    <span>{ui.socialProofLive.replace('{n}', String(activity.livePlayers))}</span>
+                  )}
+                  {lobbies.length > 0 && (
+                    <span>{ui.socialProofOpen.replace('{n}', String(lobbies.length))}</span>
+                  )}
+                </>
+              ) : (
+                <span>{ui.socialProofEmpty}</span>
+              )}
+            </div>
             <button className="btn btn-primary" type="button" onClick={() => { setCreateStep('size'); setGroupSize(null); setScreen('create') }}>
               {ui.startNew}
             </button>
@@ -970,6 +995,7 @@ function PlayView({
   const [wasHost, setWasHost] = useState(isHost)
   const [hadParty, setHadParty] = useState(room.premiumTier === 'party')
   const [localFlash, setLocalFlash] = useState('')
+  const knownPlayerIds = useRef(new Set(room.players.map((p) => p.id)))
 
   useEffect(() => {
     if (isHost && !wasHost) {
@@ -987,6 +1013,22 @@ function PlayView({
     }
     setHadParty(isParty)
   }, [room.premiumTier, hadParty, ui.partyUnlockedBanner])
+
+  useEffect(() => {
+    if (!isHost || room.status !== 'lobby') {
+      knownPlayerIds.current = new Set(room.players.map((p) => p.id))
+      return
+    }
+    const newcomers = room.players.filter((p) => !knownPlayerIds.current.has(p.id))
+    knownPlayerIds.current = new Set(room.players.map((p) => p.id))
+    if (newcomers.length === 0) return
+    const name = newcomers[0]?.name || '?'
+    const playing = room.players.filter((p) => p.playing).length
+    setLocalFlash(
+      `${ui.playerJoinedFlash.replace('{name}', name)} · ${ui.playersNowShare.replace('{n}', String(playing))}`,
+    )
+    window.setTimeout(() => setLocalFlash(''), 5500)
+  }, [room.players, room.status, isHost, ui.playerJoinedFlash, ui.playersNowShare])
 
   const hostPlayer = room.players.find((p) => p.id === room.hostId)
   const hostAway = Boolean(hostPlayer && !hostPlayer.connected)
@@ -1789,6 +1831,8 @@ function WinnerView({
   const hostedOnly = me && !me.playing
   const [busy, setBusy] = useState(false)
   const [shareFlash, setShareFlash] = useState('')
+  const [showShareNudge, setShowShareNudge] = useState(true)
+  const invite = joinUrl(room.code)
 
   async function onRematch() {
     setBusy(true)
@@ -1800,14 +1844,16 @@ function WinnerView({
 
   async function shareResults() {
     const lines = ranked.map((p, i) => `${i + 1}. ${p.name} — ${p.score}`)
-    const invite = `${window.location.origin}/?join=${room.code}`
-    const text =
-      room.language === 'en'
-        ? `Factopia results\n${lines.join('\n')}\n\nPlay again: ${invite}`
-        : `Factopia-resultat\n${lines.join('\n')}\n\nSpela igen: ${invite}`
+    const text = ui.shareChallengeText
+      .replace('{lines}', lines.join('\n'))
+      .replace('{invite}', invite)
+    void trackMetric('share_results', room.code)
+    setShowShareNudge(false)
     try {
       if (typeof navigator.share === 'function') {
         await navigator.share({ title: 'Factopia', text, url: invite })
+        setShareFlash(ui.resultsCopied)
+        window.setTimeout(() => setShareFlash(''), 2000)
         return
       }
     } catch {
@@ -1822,8 +1868,30 @@ function WinnerView({
     }
   }
 
+  async function shareInviteMore() {
+    const text =
+      room.language === 'en'
+        ? `Join our Factopia rematch: ${room.code}\n${invite}`
+        : `Gå med i vår Factopia-omstart: ${room.code}\n${invite}`
+    void trackMetric('share_results', `invite:${room.code}`)
+    try {
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ title: 'Factopia', text, url: invite })
+        return
+      }
+    } catch {
+      // fall through
+    }
+    try {
+      await navigator.clipboard.writeText(text)
+      setShareFlash(ui.copied)
+      window.setTimeout(() => setShareFlash(''), 2000)
+    } catch {
+      onError(ui.somethingWrong)
+    }
+  }
+
   async function shareImage() {
-    const invite = `${window.location.origin}/?join=${room.code}`
     const blob = await renderResultsImage({
       title: winner ? `${ui.winnerIs} ${winner.name}` : ui.standings,
       subtitle: `${winner?.score ?? 0} ${ui.points}`,
@@ -1833,18 +1901,22 @@ function WinnerView({
         score: `${p.score}`,
       })),
       footer: invite,
+      cta: ui.shareImageCta,
     })
     if (!blob) {
       onError(ui.somethingWrong)
       return
     }
+    void trackMetric('share_results', `image:${room.code}`)
+    setShowShareNudge(false)
     const file = new File([blob], 'factopia-resultat.png', { type: 'image/png' })
+    const text = ui.imageShareText.replace('{invite}', invite)
     try {
       if (typeof navigator.share === 'function' && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
           title: 'Factopia',
-          text: room.language === 'en' ? 'We played Factopia!' : 'Vi körde Factopia!',
+          text,
         })
         return
       }
@@ -1873,6 +1945,19 @@ function WinnerView({
         {winner?.score ?? 0} {ui.points}
       </p>
 
+      {showShareNudge && (
+        <p className="party-unlock-banner share-nudge">{ui.shareViralHint}</p>
+      )}
+
+      <div className="party-plans viral-share">
+        <button className="btn btn-primary" type="button" onClick={() => void shareResults()}>
+          {shareFlash || ui.challengeShare}
+        </button>
+        <button className="btn btn-accent" type="button" onClick={() => void shareImage()}>
+          {ui.shareImage}
+        </button>
+      </div>
+
       <p className="section-title">{ui.standings}</p>
       <ol className="scoreboard">
         {ranked.map((p, i) => (
@@ -1892,19 +1977,15 @@ function WinnerView({
         ))}
       </ol>
 
-      <div className="party-plans">
-        <button className="btn btn-accent" type="button" onClick={() => void shareResults()}>
-          {shareFlash || ui.shareResults}
-        </button>
-        <button className="btn btn-secondary" type="button" onClick={() => void shareImage()}>
-          {ui.shareImage}
-        </button>
-      </div>
-
       {isHost ? (
-        <button className="btn btn-primary" type="button" disabled={busy} onClick={() => void onRematch()}>
-          {ui.playAgain}
-        </button>
+        <>
+          <button className="btn btn-secondary" type="button" disabled={busy} onClick={() => void onRematch()}>
+            {ui.playAgain}
+          </button>
+          <button className="btn btn-ghost" type="button" onClick={() => void shareInviteMore()}>
+            {ui.inviteMoreRematch}
+          </button>
+        </>
       ) : (
         <p className="waiting">{ui.waitingRematch}</p>
       )}
