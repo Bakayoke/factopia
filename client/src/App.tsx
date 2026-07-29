@@ -87,7 +87,7 @@ export default function App() {
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
   const [questionCount] = useState(10)
-  const [hostPlays, setHostPlays] = useState(true)
+  const [hostPlays, setHostPlays] = useState(false)
   const [advanceMode] = useState<AdvanceMode>('auto')
   const [language] = useState<QuizLanguage>(() => detectPreferredLanguage())
   const [joinStep, setJoinStep] = useState<'code' | 'name'>('code')
@@ -119,6 +119,7 @@ export default function App() {
   const [groupSize, setGroupSize] = useState<'small' | 'big' | null>(null)
   const [fullRoomCode, setFullRoomCode] = useState('')
   const [fullWaitlistCount, setFullWaitlistCount] = useState(0)
+  const [hostTvDefault, setHostTvDefault] = useState(false)
   const [resumeCheckout, setResumeCheckout] = useState<{
     roomCode?: string
     plan: PartyPlan
@@ -410,6 +411,7 @@ export default function App() {
       await setCategoryPack(pendingPack)
       setPendingPack(null)
     }
+    setHostTvDefault(true)
     setScreen('play')
   }
 
@@ -523,47 +525,13 @@ export default function App() {
                   <p className="footer-note">{ui.priceAnchorDay}</p>
                   <p className="footer-note">{ui.priceAnchorWeek}</p>
                   {firstTime && <p className="party-flash">{ui.firstPartyDeal}</p>}
-                  <div className="party-plans">
-                    {weekend ? (
-                      <>
-                        <button
-                          className="btn btn-party"
-                          type="button"
-                          disabled={checkoutBusy}
-                          onClick={() => void onBuyParty(undefined, 'week')}
-                        >
-                          {checkoutBusy ? ui.buyPartyBusy : buyWeekLabel}
-                        </button>
-                        <button
-                          className="btn btn-secondary"
-                          type="button"
-                          disabled={checkoutBusy}
-                          onClick={() => void onBuyParty(undefined, 'day')}
-                        >
-                          {buyDayLabel}
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          className="btn btn-party"
-                          type="button"
-                          disabled={checkoutBusy}
-                          onClick={() => void onBuyParty(undefined, 'day')}
-                        >
-                          {checkoutBusy ? ui.buyPartyBusy : buyDayLabel}
-                        </button>
-                        <button
-                          className="btn btn-secondary"
-                          type="button"
-                          disabled={checkoutBusy}
-                          onClick={() => void onBuyParty(undefined, 'week')}
-                        >
-                          {buyWeekLabel}
-                        </button>
-                      </>
-                    )}
-                  </div>
+                  <PartyBuyPanel
+                    ui={ui}
+                    buyDayLabel={buyDayLabel}
+                    buyWeekLabel={buyWeekLabel}
+                    checkoutBusy={checkoutBusy}
+                    onBuyParty={(plan) => void onBuyParty(undefined, plan || defaultPlan)}
+                  />
                   {resumeCheckout && (
                     <button
                       className="btn btn-accent"
@@ -807,24 +775,15 @@ export default function App() {
             </p>
             <p className="footer-note">{ui.priceAnchorDay}</p>
             {firstTime && <p className="party-flash">{ui.firstPartyDeal}</p>}
-            <div className="party-plans">
-              <button
-                className="btn btn-party"
-                type="button"
-                disabled={checkoutBusy}
-                onClick={() => void onBuyParty(fullRoomCode, defaultPlan)}
-              >
-                {checkoutBusy ? ui.buyPartyBusy : ui.unlockForEveryone}
-              </button>
-              <button
-                className="btn btn-secondary"
-                type="button"
-                disabled={checkoutBusy}
-                onClick={() => void onBuyParty(fullRoomCode, weekend ? 'day' : 'week')}
-              >
-                {weekend ? buyDayLabel : buyWeekLabel}
-              </button>
-            </div>
+            <PartyBuyPanel
+              ui={ui}
+              buyDayLabel={buyDayLabel}
+              buyWeekLabel={buyWeekLabel}
+              checkoutBusy={checkoutBusy}
+              onBuyParty={(plan) => void onBuyParty(fullRoomCode, plan || defaultPlan)}
+              urgent
+              primaryLabel={ui.unlockForEveryone}
+            />
             <button
               className="btn btn-ghost"
               type="button"
@@ -912,9 +871,68 @@ export default function App() {
             buyWeekLabel={buyWeekLabel}
             onBuyParty={(plan) => void onBuyParty(room.code, plan)}
             checkoutBusy={checkoutBusy}
+            startInTvMode={hostTvDefault}
           />
         )}
       </div>
+    </div>
+  )
+}
+
+function PartyBuyPanel({
+  ui,
+  buyDayLabel,
+  buyWeekLabel,
+  checkoutBusy,
+  onBuyParty,
+  urgent,
+  primaryLabel,
+}: {
+  ui: ReturnType<typeof t>
+  buyDayLabel: string
+  buyWeekLabel: string
+  checkoutBusy: boolean
+  onBuyParty: (plan?: PartyPlan) => void
+  urgent?: boolean
+  primaryLabel?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const weekend = isWeekend()
+  if (!open) {
+    return (
+      <div className={`party-plans${urgent ? ' urgent' : ''}`}>
+        <button
+          className="btn btn-party"
+          type="button"
+          disabled={checkoutBusy}
+          onClick={() => setOpen(true)}
+        >
+          {checkoutBusy ? ui.buyPartyBusy : primaryLabel || ui.unlockPartyFrom}
+        </button>
+        <p className="footer-note">{ui.payWithSwish}</p>
+      </div>
+    )
+  }
+  return (
+    <div className={`party-plans${urgent ? ' urgent' : ''}`}>
+      <p className="party-hint">{ui.choosePlan}</p>
+      <button
+        className="btn btn-party"
+        type="button"
+        disabled={checkoutBusy}
+        onClick={() => onBuyParty(weekend ? 'week' : 'day')}
+      >
+        {checkoutBusy ? ui.buyPartyBusy : weekend ? buyWeekLabel : buyDayLabel}
+      </button>
+      <button
+        className="btn btn-secondary"
+        type="button"
+        disabled={checkoutBusy}
+        onClick={() => onBuyParty(weekend ? 'day' : 'week')}
+      >
+        {weekend ? buyDayLabel : buyWeekLabel}
+      </button>
+      <p className="footer-note">{ui.payWithSwish}</p>
     </div>
   )
 }
@@ -931,6 +949,7 @@ function PlayView({
   buyWeekLabel,
   onBuyParty,
   checkoutBusy,
+  startInTvMode,
 }: {
   room: PublicRoom
   playerId: string
@@ -943,10 +962,11 @@ function PlayView({
   buyWeekLabel: string
   onBuyParty: (plan?: PartyPlan) => void
   checkoutBusy: boolean
+  startInTvMode?: boolean
 }) {
   const isHost = room.hostId === playerId
   const ui = t(room.language)
-  const [tvMode, setTvMode] = useState(false)
+  const [tvMode, setTvMode] = useState(Boolean(startInTvMode && isHost))
   const [wasHost, setWasHost] = useState(isHost)
   const [hadParty, setHadParty] = useState(room.premiumTier === 'party')
   const [localFlash, setLocalFlash] = useState('')
@@ -1075,9 +1095,11 @@ function Lobby({
   const [showCode, setShowCode] = useState(false)
   const [partyMsg, setPartyMsg] = useState('')
   const [shareFlash, setShareFlash] = useState('')
+  const [showSettings, setShowSettings] = useState(false)
+  const [showMoreSettings, setShowMoreSettings] = useState(false)
   const ui = t(room.language)
   const me = room.players.find((p) => p.id === playerId)
-  const hostPlaying = me?.playing ?? true
+  const hostPlaying = me?.playing ?? false
   const participants = room.players.filter((p) => p.playing)
   const spectators = room.players.filter((p) => !p.playing)
   const isParty = room.premiumTier === 'party'
@@ -1091,6 +1113,7 @@ function Lobby({
   const almostFull = !isParty && maxPlayers > 0 && seatsLeft !== null && seatsLeft <= 1
   const isFull = !isParty && maxPlayers > 0 && seatsLeft === 0
   const waitlist = room.waitlist ?? []
+  const blockStart = isHost && !isParty && waitlist.length > 0
 
   useEffect(() => {
     if (!isHost || isParty) return
@@ -1127,7 +1150,7 @@ function Lobby({
         })
         return
       } catch {
-        // fall through to copy
+        // fall through
       }
     }
     await copyInvite()
@@ -1185,11 +1208,15 @@ function Lobby({
       return
     }
     onPartyPass({ token: res.token, expiresAt: res.expiresAt })
-    setPartyMsg(ui.partyActive)
+    setPartyMsg(ui.partyUnlockedSeats)
     setPartyCode('')
   }
 
   async function onStart() {
+    if (blockStart) {
+      onError(ui.startBlockedWaitlist.replace('{n}', String(waitlist.length)))
+      return
+    }
     setBusy(true)
     onError('')
     const res = await startGame()
@@ -1199,14 +1226,14 @@ function Lobby({
 
   return (
     <div className={`card stack${tvMode ? ' tv-mode' : ''}`}>
-      <div className="code-display">
+      <div className="code-display host-focus">
         <span>{ui.gameCode}</span>
         <strong>{room.code}</strong>
         {!tvMode && <p className="invite-hint">{ui.inviteHint}</p>}
         {!tvMode && (
-          <div className="invite-actions">
-            <button className="btn btn-secondary" type="button" onClick={() => void copyInvite()}>
-              {shareFlash || ui.copyCode}
+          <div className="invite-actions host-primary-actions">
+            <button className="btn btn-primary" type="button" onClick={() => void copyInvite()}>
+              {shareFlash || ui.copyLinkPrimary}
             </button>
             <button className="btn btn-accent" type="button" onClick={() => void shareInvite()}>
               {ui.shareInvite}
@@ -1214,107 +1241,87 @@ function Lobby({
           </div>
         )}
         <div className="invite-qr">
-          <img src={qrUrl(invite)} alt={ui.scanToJoin} width={tvMode ? 260 : 180} height={tvMode ? 260 : 180} />
+          <img src={qrUrl(invite)} alt={ui.scanToJoin} width={tvMode ? 280 : 200} height={tvMode ? 280 : 200} />
           <span>{ui.scanToJoin}</span>
         </div>
       </div>
 
       {isHost && (
-        <button className="btn-tiny" type="button" onClick={onToggleTv}>
-          {tvMode ? ui.tvModeOff : ui.tvModeOn}
+        <button className={`btn ${tvMode ? 'btn-secondary' : 'btn-accent'}`} type="button" onClick={onToggleTv}>
+          {tvMode ? ui.tvModeOff : ui.showOnTv}
         </button>
       )}
 
-      {isHost && !tvMode ? (
-        <>
-          <div className={`party-banner ${isParty ? 'on' : ''}`}>
-            <div>
-              <strong>{isParty ? ui.partyActive : ui.party}</strong>
-              <p>
-                {isParty && room.premiumExpiresAt
-                  ? `${ui.partyActiveUntil} ${formatExpiry(room.premiumExpiresAt, room.language)}`
-                  : ui.freeTierOk}
-              </p>
+      {isHost && isParty && (
+        <div className="party-banner on">
+          <strong>{ui.partyActive}</strong>
+          <p>
+            {room.premiumExpiresAt
+              ? `${ui.partyActiveUntil} ${formatExpiry(room.premiumExpiresAt, room.language)}`
+              : ui.partyActive}
+          </p>
+          {room.premiumExpiresAt && room.premiumExpiresAt - Date.now() < 2 * 60 * 60 * 1000 && (
+            <div className="party-expiring">
+              <p className="party-hint">{ui.partyExpiringSoon}</p>
+              <PartyBuyPanel
+                ui={ui}
+                buyDayLabel={buyDayLabel}
+                buyWeekLabel={buyWeekLabel}
+                checkoutBusy={checkoutBusy}
+                onBuyParty={onBuyParty}
+                primaryLabel={ui.renewParty}
+              />
             </div>
-            {isParty && room.premiumExpiresAt && room.premiumExpiresAt - Date.now() < 2 * 60 * 60 * 1000 && (
-              <div className="party-expiring">
-                <p className="party-hint">{ui.partyExpiringSoon}</p>
-                <button
-                  className="btn btn-party"
-                  type="button"
-                  disabled={checkoutBusy}
-                  onClick={() => onBuyParty('week')}
-                >
-                  {ui.renewParty}
-                </button>
-              </div>
-            )}
-            {!isParty && (
-              <>
-                <p className="party-hint">{almostFull || isFull ? (isFull ? ui.roomFullUpsell : ui.roomAlmostFull) : ui.buyPartyHint}</p>
-                <p className="footer-note">{ui.priceAnchorDay}</p>
-                <div className={`party-plans${almostFull || isFull ? ' urgent' : ''}`}>
-                  <button
-                    className="btn btn-party"
-                    type="button"
-                    disabled={checkoutBusy}
-                    onClick={() => onBuyParty(isWeekend() ? 'week' : 'day')}
-                  >
-                    {checkoutBusy ? ui.buyPartyBusy : isWeekend() ? buyWeekLabel : buyDayLabel}
-                  </button>
-                  <button
-                    className="btn btn-secondary"
-                    type="button"
-                    disabled={checkoutBusy}
-                    onClick={() => onBuyParty(isWeekend() ? 'day' : 'week')}
-                  >
-                    {isWeekend() ? buyDayLabel : buyWeekLabel}
-                  </button>
-                </div>
-              </>
-            )}
-            {!isParty && (
-              <>
-                <button className="btn-tiny" type="button" onClick={() => setShowCode((v) => !v)}>
-                  {showCode ? ui.hideCode : ui.haveCode}
-                </button>
-                {showCode && (
-                  <div className="party-redeem">
-                    <input
-                      value={partyCode}
-                      onChange={(e) => setPartyCode(e.target.value.toUpperCase())}
-                      placeholder={ui.partyCode}
-                      maxLength={64}
-                    />
-                    <button className="btn btn-secondary" type="button" onClick={onUnlockParty} disabled={busy}>
-                      {ui.activate}
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-            {!isParty && !partyInfo.enabled && <p className="footer-note">{ui.buyPartySoon}</p>}
-          </div>
+          )}
+        </div>
+      )}
 
-          <div>
-            <label style={{ marginBottom: '0.4rem' }}>{ui.language}</label>
-            <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-              <button
-                type="button"
-                className={`choice ${room.language === 'sv' ? 'selected' : ''}`}
-                onClick={() => changeLanguage('sv')}
-              >
-                {ui.swedish}
-              </button>
-              <button
-                type="button"
-                className={`choice ${room.language === 'en' ? 'selected' : ''}`}
-                onClick={() => changeLanguage('en')}
-              >
-                {ui.english}
+      {isHost && !isParty && !tvMode && (
+        <div className={`party-banner${almostFull || isFull || waitlist.length > 0 ? ' urgent-inline' : ''}`}>
+          <p className="party-hint">
+            {waitlist.length > 0 || isFull
+              ? ui.roomFullUpsell
+              : almostFull
+                ? ui.roomAlmostFull
+                : ui.buyPartyHint}
+          </p>
+          <p className="footer-note">{ui.priceAnchorDay}</p>
+          <PartyBuyPanel
+            ui={ui}
+            buyDayLabel={buyDayLabel}
+            buyWeekLabel={buyWeekLabel}
+            checkoutBusy={checkoutBusy}
+            onBuyParty={onBuyParty}
+            urgent={almostFull || isFull || waitlist.length > 0}
+          />
+          <button className="btn-tiny" type="button" onClick={() => setShowCode((v) => !v)}>
+            {showCode ? ui.hideCode : ui.haveCode}
+          </button>
+          {showCode && (
+            <div className="party-redeem">
+              <input
+                value={partyCode}
+                onChange={(e) => setPartyCode(e.target.value.toUpperCase())}
+                placeholder={ui.partyCode}
+                maxLength={64}
+              />
+              <button className="btn btn-secondary" type="button" onClick={onUnlockParty} disabled={busy}>
+                {ui.activate}
               </button>
             </div>
-          </div>
+          )}
+          {!partyInfo.enabled && <p className="footer-note">{ui.buyPartySoon}</p>}
+        </div>
+      )}
+
+      {isHost && !tvMode && (
+        <button className="btn-tiny" type="button" onClick={() => setShowSettings((v) => !v)}>
+          {showSettings ? ui.hideSettings : ui.editSettings}
+        </button>
+      )}
+
+      {isHost && !tvMode && showSettings && (
+        <>
           <div>
             <label style={{ marginBottom: '0.4rem' }}>{ui.vibe}</label>
             <div className="choice-row pack-row">
@@ -1326,6 +1333,21 @@ function Lobby({
                   onClick={() => void changePack(p.id)}
                 >
                   {ui[p.labelKey]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label style={{ marginBottom: '0.4rem' }}>{ui.questionCount}</label>
+            <div className="choice-row">
+              {counts.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className={`choice ${room.questionCount === n ? 'selected' : ''}`}
+                  onClick={() => changeCount(n)}
+                >
+                  {n}
                 </button>
               ))}
             </div>
@@ -1349,66 +1371,77 @@ function Lobby({
               </button>
             </div>
           </div>
-          <div>
-            <label style={{ marginBottom: '0.4rem' }}>{ui.questionCount}</label>
-            <div className="choice-row">
-              {counts.map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className={`choice ${room.questionCount === n ? 'selected' : ''}`}
-                  onClick={() => changeCount(n)}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label style={{ marginBottom: '0.4rem' }}>{ui.yourRole}</label>
-            <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-              <button
-                type="button"
-                className={`choice ${hostPlaying ? 'selected' : ''}`}
-                onClick={() => changeHostPlaying(true)}
-              >
-                {ui.playAlong}
-              </button>
-              <button
-                type="button"
-                className={`choice ${!hostPlaying ? 'selected' : ''}`}
-                onClick={() => changeHostPlaying(false)}
-              >
-                {ui.hostOnly}
-              </button>
-            </div>
-          </div>
-          <div>
-            <label style={{ marginBottom: '0.4rem' }}>{ui.betweenQuestions}</label>
-            <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-              <button
-                type="button"
-                className={`choice ${room.advanceMode === 'manual' ? 'selected' : ''}`}
-                onClick={() => changeAdvance('manual')}
-              >
-                {ui.clickNext}
-              </button>
-              <button
-                type="button"
-                className={`choice ${room.advanceMode === 'auto' ? 'selected' : ''}`}
-                onClick={() => changeAdvance('auto')}
-              >
-                {ui.auto}
-              </button>
-            </div>
-          </div>
+          <button className="btn-tiny" type="button" onClick={() => setShowMoreSettings((v) => !v)}>
+            {ui.moreSettings}
+          </button>
+          {showMoreSettings && (
+            <>
+              <div>
+                <label style={{ marginBottom: '0.4rem' }}>{ui.language}</label>
+                <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                  <button
+                    type="button"
+                    className={`choice ${room.language === 'sv' ? 'selected' : ''}`}
+                    onClick={() => changeLanguage('sv')}
+                  >
+                    {ui.swedish}
+                  </button>
+                  <button
+                    type="button"
+                    className={`choice ${room.language === 'en' ? 'selected' : ''}`}
+                    onClick={() => changeLanguage('en')}
+                  >
+                    {ui.english}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label style={{ marginBottom: '0.4rem' }}>{ui.yourRole}</label>
+                <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                  <button
+                    type="button"
+                    className={`choice ${hostPlaying ? 'selected' : ''}`}
+                    onClick={() => changeHostPlaying(true)}
+                  >
+                    {ui.playAlong}
+                  </button>
+                  <button
+                    type="button"
+                    className={`choice ${!hostPlaying ? 'selected' : ''}`}
+                    onClick={() => changeHostPlaying(false)}
+                  >
+                    {ui.hostOnly}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label style={{ marginBottom: '0.4rem' }}>{ui.betweenQuestions}</label>
+                <div className="choice-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                  <button
+                    type="button"
+                    className={`choice ${room.advanceMode === 'manual' ? 'selected' : ''}`}
+                    onClick={() => changeAdvance('manual')}
+                  >
+                    {ui.clickNext}
+                  </button>
+                  <button
+                    type="button"
+                    className={`choice ${room.advanceMode === 'auto' ? 'selected' : ''}`}
+                    onClick={() => changeAdvance('auto')}
+                  >
+                    {ui.auto}
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </>
-      ) : (
-        !isHost && (
-          <p className="waiting">
-            {room.questionCount} {ui.waitingStart}
-          </p>
-        )
+      )}
+
+      {!isHost && (
+        <p className="waiting">
+          {room.questionCount} {ui.waitingStart}
+        </p>
       )}
 
       <div>
@@ -1460,14 +1493,6 @@ function Lobby({
                 </li>
               ))}
             </ul>
-            {!isParty && (
-              <div className="party-banner urgent-inline">
-                <p className="party-hint">{ui.roomFullUpsell}</p>
-                <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={() => onBuyParty(isWeekend() ? 'week' : 'day')}>
-                  {isWeekend() ? buyWeekLabel : buyDayLabel}
-                </button>
-              </div>
-            )}
           </>
         )}
         {isHost && !hostPlaying && !tvMode && (
@@ -1475,21 +1500,33 @@ function Lobby({
             {ui.hostHidden}
           </p>
         )}
-        {isHost && !isParty && maxPlayers > 0 && almostFull && !tvMode && (
-          <div className="party-banner urgent-inline">
-            <p className="party-hint">{isFull ? ui.roomFullUpsell : ui.roomAlmostFull}</p>
-            <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={() => onBuyParty('day')}>
-              {buyDayLabel}
-            </button>
-          </div>
-        )}
       </div>
 
-      {partyMsg && <p className="footer-note">{partyMsg}</p>}
+      {partyMsg && <p className="party-unlock-banner">{partyMsg}</p>}
       {error && <p className="error">{error}</p>}
 
+      {isHost && blockStart && (
+        <div className="party-banner urgent-inline">
+          <p className="party-hint">{ui.startBlockedWaitlist.replace('{n}', String(waitlist.length))}</p>
+          <PartyBuyPanel
+            ui={ui}
+            buyDayLabel={buyDayLabel}
+            buyWeekLabel={buyWeekLabel}
+            checkoutBusy={checkoutBusy}
+            onBuyParty={onBuyParty}
+            urgent
+            primaryLabel={ui.unlockThenStart}
+          />
+        </div>
+      )}
+
       {isHost && (
-        <button className="btn btn-primary" type="button" onClick={onStart} disabled={busy}>
+        <button
+          className="btn btn-primary"
+          type="button"
+          onClick={onStart}
+          disabled={busy || blockStart}
+        >
           {ui.startQuiz}
         </button>
       )}
@@ -1852,14 +1889,13 @@ function WinnerView({
         <p className="waiting">{ui.waitingRematch}</p>
       )}
       {room.premiumTier !== 'party' && isHost && partyInfo.enabled && (
-        <div className="party-plans">
-          <button className="btn btn-party" type="button" disabled={checkoutBusy} onClick={() => onBuyParty('day')}>
-            {checkoutBusy ? ui.buyPartyBusy : buyDayLabel}
-          </button>
-          <button className="btn btn-secondary" type="button" disabled={checkoutBusy} onClick={() => onBuyParty('week')}>
-            {buyWeekLabel}
-          </button>
-        </div>
+        <PartyBuyPanel
+          ui={ui}
+          buyDayLabel={buyDayLabel}
+          buyWeekLabel={buyWeekLabel}
+          checkoutBusy={checkoutBusy}
+          onBuyParty={onBuyParty}
+        />
       )}
       {room.premiumTier !== 'party' && isHost && !partyInfo.enabled && (
         <p className="footer-note">{ui.buyPartySoon}</p>

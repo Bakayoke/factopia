@@ -368,6 +368,25 @@ input:focus {
   margin-top: 0.85rem;
 }
 
+.host-primary-actions {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 420px) {
+  .host-primary-actions {
+    grid-template-columns: 1.35fr 1fr;
+  }
+}
+
+.code-display.host-focus {
+  padding-bottom: 0.25rem;
+}
+
+.code-display.host-focus .invite-qr img {
+  width: 200px;
+  height: 200px;
+}
+
 .invite-qr {
   margin-top: 1rem;
   display: flex;
