@@ -632,6 +632,117 @@ input:focus {
   margin: 0;
 }
 
+.lobby-roster {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1rem 1.05rem;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--muted) 22%, transparent);
+}
+
+.lobby-roster.is-waiting {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  animation: lobby-wait-glow 2.4s ease-in-out infinite;
+}
+
+.lobby-roster.has-players {
+  border-color: color-mix(in srgb, var(--brand) 28%, transparent);
+}
+
+.lobby-waiting-status {
+  text-align: center;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.lobby-waiting-title {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 4.5vw, 1.65rem);
+  font-weight: 800;
+  color: var(--text);
+}
+
+.lobby-waiting-hint {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.lobby-waiting-count {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+
+.lobby-ready-line {
+  margin: 0;
+  text-align: center;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.lobby-roster-head {
+  margin: 0;
+}
+
+.lobby-pulse {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+  animation: lobby-pulse 1.6s ease-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes lobby-pulse {
+  0% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 12px transparent;
+  }
+  100% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@keyframes lobby-wait-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+}
+
+.tv-mode .lobby-waiting-title {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+}
+
+.tv-mode .lobby-waiting-hint {
+  font-size: 1.15rem;
+}
+
+.tv-mode .lobby-waiting-count {
+  font-size: 1rem;
+}
+
 .next-countdown {
   text-align: center;
   margin: 0;

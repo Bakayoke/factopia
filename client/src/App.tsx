@@ -1252,6 +1252,90 @@ function Lobby({
         </button>
       )}
 
+      <div className={`lobby-roster${participants.length === 0 ? ' is-waiting' : ' has-players'}`}>
+        {isHost && participants.length === 0 ? (
+          <div className="lobby-waiting-status" aria-live="polite">
+            <p className="lobby-waiting-title">
+              <span className="lobby-pulse" aria-hidden="true" />
+              {ui.waitingForPlayers}
+            </p>
+            <p className="lobby-waiting-hint">{ui.waitingForPlayersHint}</p>
+            <p className="lobby-waiting-count">
+              {ui.playersJoined.replace('{n}', '0')} · {playersLabel === ui.unlimited ? ui.unlimited : `max ${playersLabel}`}
+            </p>
+          </div>
+        ) : (
+          <>
+            <p className="meta lobby-roster-head">
+              <span>{ui.participants}</span>
+              <span>
+                {participants.length}/{playersLabel}
+              </span>
+            </p>
+            {isHost && participants.length > 0 && (
+              <p className="lobby-ready-line">{ui.readyWhenYouAre}</p>
+            )}
+          </>
+        )}
+
+        {participants.length === 0 && !isHost ? (
+          <p className="waiting">{ui.noPlayers}</p>
+        ) : participants.length > 0 ? (
+          <ul className={`players${tvMode ? ' tv-players' : ''}`}>
+            {participants.map((p) => (
+              <li key={p.id}>
+                <span>{p.name}</span>
+                {p.id === playerId && <span className="you">{ui.you}</span>}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {spectators.length > 0 && (
+          <>
+            <p className="meta" style={{ margin: '0.75rem 0 0.5rem' }}>
+              <span>{ui.spectators}</span>
+              <span>{spectators.length}</span>
+            </p>
+            <ul className="players">
+              {spectators.map((p) => (
+                <li key={p.id}>
+                  <span>{p.name}</span>
+                  <span className="you">{ui.watching}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {isHost && waitlist.length > 0 && (
+          <>
+            <p className="meta" style={{ margin: '0.75rem 0 0.5rem' }}>
+              <span>{ui.waitingToJoin}</span>
+              <span>{waitlist.length}</span>
+            </p>
+            <ul className="players waitlist">
+              {waitlist.map((w) => (
+                <li key={w.id}>
+                  <span>{w.name}</span>
+                  <span className="you">🔒</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {isHost && !hostPlaying && !tvMode && participants.length > 0 && (
+          <p className="footer-note" style={{ marginTop: '0.6rem' }}>
+            {ui.hostHidden}
+          </p>
+        )}
+      </div>
+
+      {!isHost && (
+        <p className="waiting">
+          {room.questionCount} {ui.waitingStart}
+        </p>
+      )}
+
       {isHost && isParty && (
         <div className="party-banner on">
           <strong>{ui.partyActive}</strong>
@@ -1437,70 +1521,6 @@ function Lobby({
           )}
         </>
       )}
-
-      {!isHost && (
-        <p className="waiting">
-          {room.questionCount} {ui.waitingStart}
-        </p>
-      )}
-
-      <div>
-        <p className="meta" style={{ marginBottom: '0.5rem' }}>
-          <span>{ui.participants}</span>
-          <span>
-            {participants.length}/{playersLabel}
-          </span>
-        </p>
-        {participants.length === 0 ? (
-          <p className="waiting">{ui.noPlayers}</p>
-        ) : (
-          <ul className={`players${tvMode ? ' tv-players' : ''}`}>
-            {participants.map((p) => (
-              <li key={p.id}>
-                <span>{p.name}</span>
-                {p.id === playerId && <span className="you">{ui.you}</span>}
-              </li>
-            ))}
-          </ul>
-        )}
-        {spectators.length > 0 && (
-          <>
-            <p className="meta" style={{ margin: '0.75rem 0 0.5rem' }}>
-              <span>{ui.spectators}</span>
-              <span>{spectators.length}</span>
-            </p>
-            <ul className="players">
-              {spectators.map((p) => (
-                <li key={p.id}>
-                  <span>{p.name}</span>
-                  <span className="you">{ui.watching}</span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-        {isHost && waitlist.length > 0 && (
-          <>
-            <p className="meta" style={{ margin: '0.75rem 0 0.5rem' }}>
-              <span>{ui.waitingToJoin}</span>
-              <span>{waitlist.length}</span>
-            </p>
-            <ul className="players waitlist">
-              {waitlist.map((w) => (
-                <li key={w.id}>
-                  <span>{w.name}</span>
-                  <span className="you">🔒</span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-        {isHost && !hostPlaying && !tvMode && (
-          <p className="footer-note" style={{ marginTop: '0.6rem' }}>
-            {ui.hostHidden}
-          </p>
-        )}
-      </div>
 
       {partyMsg && <p className="party-unlock-banner">{partyMsg}</p>}
       {error && <p className="error">{error}</p>}
