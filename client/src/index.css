@@ -209,6 +209,83 @@ button {
   margin-top: 0.35rem;
 }
 
+.host-control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.tv-host-bar {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 5;
+}
+
+.lobby-settings {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.tv-settings-panel {
+  padding: 1rem;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 92%, #000);
+  border: 1px solid color-mix(in srgb, var(--muted) 28%, transparent);
+  box-shadow: var(--shadow);
+  max-height: min(70vh, 560px);
+  overflow: auto;
+  animation: pop-in 0.35s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.tv-mode .tv-settings-panel .choice {
+  font-size: 0.95rem;
+  padding: 0.65rem 0.5rem;
+}
+
+.sister-game {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+  padding: 0.95rem 1.05rem;
+  border-radius: 18px;
+  text-decoration: none;
+  color: inherit;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #1a5c4a 18%, var(--surface)), color-mix(in srgb, #c9921a 12%, var(--surface)));
+  border: 1px solid color-mix(in srgb, #1a5c4a 28%, transparent);
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.sister-game:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, #c9921a 45%, transparent);
+}
+
+.sister-game strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+
+.sister-game span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.sister-game em {
+  font-style: normal;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--accent-deep);
+  margin-top: 0.15rem;
+}
+
+.sister-game.compact {
+  margin-top: 0.35rem;
+}
+
 .party-unlock-banner {
   margin: 0 0 0.75rem;
   text-align: center;

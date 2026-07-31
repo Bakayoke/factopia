@@ -52,6 +52,7 @@ const FREE_COUNTS = [10, 20, 30, 50]
 const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
 const TIP_URL = (import.meta.env.VITE_TIP_URL as string | undefined) || ''
+const PARTY_PATHS_URL = 'https://partypaths.com'
 const PENDING_ROOM_KEY = 'factopia-pending-room'
 const RESUME_CHECKOUT_KEY = 'factopia-resume-checkout'
 const PENDING_CREATE_KEY = 'factopia-pending-create'
@@ -601,6 +602,16 @@ export default function App() {
               )}
             </div>
             <p className="footer-note">{ui.footer}</p>
+            <a
+              className="sister-game"
+              href={PARTY_PATHS_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Party Paths</strong>
+              <span>{ui.partyPathsPitch}</span>
+              <em>{ui.partyPathsCta}</em>
+            </a>
           </div>
         )}
 
@@ -1289,9 +1300,22 @@ function Lobby({
       </div>
 
       {isHost && (
-        <button className={`btn ${tvMode ? 'btn-secondary' : 'btn-accent'}`} type="button" onClick={onToggleTv}>
-          {tvMode ? ui.tvModeOff : ui.showOnTv}
-        </button>
+        <div className={`host-control-bar${tvMode ? ' tv-host-bar' : ''}`}>
+          <button
+            className={`btn ${tvMode ? 'btn-secondary' : 'btn-accent'}`}
+            type="button"
+            onClick={onToggleTv}
+          >
+            {tvMode ? ui.tvModeOff : ui.showOnTv}
+          </button>
+          <button
+            className={`btn ${showSettings ? 'btn-primary' : 'btn-secondary'}`}
+            type="button"
+            onClick={() => setShowSettings((v) => !v)}
+          >
+            {showSettings ? ui.hideSettings : ui.editSettings}
+          </button>
+        </div>
       )}
 
       <div className={`lobby-roster${participants.length === 0 ? ' is-waiting' : ' has-players'}`}>
@@ -1440,14 +1464,8 @@ function Lobby({
         </div>
       )}
 
-      {isHost && !tvMode && (
-        <button className="btn-tiny" type="button" onClick={() => setShowSettings((v) => !v)}>
-          {showSettings ? ui.hideSettings : ui.editSettings}
-        </button>
-      )}
-
-      {isHost && !tvMode && showSettings && (
-        <>
+      {isHost && showSettings && (
+        <div className={`lobby-settings${tvMode ? ' tv-settings-panel' : ''}`}>
           <div>
             <label style={{ marginBottom: '0.4rem' }}>{ui.vibe}</label>
             <div className="choice-row pack-row">
@@ -1561,7 +1579,12 @@ function Lobby({
               </div>
             </>
           )}
-        </>
+          {tvMode && (
+            <button className="btn btn-ghost" type="button" onClick={onLeave}>
+              {ui.endQuiz}
+            </button>
+          )}
+        </div>
       )}
 
       {partyMsg && <p className="party-unlock-banner">{partyMsg}</p>}
@@ -2001,6 +2024,16 @@ function WinnerView({
       {room.premiumTier !== 'party' && isHost && !partyInfo.enabled && (
         <p className="footer-note">{ui.buyPartySoon}</p>
       )}
+      <a
+        className="sister-game compact"
+        href={PARTY_PATHS_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <strong>Party Paths</strong>
+        <span>{ui.partyPathsPitch}</span>
+        <em>{ui.partyPathsCta}</em>
+      </a>
       <button className="btn btn-ghost" type="button" onClick={onLeave}>
         {ui.leaveRoom}
       </button>

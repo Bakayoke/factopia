@@ -176,6 +176,8 @@ const sv = {
     'Vi körde Factopia! 🏆\n{lines}\n\nUtmana oss — gå med här:\n{invite}',
   imageShareText: 'Vi körde Factopia — vågar du slå oss? {invite}',
   shareImageCta: 'factopia.net · utmana dina vänner',
+  partyPathsPitch: 'Sug efter mer än quiz? Rösta er igenom ett partyäventyr.',
+  partyPathsCta: 'Prova Party Paths',
 }
 
 const en: typeof sv = {
@@ -354,6 +356,8 @@ const en: typeof sv = {
     'We played Factopia! 🏆\n{lines}\n\nChallenge us — join here:\n{invite}',
   imageShareText: 'We played Factopia — can you beat us? {invite}',
   shareImageCta: 'factopia.net · challenge your friends',
+  partyPathsPitch: 'Want more than quiz? Vote your way through a party adventure.',
+  partyPathsCta: 'Try Party Paths',
 }
 
 export type UiStrings = typeof sv
