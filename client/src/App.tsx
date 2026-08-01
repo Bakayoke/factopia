@@ -53,6 +53,7 @@ const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
 const TIP_URL = (import.meta.env.VITE_TIP_URL as string | undefined) || ''
 const PARTY_PATHS_URL = 'https://partypaths.com'
+const SABOTEXT_URL = 'https://sabotext.com'
 const PENDING_ROOM_KEY = 'factopia-pending-room'
 const RESUME_CHECKOUT_KEY = 'factopia-resume-checkout'
 const PENDING_CREATE_KEY = 'factopia-pending-create'
@@ -611,6 +612,16 @@ export default function App() {
               <strong>Party Paths</strong>
               <span>{ui.partyPathsPitch}</span>
               <em>{ui.partyPathsCta}</em>
+            </a>
+            <a
+              className="sister-game sabotext"
+              href={SABOTEXT_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Sabotext</strong>
+              <span>{ui.sabotextPitch}</span>
+              <em>{ui.sabotextCta}</em>
             </a>
           </div>
         )}
@@ -2044,6 +2055,16 @@ function WinnerView({
         <strong>Party Paths</strong>
         <span>{ui.partyPathsPitch}</span>
         <em>{ui.partyPathsCta}</em>
+      </a>
+      <a
+        className="sister-game compact sabotext"
+        href={SABOTEXT_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <strong>Sabotext</strong>
+        <span>{ui.sabotextPitch}</span>
+        <em>{ui.sabotextCta}</em>
       </a>
       <button className="btn btn-ghost" type="button" onClick={onLeave}>
         {ui.leaveRoom}

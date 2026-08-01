@@ -286,6 +286,20 @@ button {
   margin-top: 0.35rem;
 }
 
+.sister-game.sabotext {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #7c3aed 16%, var(--surface)), color-mix(in srgb, #fb7185 12%, var(--surface)));
+  border-color: color-mix(in srgb, #7c3aed 28%, transparent);
+}
+
+.sister-game.sabotext:hover {
+  border-color: color-mix(in srgb, #fb7185 45%, transparent);
+}
+
+.sister-game.sabotext em {
+  color: #6d28d9;
+}
+
 .party-unlock-banner {
   margin: 0 0 0.75rem;
   text-align: center;
