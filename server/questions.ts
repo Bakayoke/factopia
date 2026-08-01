@@ -6,6 +6,8 @@ import { BULK_SV_QUESTIONS } from './questions-bulk-sv.js'
 import { BULK_EN_QUESTIONS } from './questions-bulk-en.js'
 import { TP_SV_QUESTIONS } from './questions-tp-sv.js'
 import { TP_EN_QUESTIONS } from './questions-tp-en.js'
+import { MODE_SV_QUESTIONS, MODE_EN_QUESTIONS } from './questions-modes.js'
+import { assignSpecialModes } from './scoring.js'
 
 export type QuizLanguage = 'sv' | 'en'
 
@@ -807,8 +809,14 @@ export const QUESTIONS_SV: Question[] = [
   ...SV_MORE_QUESTIONS,
   ...BULK_SV_QUESTIONS,
   ...TP_SV_QUESTIONS,
+  ...MODE_SV_QUESTIONS,
 ]
-export const QUESTIONS_EN: Question[] = [...EN_QUESTIONS, ...BULK_EN_QUESTIONS, ...TP_EN_QUESTIONS]
+export const QUESTIONS_EN: Question[] = [
+  ...EN_QUESTIONS,
+  ...BULK_EN_QUESTIONS,
+  ...TP_EN_QUESTIONS,
+  ...MODE_EN_QUESTIONS,
+]
 /** @deprecated use QUESTIONS_SV / QUESTIONS_EN */
 export const QUESTIONS: Question[] = QUESTIONS_SV
 
@@ -963,5 +971,8 @@ export function pickQuestions(
     selected = [...selected, ...filler]
   }
 
-  return shuffle([...customs, ...selected.map(withShuffledOptions)])
+  return assignSpecialModes(
+    shuffle([...customs, ...selected.map(withShuffledOptions)]),
+    language,
+  )
 }

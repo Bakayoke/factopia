@@ -24,6 +24,8 @@ export type PremiumLimits = {
   questionCounts: number[]
 }
 
+export type QuestionMode = 'normal' | 'double' | 'lightning'
+
 export type PublicQuestion = {
   index: number
   total: number
@@ -31,6 +33,8 @@ export type PublicQuestion = {
   text: string
   options: [string, string, string, string]
   endsAt: number
+  mode: QuestionMode
+  durationMs: number
 }
 
 export type RoundResult = {

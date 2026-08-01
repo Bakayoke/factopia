@@ -1,9 +1,13 @@
+export type QuestionMode = 'normal' | 'double' | 'lightning'
+
 export type Question = {
   id: string
   category: string
   text: string
   options: [string, string, string, string]
   correctIndex: number
+  /** Optional special round type — assigned at pick-time if missing */
+  mode?: QuestionMode
 }
 
 export type Player = {
@@ -33,6 +37,9 @@ export type PublicQuestion = {
   text: string
   options: [string, string, string, string]
   endsAt: number
+  mode: QuestionMode
+  /** Timer window for this question (ms) — drives client progress bar */
+  durationMs: number
 }
 
 export type RoundResult = {

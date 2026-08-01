@@ -1649,7 +1649,7 @@ function QuestionView({
   const manual = room.advanceMode === 'manual'
   const { ratio, seconds } = useCountdown(
     revealing && manual ? null : (q?.endsAt ?? null),
-    revealing ? REVEAL_MS : QUESTION_MS,
+    revealing ? REVEAL_MS : (q?.durationMs ?? QUESTION_MS),
   )
   const locked = isSpectator || room.yourAnswer !== null || revealing
   const isLast = q ? q.index + 1 >= q.total : false
@@ -1690,14 +1690,25 @@ function QuestionView({
       )}
       <div className="meta">
         <span className="category">{q.category}</span>
+        {q.mode === 'double' && <span className="mode-badge mode-double">{ui.modeDouble}</span>}
+        {q.mode === 'lightning' && (
+          <span className="mode-badge mode-lightning">{ui.modeLightning}</span>
+        )}
         <span>
           {q.index + 1}/{q.total}
         </span>
       </div>
 
+      {!revealing && q.mode === 'lightning' && (
+        <p className="mode-hint lightning-hint">{ui.modeLightningHint}</p>
+      )}
+      {!revealing && q.mode === 'double' && (
+        <p className="mode-hint double-hint">{ui.modeDoubleHint}</p>
+      )}
+
       {!revealing && (
         <>
-          <div className="progress" aria-hidden>
+          <div className={`progress${q.mode === 'lightning' ? ' lightning-bar' : ''}`} aria-hidden>
             <span style={{ width: `${ratio * 100}%` }} />
           </div>
           <p className="meta" style={{ justifyContent: 'center', margin: 0 }}>

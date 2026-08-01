@@ -3,6 +3,13 @@ import { categoriesForPack, normalizePackId, type CategoryPackId } from './packs
 import { pickQuestions } from './questions.js'
 import { trackFunnel } from './metrics.js'
 import {
+  QUESTION_MS,
+  REVEAL_MS,
+  normalizeMode,
+  questionDurationMs,
+  scoreCorrectAnswer,
+} from './scoring.js'
+import {
   limitsFor,
   lookupPass,
   redeemPassCode,
@@ -22,8 +29,6 @@ import type {
 const makeCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ', 4)
 const DISCONNECT_GRACE_MS = 60_000
 const HOST_TRANSFER_AFTER_MS = 90_000
-const QUESTION_MS = 20_000
-const REVEAL_MS = 6_000
 const ROOM_IDLE_MS = 12 * 60 * 60 * 1000
 
 const rooms = new Map<string, Room>()
@@ -526,7 +531,8 @@ function advanceToQuestion(room: Room) {
 
   room.status = 'question'
   room.questionStartedAt = Date.now()
-  room.endsAt = room.questionStartedAt + QUESTION_MS
+  const q = room.questions[room.currentIndex]
+  room.endsAt = room.questionStartedAt + questionDurationMs(q?.mode)
 }
 
 export function submitAnswer(
@@ -570,8 +576,7 @@ export function revealQuestion(room: Room) {
     if (correct) {
       const answeredAt = room.answerTimes[player.id] ?? Date.now()
       const elapsed = answeredAt - room.questionStartedAt
-      const speedBonus = Math.max(0, Math.round(500 * (1 - elapsed / QUESTION_MS)))
-      gained = 1000 + speedBonus
+      gained = scoreCorrectAnswer(elapsed, q.mode)
       player.score += gained
     }
     results.push({
@@ -701,6 +706,8 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
       text: q.text,
       options: q.options,
       endsAt: room.endsAt,
+      mode: normalizeMode(q.mode),
+      durationMs: questionDurationMs(q.mode),
     }
   }
 

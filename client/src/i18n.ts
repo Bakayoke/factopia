@@ -178,6 +178,10 @@ const sv = {
   shareImageCta: 'factopia.net · utmana dina vänner',
   partyPathsPitch: 'Sug efter mer än quiz? Rösta er igenom ett partyäventyr.',
   partyPathsCta: 'Prova Party Paths',
+  modeDouble: '×2 poäng',
+  modeLightning: 'Blixt',
+  modeLightningHint: 'Blixtfråga — 8 sekunder!',
+  modeDoubleHint: 'Dubbla poäng den här frågan!',
 }
 
 const en: typeof sv = {
@@ -358,6 +362,10 @@ const en: typeof sv = {
   shareImageCta: 'factopia.net · challenge your friends',
   partyPathsPitch: 'Want more than quiz? Vote your way through a party adventure.',
   partyPathsCta: 'Try Party Paths',
+  modeDouble: '×2 points',
+  modeLightning: 'Lightning',
+  modeLightningHint: 'Lightning round — 8 seconds!',
+  modeDoubleHint: 'Double points on this question!',
 }
 
 export type UiStrings = typeof sv

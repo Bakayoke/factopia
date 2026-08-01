@@ -687,6 +687,52 @@ input:focus {
   border-radius: 999px;
 }
 
+.mode-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+}
+
+.mode-double {
+  color: #7a4a00;
+  background: color-mix(in srgb, var(--sun) 35%, transparent);
+}
+
+.mode-lightning {
+  color: #6b1a8a;
+  background: color-mix(in srgb, #c084fc 32%, transparent);
+  animation: lobby-pulse 1.4s ease-out infinite;
+}
+
+.mode-hint {
+  margin: 0;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.lightning-hint {
+  color: #6b1a8a;
+  animation: pop-in 0.35s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.double-hint {
+  color: #7a4a00;
+}
+
+.tv-mode .mode-badge {
+  font-size: 0.95rem;
+  padding: 0.4rem 0.85rem;
+}
+
+.progress.lightning-bar span {
+  background: linear-gradient(90deg, #a855f7, #f59e0b);
+}
+
 .question-text {
   margin: 0.6rem 0 0;
   font-family: var(--font-display);
