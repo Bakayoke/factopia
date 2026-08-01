@@ -558,6 +558,8 @@ export default function App() {
                     buyWeekLabel={buyWeekLabel}
                     checkoutBusy={checkoutBusy}
                     onBuyParty={(plan) => void onBuyParty(undefined, plan || defaultPlan)}
+                    primaryLabel={firstTime ? ui.unlockWithDeal : undefined}
+                    dealFlash={firstTime ? ui.firstPartyDeal : undefined}
                   />
                   {resumeCheckout && (
                     <button
@@ -829,7 +831,8 @@ export default function App() {
               checkoutBusy={checkoutBusy}
               onBuyParty={(plan) => void onBuyParty(fullRoomCode, plan || defaultPlan)}
               urgent
-              primaryLabel={ui.unlockForEveryone}
+              primaryLabel={firstTime ? ui.unlockWithDeal : ui.unlockForEveryone}
+              dealFlash={firstTime ? ui.firstPartyDeal : undefined}
             />
             <button
               className="btn btn-ghost"
@@ -919,6 +922,7 @@ export default function App() {
             onBuyParty={(plan) => void onBuyParty(room.code, plan)}
             checkoutBusy={checkoutBusy}
             startInTvMode={hostTvDefault}
+            firstTime={firstTime}
           />
         )}
       </div>
@@ -934,6 +938,7 @@ function PartyBuyPanel({
   onBuyParty,
   urgent,
   primaryLabel,
+  dealFlash,
 }: {
   ui: ReturnType<typeof t>
   buyDayLabel: string
@@ -942,12 +947,19 @@ function PartyBuyPanel({
   onBuyParty: (plan?: PartyPlan) => void
   urgent?: boolean
   primaryLabel?: string
+  dealFlash?: string
 }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(Boolean(urgent))
   const weekend = isWeekend()
+
+  useEffect(() => {
+    if (urgent) setOpen(true)
+  }, [urgent])
+
   if (!open) {
     return (
       <div className={`party-plans${urgent ? ' urgent' : ''}`}>
+        {dealFlash && <p className="party-flash">{dealFlash}</p>}
         <button
           className="btn btn-party"
           type="button"
@@ -962,6 +974,7 @@ function PartyBuyPanel({
   }
   return (
     <div className={`party-plans${urgent ? ' urgent' : ''}`}>
+      {dealFlash && <p className="party-flash">{dealFlash}</p>}
       <p className="party-hint">{ui.choosePlan}</p>
       <button
         className="btn btn-party"
@@ -997,6 +1010,7 @@ function PlayView({
   onBuyParty,
   checkoutBusy,
   startInTvMode,
+  firstTime,
 }: {
   room: PublicRoom
   playerId: string
@@ -1010,6 +1024,7 @@ function PlayView({
   onBuyParty: (plan?: PartyPlan) => void
   checkoutBusy: boolean
   startInTvMode?: boolean
+  firstTime?: boolean
 }) {
   const isHost = room.hostId === playerId
   const ui = t(room.language)
@@ -1078,6 +1093,7 @@ function PlayView({
         checkoutBusy={checkoutBusy}
         tvMode={tvMode}
         onToggleTv={() => setTvMode((v) => !v)}
+        firstTime={Boolean(firstTime)}
       />
       </>
     )
@@ -1098,6 +1114,7 @@ function PlayView({
         buyWeekLabel={buyWeekLabel}
         onBuyParty={onBuyParty}
         checkoutBusy={checkoutBusy}
+        firstTime={Boolean(firstTime)}
       />
       </>
     )
@@ -1138,6 +1155,7 @@ function Lobby({
   checkoutBusy,
   tvMode,
   onToggleTv,
+  firstTime,
 }: {
   room: PublicRoom
   playerId: string
@@ -1153,6 +1171,7 @@ function Lobby({
   checkoutBusy: boolean
   tvMode: boolean
   onToggleTv: () => void
+  firstTime?: boolean
 }) {
   const [busy, setBusy] = useState(false)
   const [partyCode, setPartyCode] = useState('')
@@ -1174,10 +1193,32 @@ function Lobby({
   const invite = joinUrl(room.code)
   const pack = room.categoryPack ?? 'mixed'
   const seatsLeft = maxPlayers > 0 ? Math.max(0, maxPlayers - room.players.length) : null
-  const almostFull = !isParty && maxPlayers > 0 && seatsLeft !== null && seatsLeft <= 1
+  const almostFull = !isParty && maxPlayers > 0 && seatsLeft !== null && seatsLeft <= 2
   const isFull = !isParty && maxPlayers > 0 && seatsLeft === 0
   const waitlist = room.waitlist ?? []
   const blockStart = isHost && !isParty && waitlist.length > 0
+  const needsUnlock = !isParty && (almostFull || isFull || waitlist.length > 0)
+  const showPartyPitch = isHost && !isParty && (!tvMode || needsUnlock)
+  const dealFlash = firstTime ? ui.firstPartyDeal : undefined
+  const buyPrimary =
+    waitlist.length > 0
+      ? ui.unlockThenStart
+      : firstTime
+        ? ui.unlockWithDeal
+        : needsUnlock
+          ? ui.unlockPartyNow
+          : undefined
+
+  const partyHintText =
+    waitlist.length > 0
+      ? ui.waitlistUpsell.replace('{n}', String(waitlist.length))
+      : isFull
+        ? ui.roomFullUpsell
+        : seatsLeft !== null && seatsLeft > 0 && seatsLeft <= 2
+          ? ui.seatsLeftUpsell.replace('{n}', String(seatsLeft))
+          : almostFull
+            ? ui.roomAlmostFull
+            : ui.buyPartyHint
 
   useEffect(() => {
     if (!isHost || isParty) return
@@ -1437,15 +1478,9 @@ function Lobby({
         </div>
       )}
 
-      {isHost && !isParty && !tvMode && (
-        <div className={`party-banner${almostFull || isFull || waitlist.length > 0 ? ' urgent-inline' : ''}`}>
-          <p className="party-hint">
-            {waitlist.length > 0 || isFull
-              ? ui.roomFullUpsell
-              : almostFull
-                ? ui.roomAlmostFull
-                : ui.buyPartyHint}
-          </p>
+      {showPartyPitch && (
+        <div className={`party-banner${needsUnlock ? ' urgent-inline' : ''}`}>
+          <p className="party-hint">{partyHintText}</p>
           <p className="footer-note">{ui.priceAnchorDay}</p>
           <PartyBuyPanel
             ui={ui}
@@ -1453,12 +1488,16 @@ function Lobby({
             buyWeekLabel={buyWeekLabel}
             checkoutBusy={checkoutBusy}
             onBuyParty={onBuyParty}
-            urgent={almostFull || isFull || waitlist.length > 0}
+            urgent={needsUnlock}
+            primaryLabel={buyPrimary}
+            dealFlash={dealFlash}
           />
-          <button className="btn-tiny" type="button" onClick={() => setShowCode((v) => !v)}>
-            {showCode ? ui.hideCode : ui.haveCode}
-          </button>
-          {showCode && (
+          {!tvMode && (
+            <button className="btn-tiny" type="button" onClick={() => setShowCode((v) => !v)}>
+              {showCode ? ui.hideCode : ui.haveCode}
+            </button>
+          )}
+          {showCode && !tvMode && (
             <div className="party-redeem">
               <input
                 value={partyCode}
@@ -1612,6 +1651,7 @@ function Lobby({
             onBuyParty={onBuyParty}
             urgent
             primaryLabel={ui.unlockThenStart}
+            dealFlash={dealFlash}
           />
         </div>
       )}
@@ -1856,6 +1896,7 @@ function WinnerView({
   buyWeekLabel,
   onBuyParty,
   checkoutBusy,
+  firstTime,
 }: {
   room: PublicRoom
   playerId: string
@@ -1867,6 +1908,7 @@ function WinnerView({
   buyWeekLabel: string
   onBuyParty: (plan?: PartyPlan) => void
   checkoutBusy: boolean
+  firstTime?: boolean
 }) {
   const ui = t(room.language)
   const ranked = [...room.players].filter((p) => p.playing).sort((a, b) => b.score - a.score)
@@ -2035,13 +2077,20 @@ function WinnerView({
         <p className="waiting">{ui.waitingRematch}</p>
       )}
       {room.premiumTier !== 'party' && isHost && partyInfo.enabled && (
-        <PartyBuyPanel
-          ui={ui}
-          buyDayLabel={buyDayLabel}
-          buyWeekLabel={buyWeekLabel}
-          checkoutBusy={checkoutBusy}
-          onBuyParty={onBuyParty}
-        />
+        <div className="party-banner urgent-inline">
+          <p className="party-hint">{ui.winnerPartyNudge}</p>
+          <p className="footer-note">{ui.priceAnchorDay}</p>
+          <PartyBuyPanel
+            ui={ui}
+            buyDayLabel={buyDayLabel}
+            buyWeekLabel={buyWeekLabel}
+            checkoutBusy={checkoutBusy}
+            onBuyParty={onBuyParty}
+            urgent
+            primaryLabel={firstTime ? ui.unlockWithDeal : ui.unlockPartyNow}
+            dealFlash={firstTime ? ui.firstPartyDeal : undefined}
+          />
+        </div>
       )}
       {room.premiumTier !== 'party' && isHost && !partyInfo.enabled && (
         <p className="footer-note">{ui.buyPartySoon}</p>

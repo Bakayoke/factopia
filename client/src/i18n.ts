@@ -184,6 +184,11 @@ const sv = {
   modeLightning: 'Blixt',
   modeLightningHint: 'Blixtfråga — 8 sekunder!',
   modeDoubleHint: 'Dubbla poäng den här frågan!',
+  seatsLeftUpsell: 'Bara {n} platser kvar — lås upp Party för hela gänget.',
+  waitlistUpsell: '{n} vill in — ett köp öppnar för alla.',
+  unlockWithDeal: 'Lås upp Party · −30%',
+  unlockPartyNow: 'Lås upp Party nu',
+  winnerPartyNudge: 'Nästa runda med fler? Party = obegränsat antal spelare.',
 }
 
 const en: typeof sv = {
@@ -370,6 +375,11 @@ const en: typeof sv = {
   modeLightning: 'Lightning',
   modeLightningHint: 'Lightning round — 8 seconds!',
   modeDoubleHint: 'Double points on this question!',
+  seatsLeftUpsell: 'Only {n} seats left — unlock Party for the whole crew.',
+  waitlistUpsell: '{n} waiting — one purchase opens the room for everyone.',
+  unlockWithDeal: 'Unlock Party · −30%',
+  unlockPartyNow: 'Unlock Party now',
+  winnerPartyNudge: 'Next round with more people? Party = unlimited players.',
 }
 
 export type UiStrings = typeof sv
