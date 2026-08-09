@@ -300,6 +300,20 @@ button {
   color: #6d28d9;
 }
 
+.sister-game.scourgeborn {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #14532d 22%, var(--surface)), color-mix(in srgb, #7f1d1d 14%, var(--surface)));
+  border-color: color-mix(in srgb, #166534 35%, transparent);
+}
+
+.sister-game.scourgeborn:hover {
+  border-color: color-mix(in srgb, #b91c1c 45%, transparent);
+}
+
+.sister-game.scourgeborn em {
+  color: #166534;
+}
+
 .party-unlock-banner {
   margin: 0 0 0.75rem;
   text-align: center;

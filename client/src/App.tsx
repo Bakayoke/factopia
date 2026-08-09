@@ -54,6 +54,7 @@ const REVEAL_MS = 6_000
 const TIP_URL = (import.meta.env.VITE_TIP_URL as string | undefined) || ''
 const PARTY_PATHS_URL = 'https://partypaths.com'
 const SABOTEXT_URL = 'https://sabotext.com'
+const SCOURGEBORN_URL = 'https://scourgeborn.com'
 const PENDING_ROOM_KEY = 'factopia-pending-room'
 const RESUME_CHECKOUT_KEY = 'factopia-resume-checkout'
 const PENDING_CREATE_KEY = 'factopia-pending-create'
@@ -624,6 +625,16 @@ export default function App() {
               <strong>Sabotext</strong>
               <span>{ui.sabotextPitch}</span>
               <em>{ui.sabotextCta}</em>
+            </a>
+            <a
+              className="sister-game scourgeborn"
+              href={SCOURGEBORN_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Scourgeborn</strong>
+              <span>{ui.scourgebornPitch}</span>
+              <em>{ui.scourgebornCta}</em>
             </a>
           </div>
         )}
@@ -2114,6 +2125,16 @@ function WinnerView({
         <strong>Sabotext</strong>
         <span>{ui.sabotextPitch}</span>
         <em>{ui.sabotextCta}</em>
+      </a>
+      <a
+        className="sister-game compact scourgeborn"
+        href={SCOURGEBORN_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <strong>Scourgeborn</strong>
+        <span>{ui.scourgebornPitch}</span>
+        <em>{ui.scourgebornCta}</em>
       </a>
       <button className="btn btn-ghost" type="button" onClick={onLeave}>
         {ui.leaveRoom}
