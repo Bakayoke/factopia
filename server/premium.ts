@@ -7,12 +7,12 @@ export type PremiumLimits = {
 }
 
 export const FREE_LIMITS: PremiumLimits = {
-  maxPlayers: 5, // host + 4
+  maxPlayers: 0, // unlimited — game is free
   questionCounts: [10, 20, 30, 50],
 }
 
 export const PARTY_LIMITS: PremiumLimits = {
-  maxPlayers: 0, // unlimited — pay for bigger groups, not question inventing
+  maxPlayers: 0, // unlimited
   questionCounts: [10, 20, 30, 50],
 }
 
@@ -42,8 +42,7 @@ function touchPasses() {
 }
 
 function configuredPassCodes(): Set<string> {
-  // Only this free bypass by default — everyone else pays via Stripe.
-  const raw = process.env.PARTY_PASS_CODES ?? 'LinusÄrBästHundraProcent'
+  const raw = process.env.PARTY_PASS_CODES ?? ''
   return new Set(
     raw
       .split(',')
