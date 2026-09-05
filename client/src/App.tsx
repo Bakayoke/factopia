@@ -41,6 +41,7 @@ const TIP_URL = (import.meta.env.VITE_TIP_URL as string | undefined) || ''
 const PARTY_PATHS_URL = 'https://partypaths.com'
 const SABOTEXT_URL = 'https://sabotext.com'
 const SCOURGEBORN_URL = 'https://scourgeborn.com'
+const YOUR_TASK_IS_URL = 'https://yourtaskis.com'
 
 const PACKS: { id: CategoryPackId; labelKey: keyof ReturnType<typeof t> }[] = [
   { id: 'mixed', labelKey: 'packMixed' },
@@ -328,6 +329,16 @@ export default function App() {
               <strong>Scourgeborn</strong>
               <span>{ui.scourgebornPitch}</span>
               <em>{ui.scourgebornCta}</em>
+            </a>
+            <a
+              className="sister-game yourtaskis"
+              href={YOUR_TASK_IS_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Your Task Is</strong>
+              <span>{ui.yourTaskIsPitch}</span>
+              <em>{ui.yourTaskIsCta}</em>
             </a>
           </div>
         )}
@@ -1404,6 +1415,16 @@ function WinnerView({
         <strong>Scourgeborn</strong>
         <span>{ui.scourgebornPitch}</span>
         <em>{ui.scourgebornCta}</em>
+      </a>
+      <a
+        className="sister-game compact yourtaskis"
+        href={YOUR_TASK_IS_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <strong>Your Task Is</strong>
+        <span>{ui.yourTaskIsPitch}</span>
+        <em>{ui.yourTaskIsCta}</em>
       </a>
       <button className="btn btn-ghost" type="button" onClick={onLeave}>
         {ui.leaveRoom}

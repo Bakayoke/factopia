@@ -314,6 +314,20 @@ button {
   color: #166534;
 }
 
+.sister-game.yourtaskis {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #1e3a5f 20%, var(--surface)), color-mix(in srgb, #f4c430 14%, var(--surface)));
+  border-color: color-mix(in srgb, #f4c430 40%, transparent);
+}
+
+.sister-game.yourtaskis:hover {
+  border-color: color-mix(in srgb, #f4c430 65%, transparent);
+}
+
+.sister-game.yourtaskis em {
+  color: #8a6d00;
+}
+
 .party-unlock-banner {
   margin: 0 0 0.75rem;
   text-align: center;
