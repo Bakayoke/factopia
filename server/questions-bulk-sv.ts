@@ -18,8 +18,8 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-483",
     category: "Natur",
-    text: "Var lever typiskt en älg?",
-    options: ["savann","savann","skog","hav"],
+    text: "Var lever en älg?",
+    options: ["savann","träsk","skog","hav"],
     correctIndex: 2,
   },
   {
@@ -67,8 +67,8 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-507",
     category: "Natur",
-    text: "Var lever typiskt en krokodil?",
-    options: ["hav","skog","träsk","hav"],
+    text: "Var lever en krokodil?",
+    options: ["hav","skog","träsk","berg"],
     correctIndex: 2,
   },
   {
@@ -102,7 +102,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-528",
     category: "Sport",
-    text: "Hur många spelare har baseboll typiskt på planen per lag?",
+    text: "Hur många spelare har ett basebollag på planen samtidigt?",
     options: ["12","5","9","11"],
     correctIndex: 2,
   },
@@ -186,7 +186,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-524",
     category: "Sport",
-    text: "Hur många spelare har tennis typiskt på planen per lag?",
+    text: "Hur många spelare spelar per sida i tennis (singel)?",
     options: ["11","5","1","8"],
     correctIndex: 2,
   },
@@ -312,7 +312,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-489",
     category: "Natur",
-    text: "Var lever typiskt en pingvin?",
+    text: "Var lever en pingvin?",
     options: ["skog","djungel","savann","Antarktis"],
     correctIndex: 3,
   },
@@ -396,8 +396,8 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-485",
     category: "Natur",
-    text: "Var lever typiskt en lejon?",
-    options: ["skog","savann","skog","Antarktis"],
+    text: "Var lever ett lejon?",
+    options: ["skog","savann","hav","Antarktis"],
     correctIndex: 1,
   },
   {
@@ -459,7 +459,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-516",
     category: "Sport",
-    text: "Hur många spelare har ishockey typiskt på planen per lag?",
+    text: "Hur många spelare (inkl. målvakt) har ett ishockeylag på isen samtidigt?",
     options: ["12","9","11","6"],
     correctIndex: 3,
   },
@@ -487,8 +487,8 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-505",
     category: "Natur",
-    text: "Var lever typiskt en uggla?",
-    options: ["savann","Kina","skog","savann"],
+    text: "Var lever en uggla?",
+    options: ["savann","öken","skog","hav"],
     correctIndex: 2,
   },
   {
@@ -515,8 +515,8 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-493",
     category: "Natur",
-    text: "Var lever typiskt en panda?",
-    options: ["savann","hav","Kina","träsk"],
+    text: "Var lever en panda?",
+    options: ["savann","hav","bambuskog","träsk"],
     correctIndex: 2,
   },
   {
@@ -620,8 +620,8 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-491",
     category: "Natur",
-    text: "Var lever typiskt en känguru?",
-    options: ["berg","skog","Australien","skog"],
+    text: "Var lever en känguru?",
+    options: ["berg","regnskog","grässlätt","öken"],
     correctIndex: 2,
   },
   {
@@ -879,8 +879,8 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-499",
     category: "Natur",
-    text: "Var lever typiskt en haj?",
-    options: ["skog","skog","hav","savann"],
+    text: "Var lever en haj?",
+    options: ["skog","träsk","hav","savann"],
     correctIndex: 2,
   },
   {
@@ -921,7 +921,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-501",
     category: "Natur",
-    text: "Var lever typiskt en delfin?",
+    text: "Var lever en delfin?",
     options: ["skog","savann","hav","djungel"],
     correctIndex: 2,
   },
@@ -998,7 +998,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-487",
     category: "Natur",
-    text: "Var lever typiskt en elefant?",
+    text: "Var lever en elefant?",
     options: ["skog","savann","hav","berg"],
     correctIndex: 1,
   },
@@ -1103,7 +1103,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-484",
     category: "Natur",
-    text: "Vad kallas ungen till en lejon?",
+    text: "Vad kallas ungen till ett lejon?",
     options: ["krokodilunge","örnunge","lejonunge","hajunge"],
     correctIndex: 2,
   },
@@ -1159,7 +1159,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-511",
     category: "Natur",
-    text: "Var lever typiskt en zebra?",
+    text: "Var lever en zebra?",
     options: ["savann","Antarktis","hav","berg"],
     correctIndex: 0,
   },
@@ -1194,14 +1194,14 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-503",
     category: "Natur",
-    text: "Var lever typiskt en örn?",
-    options: ["hav","Australien","hav","berg"],
+    text: "Var lever en örn?",
+    options: ["hav","savann","djungel","berg"],
     correctIndex: 3,
   },
   {
     id: "bulk-sv-526",
     category: "Sport",
-    text: "Hur många spelare har golf typiskt på planen per lag?",
+    text: "Hur många spelare spelar normalt per boll i golf?",
     options: ["1","12","5","9"],
     correctIndex: 0,
   },
@@ -1243,9 +1243,9 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-497",
     category: "Natur",
-    text: "Var lever typiskt en björn?",
-    options: ["Kina","skog","savann","djungel"],
-    correctIndex: 1,
+    text: "Var lever en björn?",
+    options: ["skog","berg","savann","djungel"],
+    correctIndex: 0,
   },
   {
     id: "bulk-sv-23",
@@ -1544,8 +1544,8 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-513",
     category: "Natur",
-    text: "Var lever typiskt en gorilla?",
-    options: ["skog","djungel","savann","Australien"],
+    text: "Var lever en gorilla?",
+    options: ["öken","djungel","savann","Antarktis"],
     correctIndex: 1,
   },
   {
@@ -1649,7 +1649,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-514",
     category: "Sport",
-    text: "Hur många spelare har fotboll typiskt på planen per lag?",
+    text: "Hur många spelare har ett fotbollslag på planen samtidigt?",
     options: ["12","11","5","8"],
     correctIndex: 1,
   },
@@ -1705,7 +1705,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-522",
     category: "Sport",
-    text: "Hur många spelare har volleyboll typiskt på planen per lag?",
+    text: "Hur många spelare har ett volleybollag på planen samtidigt?",
     options: ["9","12","6","5"],
     correctIndex: 2,
   },
@@ -1726,7 +1726,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-520",
     category: "Sport",
-    text: "Hur många spelare har basket typiskt på planen per lag?",
+    text: "Hur många spelare har ett basketlag på planen samtidigt?",
     options: ["5","10","6","8"],
     correctIndex: 0,
   },
@@ -1796,7 +1796,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-518",
     category: "Sport",
-    text: "Hur många spelare har handboll typiskt på planen per lag?",
+    text: "Hur många spelare har ett handbollslag på planen samtidigt?",
     options: ["9","11","6","7"],
     correctIndex: 3,
   },
@@ -1901,8 +1901,8 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-495",
     category: "Natur",
-    text: "Var lever typiskt en varg?",
-    options: ["skog","hav","Kina","Australien"],
+    text: "Var lever en varg?",
+    options: ["skog","hav","tundra","öken"],
     correctIndex: 0,
   },
   {
@@ -2013,7 +2013,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-509",
     category: "Natur",
-    text: "Var lever typiskt en giraff?",
+    text: "Var lever en giraff?",
     options: ["berg","skog","savann","träsk"],
     correctIndex: 2,
   },
@@ -2293,35 +2293,35 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-14",
     category: "Musik",
-    text: "Hur många strängar har en gitarr typiskt?",
+    text: "Hur många strängar har en gitarr vanligtvis?",
     options: ["8","6","7","4"],
     correctIndex: 1,
   },
   {
     id: "tri-sv-15",
     category: "Musik",
-    text: "Hur många strängar har en violin typiskt?",
+    text: "Hur många strängar har en violin vanligtvis?",
     options: ["5","3","4","8"],
     correctIndex: 2,
   },
   {
     id: "tri-sv-16",
     category: "Musik",
-    text: "Hur många strängar har en cello typiskt?",
+    text: "Hur många strängar har en cello vanligtvis?",
     options: ["7","6","4","5"],
     correctIndex: 2,
   },
   {
     id: "tri-sv-17",
     category: "Musik",
-    text: "Hur många strängar har en bas typiskt?",
+    text: "Hur många strängar har en bas vanligtvis?",
     options: ["8","4","6","3"],
     correctIndex: 1,
   },
   {
     id: "tri-sv-18",
     category: "Musik",
-    text: "Hur många strängar har en ukulele typiskt?",
+    text: "Hur många strängar har en ukulele vanligtvis?",
     options: ["4","7","5","3"],
     correctIndex: 0,
   },
@@ -2419,7 +2419,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-32",
     category: "Geografi",
-    text: "Vad är Paris mest känt för bland dessa?",
+    text: "Vilket landmärke förknippas mest med Paris?",
     options: ["Big Ben","Eiffeltornet","Operahuset","Colosseum"],
     correctIndex: 1,
   },
@@ -2433,7 +2433,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-34",
     category: "Geografi",
-    text: "Vad är Rom mest känt för bland dessa?",
+    text: "Vilket landmärke förknippas mest med Rom?",
     options: ["Frihetsgudinnan","Kinesiska muren","Colosseum","Taj Mahal"],
     correctIndex: 2,
   },
@@ -2447,7 +2447,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-36",
     category: "Geografi",
-    text: "Vad är Kairo mest känt för bland dessa?",
+    text: "Vilket landmärke förknippas mest med Kairo?",
     options: ["Pyramiderna i Giza","Akropolis","Frihetsgudinnan","Det lutande tornet"],
     correctIndex: 0,
   },
@@ -2461,7 +2461,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-38",
     category: "Geografi",
-    text: "Vad är Peking mest känt för bland dessa?",
+    text: "Vilket landmärke förknippas mest med Peking?",
     options: ["Akropolis","Operahuset","Kinesiska muren","Big Ben"],
     correctIndex: 2,
   },
@@ -2475,7 +2475,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-40",
     category: "Geografi",
-    text: "Vad är Agra mest känt för bland dessa?",
+    text: "Vilket landmärke förknippas mest med Agra?",
     options: ["Taj Mahal","Eiffeltornet","Akropolis","Operahuset"],
     correctIndex: 0,
   },
@@ -2489,7 +2489,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-42",
     category: "Geografi",
-    text: "Vad är Sydney mest känt för bland dessa?",
+    text: "Vilket landmärke förknippas mest med Sydney?",
     options: ["Akropolis","Frihetsgudinnan","Operahuset","Colosseum"],
     correctIndex: 2,
   },
@@ -2503,7 +2503,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-44",
     category: "Geografi",
-    text: "Vad är New York mest känt för bland dessa?",
+    text: "Vilket landmärke förknippas mest med New York?",
     options: ["Colosseum","Taj Mahal","Frihetsgudinnan","Operahuset"],
     correctIndex: 2,
   },
@@ -2517,7 +2517,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-46",
     category: "Geografi",
-    text: "Vad är London mest känt för bland dessa?",
+    text: "Vilket landmärke förknippas mest med London?",
     options: ["Det lutande tornet","Taj Mahal","Big Ben","Akropolis"],
     correctIndex: 2,
   },
@@ -2531,7 +2531,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-48",
     category: "Geografi",
-    text: "Vad är Aten mest känt för bland dessa?",
+    text: "Vilket landmärke förknippas mest med Aten?",
     options: ["Big Ben","Akropolis","Kinesiska muren","Det lutande tornet"],
     correctIndex: 1,
   },
@@ -2545,7 +2545,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-50",
     category: "Geografi",
-    text: "Vad är Pisa mest känt för bland dessa?",
+    text: "Vilket landmärke förknippas mest med Pisa?",
     options: ["Pyramiderna i Giza","Colosseum","Det lutande tornet","Akropolis"],
     correctIndex: 2,
   },

@@ -1012,14 +1012,14 @@ export const TP_SV_QUESTIONS: Question[] = [
   {
     id: "tp-sv-riv-121",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst floden Nilén?",
-    options: ["Egypten","Frankrike","Europa","Europa"],
+    text: "I vilket land/område förknippas främst floden Nilen?",
+    options: ["Egypten","Frankrike","Europa","Kina"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-riv-122",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst floden Amazonfloden?",
+    text: "I vilket land/område förknippas främst Amazonfloden?",
     options: ["Brasilien","Kina","Egypten","Storbritannien"],
     correctIndex: 0,
   },
@@ -1356,7 +1356,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     id: "tp-sv-spo-214",
     category: "Sport",
     text: "Vilken sport förknippas främst med Tour de Ski?",
-    options: ["längdskidor","fotboll","fotboll","amerikansk fotboll"],
+    options: ["längdskidor","fotboll","skidskytte","amerikansk fotboll"],
     correctIndex: 0,
   },
   {
@@ -2112,7 +2112,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     id: "tp-sv-more-24",
     category: "Geografi",
     text: "Vilken flod rinner genom Kairo?",
-    options: ["Nilén","Eufrat","Tigris","Jordan"],
+    options: ["Nilen","Eufrat","Tigris","Jordan"],
     correctIndex: 0,
   },
   {
@@ -2440,7 +2440,7 @@ export const TP_SV_QUESTIONS: Question[] = [
   {
     id: "tp-sv-more-71",
     category: "Teknik",
-    text: "Vad betyder USB ungefär?",
+    text: "Vad betyder USB?",
     options: ["Universal Serial Bus","Ultra Speed Band","United System Bridge","User Soft Button"],
     correctIndex: 0,
   },

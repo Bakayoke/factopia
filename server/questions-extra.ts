@@ -32,7 +32,7 @@ export const EXTRA_QUESTIONS: Question[] = [
   {
     id: "geo-x5",
     category: "Geografi",
-    text: "Vilket land är känt för tulpaner och vindkraftsverk i Holland-klichén?",
+    text: "Vilket land är känt för tulpaner och väderkvarnar?",
     options: ["Belgien","Nederländerna","Danmark","Tyskland"],
     correctIndex: 1,
   },
@@ -221,7 +221,7 @@ export const EXTRA_QUESTIONS: Question[] = [
   {
     id: "his-x12",
     category: "Historia",
-    text: "Vad hette skeppet som Titanic tillhörde (rederi)?",
+    text: "Vilket rederi tillhörde Titanic?",
     options: ["Cunard","White Star Line","Royal Navy","Hamburg America"],
     correctIndex: 1,
   },
@@ -235,14 +235,14 @@ export const EXTRA_QUESTIONS: Question[] = [
   {
     id: "his-x14",
     category: "Historia",
-    text: "Vilket land koloniserade Indien under British Raj?",
+    text: "Vilket land styrde Indien under British Raj?",
     options: ["Frankrike","Storbritannien","Portugal","Nederländerna"],
     correctIndex: 1,
   },
   {
     id: "his-x15",
     category: "Historia",
-    text: "När firades Sveriges 500-årsjubileum av Gustav Vasa ungefär?",
+    text: "Vilket år firades 400-årsjubileet av Gustav Vasas kungaval ungefär?",
     options: ["1920","1923","1950","1971"],
     correctIndex: 1,
   },
@@ -1425,7 +1425,7 @@ export const EXTRA_QUESTIONS: Question[] = [
   {
     id: "misc-x19",
     category: "Allmänt",
-    text: "Vad betyder \"foto\" i grekiskan ungefär?",
+    text: "Vad betyder \"foto\" på grekiska ungefär?",
     options: ["Ljud","Ljus","Färg","Bild"],
     correctIndex: 1,
   },

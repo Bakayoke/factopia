@@ -168,7 +168,7 @@ export const MODE_SV_QUESTIONS: Question[] = [
   {
     id: 'msv-d6',
     category: 'Sport',
-    text: 'Hur många spelare har ett ishockeylag samtidigt på isen (per lag, utan målvakt räknas ofta 5+1)?',
+    text: 'Hur många utespelare + målvakt har ett ishockeylag samtidigt på isen?',
     options: ['4 utespelare + MV', '5 utespelare + MV', '6 utespelare + MV', '3 utespelare + MV'],
     correctIndex: 1,
     mode: 'double',
@@ -264,7 +264,7 @@ export const MODE_SV_QUESTIONS: Question[] = [
   {
     id: 'msv-n8',
     category: 'Film & TV',
-    text: 'Vad heter den gula familjen i The Simpsons efternamn?',
+    text: 'Vad heter familjen i The Simpsons i efternamn?',
     options: ['Flanders', 'Simpson', 'Burns', 'Smith'],
     correctIndex: 1,
   },
@@ -362,7 +362,7 @@ export const MODE_SV_QUESTIONS: Question[] = [
   {
     id: 'msv-n22',
     category: 'Popkultur',
-    text: 'Vilken app ägs av Meta och handlar om korta videor?',
+    text: 'Vad heter Metas format för korta videor?',
     options: ['TikTok', 'Instagram Reels', 'Snapchat', 'YouTube Shorts'],
     correctIndex: 1,
   },

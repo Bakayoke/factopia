@@ -999,7 +999,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     id: "tp-en-spo-163",
     category: "Sports",
     text: "Which sport is Stanley Cup mainly associated with?",
-    options: ["ice hockey","football/soccer","football/soccer","basketball"],
+    options: ["ice hockey","football/soccer","tennis","basketball"],
     correctIndex: 0,
   },
   {

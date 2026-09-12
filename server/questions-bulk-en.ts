@@ -207,7 +207,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
   {
     id: "bulk-en-698",
     category: "Sports",
-    text: "How many players per team are typically on the field in volleyball?",
+    text: "How many players per team are on the court in volleyball?",
     options: ["7","12","6","10"],
     correctIndex: 2,
   },
@@ -221,7 +221,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
   {
     id: "bulk-en-663",
     category: "Nature",
-    text: "Where does a elephant typically live?",
+    text: "Where does an elephant typically live?",
     options: ["savanna","swamp","Antarctica","forest"],
     correctIndex: 0,
   },
@@ -243,14 +243,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     id: "bulk-en-673",
     category: "Nature",
     text: "Where does a bear typically live?",
-    options: ["savanna","forest","China","savanna"],
+    options: ["savanna","forest","ocean","swamp"],
     correctIndex: 1,
   },
   {
     id: "bulk-en-681",
     category: "Nature",
-    text: "Where does a owl typically live?",
-    options: ["forest","mountains","savanna","savanna"],
+    text: "Where does an owl typically live?",
+    options: ["forest","mountains","savanna","ocean"],
     correctIndex: 0,
   },
   {
@@ -326,7 +326,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
   {
     id: "bulk-en-696",
     category: "Sports",
-    text: "How many players per team are typically on the field in basketball?",
+    text: "How many players per team are on the court in basketball?",
     options: ["10","5","7","9"],
     correctIndex: 1,
   },
@@ -362,7 +362,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     id: "bulk-en-675",
     category: "Nature",
     text: "Where does a shark typically live?",
-    options: ["China","Australia","ocean","savanna"],
+    options: ["reef","river","ocean","savanna"],
     correctIndex: 2,
   },
   {
@@ -376,7 +376,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     id: "bulk-en-659",
     category: "Nature",
     text: "Where does a moose typically live?",
-    options: ["savanna","swamp","forest","savanna"],
+    options: ["savanna","swamp","forest","ocean"],
     correctIndex: 2,
   },
   {
@@ -446,7 +446,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     id: "bulk-en-687",
     category: "Nature",
     text: "Where does a zebra typically live?",
-    options: ["forest","Australia","savanna","ocean"],
+    options: ["forest","desert","savanna","ocean"],
     correctIndex: 2,
   },
   {
@@ -571,7 +571,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
   {
     id: "bulk-en-694",
     category: "Sports",
-    text: "How many players per team are typically on the field in handball?",
+    text: "How many players per team are on the court in handball?",
     options: ["11","6","8","7"],
     correctIndex: 3,
   },
@@ -838,7 +838,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     id: "bulk-en-671",
     category: "Nature",
     text: "Where does a wolf typically live?",
-    options: ["savanna","forest","savanna","swamp"],
+    options: ["savanna","forest","ocean","swamp"],
     correctIndex: 1,
   },
   {
@@ -1040,7 +1040,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
   {
     id: "bulk-en-690",
     category: "Sports",
-    text: "How many players per team are typically on the field in soccer?",
+    text: "How many players per team are on the field in soccer?",
     options: ["11","9","10","8"],
     correctIndex: 0,
   },
@@ -1062,7 +1062,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     id: "bulk-en-669",
     category: "Nature",
     text: "Where does a panda typically live?",
-    options: ["China","jungle","forest","ocean"],
+    options: ["bamboo forest","jungle","desert","ocean"],
     correctIndex: 0,
   },
   {
@@ -1334,14 +1334,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
   {
     id: "bulk-en-704",
     category: "Sports",
-    text: "How many players per team are typically on the field in baseball?",
+    text: "How many players per team are on the field in baseball?",
     options: ["8","5","6","9"],
     correctIndex: 3,
   },
   {
     id: "bulk-en-702",
     category: "Sports",
-    text: "How many players per team are typically on the field in golf?",
+    text: "How many players normally play per ball in golf?",
     options: ["5","1","11","9"],
     correctIndex: 1,
   },
@@ -1349,8 +1349,8 @@ export const BULK_EN_QUESTIONS: Question[] = [
     id: "bulk-en-667",
     category: "Nature",
     text: "Where does a kangaroo typically live?",
-    options: ["forest","swamp","China","Australia"],
-    correctIndex: 3,
+    options: ["forest","swamp","grassland","tundra"],
+    correctIndex: 2,
   },
   {
     id: "bulk-en-177",
@@ -1657,7 +1657,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     id: "bulk-en-689",
     category: "Nature",
     text: "Where does a gorilla typically live?",
-    options: ["ocean","forest","jungle","Antarctica"],
+    options: ["ocean","desert","jungle","Antarctica"],
     correctIndex: 2,
   },
   {
@@ -1754,7 +1754,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
   {
     id: "bulk-en-692",
     category: "Sports",
-    text: "How many players per team are typically on the field in ice hockey?",
+    text: "How many players per team are on the ice in ice hockey (incl. goalie)?",
     options: ["6","10","7","8"],
     correctIndex: 0,
   },
@@ -1859,8 +1859,8 @@ export const BULK_EN_QUESTIONS: Question[] = [
   {
     id: "bulk-en-679",
     category: "Nature",
-    text: "Where does a eagle typically live?",
-    options: ["savanna","China","jungle","mountains"],
+    text: "Where does an eagle typically live?",
+    options: ["savanna","forest","jungle","mountains"],
     correctIndex: 3,
   },
   {
@@ -1880,7 +1880,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
   {
     id: "bulk-en-700",
     category: "Sports",
-    text: "How many players per team are typically on the field in tennis?",
+    text: "How many players play per side in singles tennis?",
     options: ["8","1","11","6"],
     correctIndex: 1,
   },

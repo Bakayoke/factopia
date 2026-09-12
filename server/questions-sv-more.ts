@@ -4,14 +4,14 @@ export const SV_MORE_QUESTIONS: Question[] = [
   {
     id: "sv-more-1",
     category: "Sverige",
-    text: "Vilken svensk stad har broarna över Göta älv mest känt?",
+    text: "Vilken svensk stad är mest känd för broarna över Göta älv?",
     options: ["Malmö","Göteborg","Stockholm","Uppsala"],
     correctIndex: 1,
   },
   {
     id: "sv-more-2",
     category: "Sverige",
-    text: "Vad heter Sveriges statsministertitel?",
+    text: "Vad kallas Sveriges regeringschef?",
     options: ["President","Statsminister","Kung","Talman"],
     correctIndex: 1,
   },
@@ -25,21 +25,21 @@ export const SV_MORE_QUESTIONS: Question[] = [
   {
     id: "sv-more-4",
     category: "Sverige",
-    text: "Vad kallas svensk knäckebröd på engelska ofta?",
+    text: "Vad kallas knäckebröd ofta på engelska?",
     options: ["Soft bread","Crispbread","Toast","Bagel"],
     correctIndex: 1,
   },
   {
     id: "sv-more-5",
     category: "Sverige",
-    text: "Vilken svensk bilmärkesgrundare är kopplad till Volvo?",
+    text: "Vilka grundade bilmärket Volvo?",
     options: ["Wallenberg","Gabrielsson/G. Larson","Kamprad","Rausing"],
     correctIndex: 1,
   },
   {
     id: "sv-more-6",
     category: "Sverige",
-    text: "Vad firas med majbrasa ofta?",
+    text: "Vad firas ofta med majbrasa?",
     options: ["Lucia","Valborg","Midsommar","Nyår"],
     correctIndex: 1,
   },
@@ -53,7 +53,7 @@ export const SV_MORE_QUESTIONS: Question[] = [
   {
     id: "sv-more-8",
     category: "Sverige",
-    text: "Vad heter den svenska lagboken i folkmun-ish?",
+    text: "Vad kallas den svenska lagsamlingen i folkmun?",
     options: ["SFS","Lagboken","Civilrätten","Balken"],
     correctIndex: 1,
   },
@@ -81,7 +81,7 @@ export const SV_MORE_QUESTIONS: Question[] = [
   {
     id: "sv-more-12",
     category: "Sverige",
-    text: "Vad heter den svenska nobelprisutdelningen i december i?",
+    text: "I vilken stad delas Nobelpriset ut i december (ej fredspriset)?",
     options: ["Göteborg","Stockholm","Oslo","Uppsala"],
     correctIndex: 1,
   },
@@ -109,7 +109,7 @@ export const SV_MORE_QUESTIONS: Question[] = [
   {
     id: "sv-more-16",
     category: "Sverige",
-    text: "Vad heter den svenska älgjaktens säsong ungefär?",
+    text: "Under vilken årstid är älgjakten i Sverige oftast?",
     options: ["Vår","Höst","Vinter","Sommar"],
     correctIndex: 1,
   },
@@ -123,7 +123,7 @@ export const SV_MORE_QUESTIONS: Question[] = [
   {
     id: "sv-more-18",
     category: "Sverige",
-    text: "Vad kallas den svenska skolavslutningen i juni ofta?",
+    text: "Vad kallas ofta skolavslutningen i juni i Sverige?",
     options: ["Lucia","Studenten","Valborg","Kräftskiva"],
     correctIndex: 1,
   },
@@ -137,15 +137,15 @@ export const SV_MORE_QUESTIONS: Question[] = [
   {
     id: "sv-more-20",
     category: "Sverige",
-    text: "Vad heter den svenska flaggstångens toppprydnad ofta?",
+    text: "Vad sitter ofta högst upp på en svensk flaggstång?",
     options: ["Kula","Spira","Krona","Stjärna"],
     correctIndex: 0,
   },
   {
     id: "sv-more-21",
     category: "Sverige",
-    text: "Vilken svensk stad är känd för kanelbullar-fikatypiskt studentliv?",
-    options: ["Kiruna","Uppsala","Kiruna","Visby"],
+    text: "Vilken svensk stad är känd för studentliv och fikakultur?",
+    options: ["Kiruna","Uppsala","Umeå","Visby"],
     correctIndex: 1,
   },
   {
@@ -165,7 +165,7 @@ export const SV_MORE_QUESTIONS: Question[] = [
   {
     id: "sv-more-24",
     category: "Sverige",
-    text: "Vad heter den svenska myntenheten i mindre?",
+    text: "Vad heter den mindre enheten av den svenska kronan?",
     options: ["Mark","Öre","Penny","Cent"],
     correctIndex: 1,
   },
@@ -179,15 +179,15 @@ export const SV_MORE_QUESTIONS: Question[] = [
   {
     id: "sv-more-26",
     category: "Sverige",
-    text: "Vad kallas Sveriges västkustskärgård mest känt kring?",
+    text: "Vilken storstad förknippas mest med Sveriges västkustskärgård?",
     options: ["Stockholm","Göteborg","Luleå","Kalmar"],
     correctIndex: 1,
   },
   {
     id: "sv-more-27",
     category: "Sverige",
-    text: "Vilken svensk sport är bandy mest lik?",
-    options: ["Fotboll","Ishockey/fotbollshybrid","Tennis","Golf"],
+    text: "Vilken sport liknar bandy mest?",
+    options: ["Fotboll","Ishockey","Tennis","Golf"],
     correctIndex: 1,
   },
   {

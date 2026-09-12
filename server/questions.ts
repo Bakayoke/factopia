@@ -65,7 +65,7 @@ const BASE_QUESTIONS: Question[] = [
   {
     id: 'geo-8',
     category: 'Geografi',
-    text: 'Vilket är Europas högsta berg?',
+    text: 'Vilket är Europas högsta berg (inkl. Kaukasus)?',
     options: ['Mont Blanc', 'Matterhorn', 'Elbrus', 'Etna'],
     correctIndex: 2,
   },
@@ -109,7 +109,7 @@ const BASE_QUESTIONS: Question[] = [
   {
     id: 'his-4',
     category: 'Historia',
-    text: 'Vilket land byggde de första pyramiderna i Giza?',
+    text: 'I vilket land ligger pyramiderna i Giza?',
     options: ['Grekland', 'Romarriket', 'Egypten', 'Mesopotamien'],
     correctIndex: 2,
   },
@@ -376,7 +376,7 @@ const BASE_QUESTIONS: Question[] = [
   {
     id: 'sci-1',
     category: 'Vetenskap',
-    text: 'Vad är kemiska beteckningen för vatten?',
+    text: 'Vad är den kemiska beteckningen för vatten?',
     options: ['CO2', 'H2O', 'O2', 'NaCl'],
     correctIndex: 1,
   },
@@ -455,7 +455,7 @@ const BASE_QUESTIONS: Question[] = [
   {
     id: 'mat-2',
     category: 'Mat & Dryck',
-    text: 'Vad är huvudingredientet i guacamole?',
+    text: 'Vad är huvudingrediensen i guacamole?',
     options: ['Tomat', 'Avokado', 'Paprika', 'Lök'],
     correctIndex: 1,
   },
@@ -656,7 +656,7 @@ const BASE_QUESTIONS: Question[] = [
     id: 'mix-10',
     category: 'Allmänt',
     text: 'Vad kallas en grupp lejon?',
-    options: ['Flock', 'Svärm', 'Pride (flock)', 'Pack'],
+    options: ['Flock', 'Svärm', 'Pride', 'Pack'],
     correctIndex: 2,
   },
   {
@@ -755,8 +755,8 @@ const BASE_QUESTIONS: Question[] = [
   {
     id: 'pop-4',
     category: 'Popkultur',
-    text: 'Vad heter den blå katten i Hello Kitty? (trickfråga: Hello Kitty är…)',
-    options: ['En katt', 'En hund', 'En flicka som ser ut som en katt', 'En kanin'],
+    text: 'Vad är Hello Kitty enligt skaparna?',
+    options: ['En katt', 'En hund', 'En flicka som liknar en katt', 'En kanin'],
     correctIndex: 2,
   },
   {
@@ -856,13 +856,27 @@ function isMathish(q: Question): boolean {
   return q.category === 'Math' || q.category === 'Matematik' || MATHISH.test(q.text)
 }
 
-function dedupePool(pool: Question[]): Question[] {
+function hasDuplicateOptions(q: Question): boolean {
   const seen = new Set<string>()
+  for (const opt of q.options) {
+    const key = normalizeText(opt)
+    if (seen.has(key)) return true
+    seen.add(key)
+  }
+  return false
+}
+
+function dedupePool(pool: Question[]): Question[] {
+  const seenText = new Set<string>()
+  const seenId = new Set<string>()
   const out: Question[] = []
   for (const q of shuffle(pool)) {
+    if (hasDuplicateOptions(q)) continue
+    if (seenId.has(q.id)) continue
     const key = normalizeText(q.text)
-    if (seen.has(key)) continue
-    seen.add(key)
+    if (seenText.has(key)) continue
+    seenId.add(q.id)
+    seenText.add(key)
     out.push(q)
   }
   return out
