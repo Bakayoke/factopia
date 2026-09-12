@@ -328,6 +328,20 @@ button {
   color: #8a6d00;
 }
 
+.sister-game.klotterkaos {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #7c2d12 18%, var(--surface)), color-mix(in srgb, #ea580c 14%, var(--surface)));
+  border-color: color-mix(in srgb, #ea580c 40%, transparent);
+}
+
+.sister-game.klotterkaos:hover {
+  border-color: color-mix(in srgb, #f97316 60%, transparent);
+}
+
+.sister-game.klotterkaos em {
+  color: #c2410c;
+}
+
 .party-unlock-banner {
   margin: 0 0 0.75rem;
   text-align: center;

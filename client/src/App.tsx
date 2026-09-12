@@ -42,6 +42,7 @@ const PARTY_PATHS_URL = 'https://partypaths.com'
 const SABOTEXT_URL = 'https://sabotext.com'
 const SCOURGEBORN_URL = 'https://scourgeborn.com'
 const YOUR_TASK_IS_URL = 'https://yourtaskis.com'
+const KLOTTERKAOS_URL = 'https://klotterkaos.com'
 
 const PACKS: { id: CategoryPackId; labelKey: keyof ReturnType<typeof t> }[] = [
   { id: 'mixed', labelKey: 'packMixed' },
@@ -339,6 +340,16 @@ export default function App() {
               <strong>Your Task Is</strong>
               <span>{ui.yourTaskIsPitch}</span>
               <em>{ui.yourTaskIsCta}</em>
+            </a>
+            <a
+              className="sister-game klotterkaos"
+              href={KLOTTERKAOS_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Klotterkaos</strong>
+              <span>{ui.klotterkaosPitch}</span>
+              <em>{ui.klotterkaosCta}</em>
             </a>
           </div>
         )}
@@ -1425,6 +1436,16 @@ function WinnerView({
         <strong>Your Task Is</strong>
         <span>{ui.yourTaskIsPitch}</span>
         <em>{ui.yourTaskIsCta}</em>
+      </a>
+      <a
+        className="sister-game compact klotterkaos"
+        href={KLOTTERKAOS_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <strong>Klotterkaos</strong>
+        <span>{ui.klotterkaosPitch}</span>
+        <em>{ui.klotterkaosCta}</em>
       </a>
       <button className="btn btn-ghost" type="button" onClick={onLeave}>
         {ui.leaveRoom}
