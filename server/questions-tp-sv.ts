@@ -1,42 +1,21 @@
 import type { Question } from './types.js'
 
 export const TP_SV_QUESTIONS: Question[] = [
-  {
-    id: "tp-sv-s1",
-    category: "Historia",
-    text: "Vilket år blev Sverige medlem i EU?",
-    options: ["1995","1989","2001","1973"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-s2",
     category: "Historia",
     text: "Vad hette Sveriges kung under merparten av 1900-talets slut?",
     options: ["Carl XVI Gustaf","Gustav V","Oscar II","Karl XIV Johan"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-s3",
-    category: "Geografi",
-    text: "Vilken är Sveriges största sjö?",
-    options: ["Vänern","Vättern","Mälaren","Hjälmaren"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-s4",
     category: "Geografi",
     text: "Vilken är Sveriges längsta flod?",
     options: ["Klarälven–Göta älv","Dalälven","Umeälven","Luleälven"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-s5",
-    category: "Geografi",
-    text: "I vilket landskap ligger Kiruna?",
-    options: ["Lappland","Norrbotten","Västerbotten","Jämtland"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-s6",
     category: "Kultur",
     text: "Vad kallas Sveriges nationaldag?",
@@ -50,14 +29,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["13 december","24 december","6 januari","1 november"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-s8",
-    category: "Litteratur",
-    text: "Vem skrev Pippi Långstrump?",
-    options: ["Astrid Lindgren","Selma Lagerlöf","Maria Gripe","Elsa Beskow"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-s9",
     category: "Litteratur",
     text: "Vem skrev Nils Holgerssons underbara resa?",
@@ -71,21 +43,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["August Strindberg","Hjalmar Söderberg","Selma Lagerlöf","Gustaf Fröding"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-s11",
-    category: "Musik",
-    text: "Vilket svenskt band vann Eurovision 1974?",
-    options: ["ABBA","Ace of Base","Roxette","Europe"],
-    correctIndex: 0,
-  },
-  {
-    id: "tp-sv-s13",
-    category: "Sport",
-    text: "Vilken sport är Björn Borg mest känd för?",
-    options: ["Tennis","Golf","Ishockey","Fotboll"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tp-sv-s14",
     category: "Sport",
     text: "Vilken sport är Ingemar Stenmark mest känd för?",
@@ -232,14 +190,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Reykjavik","Köpenhamn","Kuala Lumpur","London"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-land-10",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Reykjavik?",
-    options: ["Island","Rumänien","Ukraina","Bulgarien"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-cap-11",
     category: "Geografi",
     text: "Vad är huvudstaden i Frankrike?",
@@ -267,14 +218,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Tyskland","Iran","Ryssland","Israel"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-cap-15",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Italien?",
-    options: ["Rom","Wien","Reykjavik","New Delhi"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-land-16",
     category: "Geografi",
     text: "Vilket land har huvudstaden Rom?",
@@ -652,14 +596,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Canberra","Oslo","Prag","Hanoi"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-land-70",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Canberra?",
-    options: ["Australien","USA","Island","Jamaica"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-cap-71",
     category: "Geografi",
     text: "Vad är huvudstaden i Nya Zeeland?",
@@ -680,14 +617,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Ottawa","Peking","Kairo","Rom"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-land-74",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Ottawa?",
-    options: ["Kanada","Malaysia","Indonesien","Irak"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-cap-75",
     category: "Geografi",
     text: "Vad är huvudstaden i USA?",
@@ -1012,70 +942,70 @@ export const TP_SV_QUESTIONS: Question[] = [
   {
     id: "tp-sv-riv-121",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst floden Nilen?",
+    text: "Vilket land förknippas mest med floden Nilen?",
     options: ["Egypten","Frankrike","Europa","Kina"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-riv-122",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst Amazonfloden?",
+    text: "Vilket land förknippas mest med Amazonfloden?",
     options: ["Brasilien","Kina","Egypten","Storbritannien"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-riv-123",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst floden Yangtze?",
+    text: "Vilket land förknippas mest med floden Yangtze?",
     options: ["Kina","Egypten","Ryssland","USA"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-riv-124",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst floden Mississippifloden?",
+    text: "Vilket land förknippas mest med Mississippifloden?",
     options: ["USA","Brasilien","Kina","Egypten"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-riv-125",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst floden Donau?",
+    text: "Vilket land förknippas mest med floden Donau?",
     options: ["Europa","Brasilien","USA","Storbritannien"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-riv-126",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst floden Rhen?",
+    text: "Vilket land förknippas mest med floden Rhen?",
     options: ["Europa","USA","Ryssland","Kina"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-riv-127",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst floden Themsen?",
+    text: "Vilket land förknippas mest med floden Themsen?",
     options: ["Storbritannien","Brasilien","Kina","Egypten"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-riv-128",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst floden Seine?",
+    text: "Vilket land förknippas mest med floden Seine?",
     options: ["Frankrike","Ryssland","Egypten","USA"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-riv-129",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst floden Ganges?",
+    text: "Vilket land förknippas mest med floden Ganges?",
     options: ["Indien","Europa","USA","Frankrike"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-riv-130",
     category: "Geografi",
-    text: "I vilket land/område förknippas främst floden Volga?",
+    text: "Vilket land förknippas mest med floden Volga?",
     options: ["Ryssland","Europa","Kina","Indien"],
     correctIndex: 0,
   },
@@ -1488,70 +1418,70 @@ export const TP_SV_QUESTIONS: Question[] = [
   {
     id: "tp-sv-mat-233",
     category: "Mat & dryck",
-    text: "Vilket land/område förknippas främst med sushi?",
+    text: "Vilket land förknippas mest med sushi?",
     options: ["Japan","Kanada","Spanien","Italien"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-mat-234",
     category: "Mat & dryck",
-    text: "Vilket land/område förknippas främst med paella?",
+    text: "Vilket land förknippas mest med paella?",
     options: ["Spanien","Kanada","Japan","Korea"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-mat-235",
     category: "Mat & dryck",
-    text: "Vilket land/område förknippas främst med pizza (ursprung)?",
+    text: "Vilket land förknippas mest med pizza?",
     options: ["Italien","Kanada","Spanien","Japan"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-mat-236",
     category: "Mat & dryck",
-    text: "Vilket land/område förknippas främst med croissant (starkt förknippas med)?",
+    text: "Vilket land förknippas mest med croissant?",
     options: ["Frankrike","Mellanöstern","Japan","Sverige"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-mat-237",
     category: "Mat & dryck",
-    text: "Vilket land/område förknippas främst med taco?",
+    text: "Vilket land förknippas mest med taco?",
     options: ["Mexiko","Italien","Kanada","Korea"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-mat-238",
     category: "Mat & dryck",
-    text: "Vilket land/område förknippas främst med kimchi?",
+    text: "Vilket land förknippas mest med kimchi?",
     options: ["Korea","Mellanöstern","Spanien","Sverige"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-mat-239",
     category: "Mat & dryck",
-    text: "Vilket land/område förknippas främst med falafel?",
+    text: "Vilket land förknippas mest med falafel?",
     options: ["Mellanöstern","Korea","Kanada","Spanien"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-mat-240",
     category: "Mat & dryck",
-    text: "Vilket land/område förknippas främst med fish and chips?",
+    text: "Vilket land förknippas mest med fish and chips?",
     options: ["Storbritannien","Sverige","Korea","Japan"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-mat-241",
     category: "Mat & dryck",
-    text: "Vilket land/område förknippas främst med surströmming?",
+    text: "Vilket land förknippas mest med surströmming?",
     options: ["Sverige","Japan","Mellanöstern","Spanien"],
     correctIndex: 0,
   },
   {
     id: "tp-sv-mat-242",
     category: "Mat & dryck",
-    text: "Vilket land/område förknippas främst med poutine?",
+    text: "Vilket land förknippas mest med poutine?",
     options: ["Kanada","Sverige","Frankrike","Korea"],
     correctIndex: 0,
   },
@@ -1618,14 +1548,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Oceanien/Australien","Europa","Antarktis","Sydamerika"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-x-252",
-    category: "Geografi",
-    text: "Vilket land har flest tidszoner?",
-    options: ["Frankrike (inkl. territorier)","Ryssland","USA","Kina"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-x-253",
     category: "Geografi",
     text: "Vad heter öknen som täcker stora delar av Nordafrika?",
@@ -1646,21 +1569,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["New York","Los Angeles","Chicago","Boston"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-x-256",
-    category: "Geografi",
-    text: "I vilket land ligger staden Marrakech?",
-    options: ["Marocko","Egypten","Tunisien","Algeriet"],
-    correctIndex: 0,
-  },
-  {
-    id: "tp-sv-x-257",
-    category: "Vetenskap",
-    text: "Hur många ben har en vuxen människa ungefär?",
-    options: ["206","156","256","306"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tp-sv-x-258",
     category: "Vetenskap",
     text: "Vilket organ pumpar blod i kroppen?",
@@ -1709,14 +1618,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Opossum","Igelkott","Skunk","Bältdjur"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-x-265",
-    category: "Natur",
-    text: "Vad äter en koala främst?",
-    options: ["Eukalyptusblad","Bambu","Fisk","Insekter"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-x-266",
     category: "Natur",
     text: "Vad äter en panda främst?",
@@ -1730,14 +1632,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Fladdermus","Flygekorre (glid)","Pingvin","Struts"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-x-268",
-    category: "Sport",
-    text: "Hur många spelare har ett fotbollslag på planen?",
-    options: ["11","9","10","12"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-x-269",
     category: "Sport",
     text: "Hur många hål har en vanlig golfrunda?",
@@ -1765,49 +1660,21 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Rio de Janeiro","London","Tokyo","Aten"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-x-273",
-    category: "Sport",
-    text: "Vilket land vann fotbolls-VM 2018?",
-    options: ["Frankrike","Kroatien","Brasilien","Tyskland"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-x-274",
     category: "Sport",
     text: "Vilket land vann fotbolls-VM 2022?",
     options: ["Argentina","Frankrike","Brasilien","Spanien"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-x-275",
-    category: "Musik",
-    text: "Hur många strängar har en vanlig gitarr?",
-    options: ["6","4","5","7"],
-    correctIndex: 0,
-  },
-  {
-    id: "tp-sv-x-276",
-    category: "Musik",
-    text: "Vilket instrument är Yo-Yo Ma mest känd för?",
-    options: ["Cello","Violin","Piano","Flöjt"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tp-sv-x-277",
     category: "Musik",
     text: "Vad kallas den högsta kvinnliga sångstämman?",
     options: ["Sopran","Alt","Tenor","Bas"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-x-278",
-    category: "Film & TV",
-    text: "Vilken skådespelare spelar Iron Man i MCU?",
-    options: ["Robert Downey Jr.","Chris Evans","Chris Hemsworth","Mark Ruffalo"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-x-279",
     category: "Film & TV",
     text: "Vilken skådespelare spelar Jack Sparrow?",
@@ -1891,21 +1758,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Apple","Samsung","Google","Microsoft"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-x-291",
-    category: "Teknik",
-    text: "Vad heter Googles mobiloperativsystem?",
-    options: ["Android","iOS","Windows Phone","Symbian"],
-    correctIndex: 0,
-  },
-  {
-    id: "tp-sv-x-292",
-    category: "Teknik",
-    text: "Vad betyder www i en webbadress?",
-    options: ["World Wide Web","Web World Wide","Wide Web World","Wireless Web Window"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tp-sv-x-293",
     category: "Mat & dryck",
     text: "Från vilken böna görs choklad?",
@@ -2073,14 +1926,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Göteborg","Malmö","Halmstad","Uddevalla"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-more-19",
-    category: "Geografi",
-    text: "I vilken stad ligger Turning Torso?",
-    options: ["Malmö","Göteborg","Stockholm","Helsingborg"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-more-20",
     category: "Geografi",
     text: "Vad heter Sveriges högsta berg?",
@@ -2101,14 +1947,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Finland","Norge","Danmark","Island"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-more-23",
-    category: "Geografi",
-    text: "Vilken flod rinner genom London?",
-    options: ["Themsen","Seine","Rhen","Donau"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-more-24",
     category: "Geografi",
     text: "Vilken flod rinner genom Kairo?",
@@ -2122,14 +1961,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Venedig","Amsterdam","Brügge","Stockholm"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-more-26",
-    category: "Geografi",
-    text: "I vilket land ligger Machu Picchu?",
-    options: ["Peru","Mexiko","Chile","Bolivia"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-more-27",
     category: "Geografi",
     text: "I vilket land ligger Taj Mahal?",
@@ -2178,14 +2010,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["D-vitamin","C-vitamin","B12","A-vitamin"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-more-34",
-    category: "Vetenskap",
-    text: "Vad kallas djur som äter både växter och kött?",
-    options: ["Allätare","Växtätare","Köttätare","Asätare"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-more-35",
     category: "Vetenskap",
     text: "Hur många kromosomer har människan normalt?",
@@ -2220,14 +2045,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Elektrisk spänning","Ström","Effekt","Energi"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-more-40",
-    category: "Natur",
-    text: "Vilket djur är Sveriges nationaldjur?",
-    options: ["Älg","Björn","Varg","Rådjur"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-more-41",
     category: "Natur",
     text: "Vilken fågel är Sveriges nationalfågel?",
@@ -2262,14 +2080,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Bläckfisk","Haj","Delfin","Val"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-more-46",
-    category: "Sport",
-    text: "Hur många perioder har en ishockeymatch normalt?",
-    options: ["3","2","4","5"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-more-47",
     category: "Sport",
     text: "Hur lång är en fotbollsmatch i ordinarie tid?",
@@ -2374,14 +2185,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Simpsons","Griffins","Smiths","Belocher"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-more-62",
-    category: "Litteratur",
-    text: "Vem skrev Bröderna Lejonhjärta?",
-    options: ["Astrid Lindgren","Maria Gripe","Selma Lagerlöf","Elsa Beskow"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-more-63",
     category: "Litteratur",
     text: "Vem skrev Ronja Rövardotter?",
@@ -2444,21 +2248,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["Universal Serial Bus","Ultra Speed Band","United System Bridge","User Soft Button"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-more-72",
-    category: "Teknik",
-    text: "Vilket företag äger Instagram?",
-    options: ["Meta (Facebook)","Google","Amazon","Apple"],
-    correctIndex: 0,
-  },
-  {
-    id: "tp-sv-more-73",
-    category: "Teknik",
-    text: "Vad heter Apples röstassistent?",
-    options: ["Siri","Alexa","Cortana","Google Assistant"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tp-sv-more-74",
     category: "Teknik",
     text: "Vad heter Amazons röstassistent?",
@@ -2500,14 +2290,7 @@ export const TP_SV_QUESTIONS: Question[] = [
     options: ["60","100","30","90"],
     correctIndex: 0,
   },
-  {
-    id: "tp-sv-more-80",
-    category: "Allmänt",
-    text: "Hur många dagar har ett skottår?",
-    options: ["366","365","364","367"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-sv-more-81",
     category: "Allmänt",
     text: "Vad heter den tredje planeten från solen?",
@@ -2520,5 +2303,5 @@ export const TP_SV_QUESTIONS: Question[] = [
     text: "Vilket språk har flest modersmålstalare i världen ungefär?",
     options: ["Mandarin-kinesiska","Engelska","Spanska","Hindi"],
     correctIndex: 0,
-  },
+  }
 ]

@@ -22,14 +22,7 @@ export const EXTRA_QUESTIONS: Question[] = [
     options: ["Algeriet","Tunisien","Marocko","Egypten"],
     correctIndex: 2,
   },
-  {
-    id: "geo-x4",
-    category: "Geografi",
-    text: "Vilket hav ligger mellan Sverige och Finland?",
-    options: ["Nordsjön","Östersjön","Atlanten","Barents hav"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "geo-x5",
     category: "Geografi",
     text: "Vilket land är känt för tulpaner och väderkvarnar?",
@@ -64,14 +57,7 @@ export const EXTRA_QUESTIONS: Question[] = [
     options: ["Kina","Japan","Sydkorea","Turkiet"],
     correctIndex: 1,
   },
-  {
-    id: "geo-x10",
-    category: "Geografi",
-    text: "Vilken flod rinner genom London?",
-    options: ["Seine","Rhen","Themsen","Donau"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "geo-x11",
     category: "Geografi",
     text: "Vilket land ligger på Iberiska halvön tillsammans med Spanien?",
@@ -165,7 +151,7 @@ export const EXTRA_QUESTIONS: Question[] = [
   {
     id: "his-x4",
     category: "Historia",
-    text: "När blev Sverige en demokrati med allmän rösträtt (ungefär)?",
+    text: "När fick Sverige allmän rösträtt ungefär?",
     options: ["1905","1919–1921","1945","1971"],
     correctIndex: 1,
   },
@@ -200,7 +186,7 @@ export const EXTRA_QUESTIONS: Question[] = [
   {
     id: "his-x9",
     category: "Historia",
-    text: "När slutade det kalla kriget ungefär?",
+    text: "Vilket år brukar man säga att det kalla kriget slutade?",
     options: ["1975","1989–1991","2001","1968"],
     correctIndex: 1,
   },
@@ -242,7 +228,7 @@ export const EXTRA_QUESTIONS: Question[] = [
   {
     id: "his-x15",
     category: "Historia",
-    text: "Vilket år firades 400-årsjubileet av Gustav Vasas kungaval ungefär?",
+    text: "Vilket år firades 400-årsjubileet av Gustav Vasas kungaval?",
     options: ["1920","1923","1950","1971"],
     correctIndex: 1,
   },
@@ -253,14 +239,7 @@ export const EXTRA_QUESTIONS: Question[] = [
     options: ["5","6","7","8"],
     correctIndex: 2,
   },
-  {
-    id: "spo-x2",
-    category: "Sport",
-    text: "I vilken sport används en shuttlecock?",
-    options: ["Tennis","Badminton","Squash","Pingis"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "spo-x3",
     category: "Sport",
     text: "Hur lång är en olympisk simbassäng?",
@@ -302,14 +281,7 @@ export const EXTRA_QUESTIONS: Question[] = [
     options: ["Golf","Tennis","Friidrott","Simning"],
     correctIndex: 1,
   },
-  {
-    id: "spo-x9",
-    category: "Sport",
-    text: "Hur många perioder har en ishockeymatch?",
-    options: ["2","3","4","5"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "spo-x10",
     category: "Sport",
     text: "Vad kallas en poäng i rugby?",
@@ -606,7 +578,7 @@ export const EXTRA_QUESTIONS: Question[] = [
   {
     id: "sci-x7",
     category: "Vetenskap",
-    text: "Vad står DNA för (ungefär)?",
+    text: "Vad står DNA för?",
     options: ["Data nucleic acid","Deoxiribonukleinsyra","Dynamic nerve axon","Dual neuron array"],
     correctIndex: 1,
   },
@@ -915,7 +887,7 @@ export const EXTRA_QUESTIONS: Question[] = [
     id: "mix-x7",
     category: "Allmänt",
     text: "Vad kallas en babykänguru?",
-    options: ["Killing","Joey","Cub","Pup"],
+    options: ["Killing","Känguruunge","Unge","Valp"],
     correctIndex: 1,
   },
   {
@@ -946,14 +918,7 @@ export const EXTRA_QUESTIONS: Question[] = [
     options: ["Spanska","Portugisiska","Franska","Italienska"],
     correctIndex: 1,
   },
-  {
-    id: "mix-x12",
-    category: "Allmänt",
-    text: "Hur många hjärtan har en bläckfisk?",
-    options: ["1","2","3","4"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "mix-x13",
     category: "Allmänt",
     text: "Vad heter världens högsta berg?",
@@ -978,7 +943,7 @@ export const EXTRA_QUESTIONS: Question[] = [
     id: "mix-x17",
     category: "Allmänt",
     text: "Vad kallas en grupp fiskar?",
-    options: ["Flock","Stim","Svärm","Pack"],
+    options: ["Flock","Stim","Svärm","Pride"],
     correctIndex: 1,
   },
   {
@@ -1114,14 +1079,7 @@ export const EXTRA_QUESTIONS: Question[] = [
     options: ["Vättern","Vänern","Mälaren","Hjälmaren"],
     correctIndex: 1,
   },
-  {
-    id: "swe-x2",
-    category: "Sverige",
-    text: "I vilken stad ligger Turning Torso?",
-    options: ["Stockholm","Göteborg","Malmö","Uppsala"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "swe-x3",
     category: "Sverige",
     text: "Vad kallas Sveriges riksdagshusplats?",
@@ -1180,7 +1138,7 @@ export const EXTRA_QUESTIONS: Question[] = [
   {
     id: "swe-x11",
     category: "Sverige",
-    text: "Vad är IKEA mest känt för?",
+    text: "Vad är IKEA mest känt för att sälja?",
     options: ["Bilar","Möbler","Telefoner","Mat"],
     correctIndex: 1,
   },
@@ -1272,7 +1230,7 @@ export const EXTRA_QUESTIONS: Question[] = [
     id: "nat-x9",
     category: "Natur",
     text: "Vad kallas en babyelefant?",
-    options: ["Killing","Kalv","Unge","Cub"],
+    options: ["Killing","Kalv","Unge","Valp"],
     correctIndex: 1,
   },
   {
@@ -1310,14 +1268,7 @@ export const EXTRA_QUESTIONS: Question[] = [
     options: ["Kattungar","Valpar","Killingar","Kycklingar"],
     correctIndex: 1,
   },
-  {
-    id: "nat-x15",
-    category: "Natur",
-    text: "Vilket djur är Sveriges nationaldjur?",
-    options: ["Björn","Älg","Varg","Rådjur"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "misc-x1",
     category: "Allmänt",
     text: "Vad är pi avrundat till två decimaler?",
@@ -1425,7 +1376,7 @@ export const EXTRA_QUESTIONS: Question[] = [
   {
     id: "misc-x19",
     category: "Allmänt",
-    text: "Vad betyder \"foto\" på grekiska ungefär?",
+    text: "Vad betyder \"foto\" på grekiska?",
     options: ["Ljud","Ljus","Färg","Bild"],
     correctIndex: 1,
   },
@@ -1435,5 +1386,5 @@ export const EXTRA_QUESTIONS: Question[] = [
     text: "Vilket år började 2000-talet?",
     options: ["1999","2000","2001","2010"],
     correctIndex: 2,
-  },
+  }
 ]

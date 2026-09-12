@@ -1,14 +1,7 @@
 import type { Question } from './types.js'
 
 export const BULK_EN_QUESTIONS: Question[] = [
-  {
-    id: "bulk-en-47",
-    category: "Geography",
-    text: "What is the capital of Morocco?",
-    options: ["Madrid","Rabat","Moscow","Amsterdam"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-en-110",
     category: "Science",
     text: "What is the chemical symbol for Hydrogen?",
@@ -57,14 +50,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["puck","shuttlecock","disk","ball"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-95",
-    category: "Geography",
-    text: "Which country has the capital Hanoi?",
-    options: ["Indonesia","Australia","Vietnam","Iran"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-665",
     category: "Nature",
     text: "Where does a penguin typically live?",
@@ -85,28 +71,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["February","April","January","March"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-65",
-    category: "Geography",
-    text: "Which country has the capital Warsaw?",
-    options: ["Poland","Mexico","Belgium","Ukraine"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-en-656",
     category: "History",
     text: "In which year: First iPhone released?",
     options: ["1991","1977","2007","1963"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-35",
-    category: "Geography",
-    text: "What is the capital of Colombia?",
-    options: ["Bogotá","Abu Dhabi","Cairo","Prague"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-en-115",
     category: "Science",
     text: "What element has the symbol C?",
@@ -120,28 +92,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Uranus","Jupiter","Mercury","Mars"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-26",
-    category: "Geography",
-    text: "What is the capital of Croatia?",
-    options: ["Warsaw","Santiago","Buenos Aires","Zagreb"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-en-32",
-    category: "Geography",
-    text: "What is the capital of Argentina?",
-    options: ["Beijing","Buenos Aires","Pretoria","Zagreb"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-en-41",
-    category: "Geography",
-    text: "What is the capital of Vietnam?",
-    options: ["Rabat","Hanoi","Tokyo","Copenhagen"],
-    correctIndex: 1,
-  },
-  {
+        {
     id: "bulk-en-135",
     category: "Science",
     text: "What element has the symbol S?",
@@ -169,42 +120,21 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["6","3","100","50"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-73",
-    category: "Geography",
-    text: "Which country has the capital Athens?",
-    options: ["Turkey","France","South Korea","Greece"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-en-180",
     category: "Science",
     text: "Which planet is #4 from the Sun?",
     options: ["Venus","Jupiter","Saturn","Mars"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-144",
-    category: "Science",
-    text: "What is the chemical symbol for Iron?",
-    options: ["Fe","H","Zn","C"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-en-643",
     category: "History",
     text: "In which year: Moon landing?",
     options: ["1977","1969","1963","2001"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-49",
-    category: "Geography",
-    text: "What is the capital of Kenya?",
-    options: ["Nairobi","Pretoria","Paris","Kyiv"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-en-698",
     category: "Sports",
     text: "How many players per team are on the court in volleyball?",
@@ -225,14 +155,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["savanna","swamp","Antarctica","forest"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-126",
-    category: "Science",
-    text: "What is the chemical symbol for Sodium?",
-    options: ["Cu","Na","F","Ag"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-en-134",
     category: "Science",
     text: "What is the chemical symbol for Phosphorus?",
@@ -267,63 +190,28 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Africa","Asia","North America","Europe"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-66",
-    category: "Geography",
-    text: "Which country has the capital Prague?",
-    options: ["Greece","Colombia","Czech Republic","Italy"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-160",
     category: "Science",
     text: "What is the chemical symbol for Tin?",
     options: ["Ag","H","Ne","Sn"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-20",
-    category: "Geography",
-    text: "What is the capital of Turkey?",
-    options: ["Ankara","Copenhagen","Helsinki","Budapest"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-en-763",
     category: "General",
     text: "What number is the Roman numeral VII?",
     options: ["9","7","50","8"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-90",
-    category: "Geography",
-    text: "Which country has the capital Tokyo?",
-    options: ["Ireland","Japan","Morocco","Serbia"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-en-775",
     category: "General",
     text: "What number is the Roman numeral C?",
     options: ["1","10","20","100"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-19",
-    category: "Geography",
-    text: "What is the capital of Greece?",
-    options: ["Berlin","Bangkok","Athens","Bern"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-en-50",
-    category: "Geography",
-    text: "What is the capital of Israel?",
-    options: ["Mexico City","Ankara","Jerusalem","London"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "bulk-en-696",
     category: "Sports",
     text: "How many players per team are on the court in basketball?",
@@ -365,42 +253,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["reef","river","ocean","savanna"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-37",
-    category: "Geography",
-    text: "What is the capital of China?",
-    options: ["Nairobi","Ottawa","Pretoria","Beijing"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-en-659",
     category: "Nature",
     text: "Where does a moose typically live?",
     options: ["savanna","swamp","forest","ocean"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-102",
-    category: "Geography",
-    text: "Which country has the capital Abuja?",
-    options: ["Vietnam","Netherlands","Nigeria","Mexico"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-en-40",
-    category: "Geography",
-    text: "What is the capital of Thailand?",
-    options: ["London","Paris","Bangkok","Kyiv"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-en-24",
-    category: "Geography",
-    text: "What is the capital of Romania?",
-    options: ["Bucharest","Abuja","Tokyo","Berlin"],
-    correctIndex: 0,
-  },
-  {
+        {
     id: "bulk-en-156",
     category: "Science",
     text: "What is the chemical symbol for Lead?",
@@ -414,21 +274,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["September","November","July","October"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-79",
-    category: "Geography",
-    text: "Which country has the capital Sofia?",
-    options: ["Saudi Arabia","Vietnam","Bulgaria","Turkey"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-en-44",
-    category: "Geography",
-    text: "What is the capital of New Zealand?",
-    options: ["Reykjavik","Rome","London","Wellington"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "bulk-en-112",
     category: "Science",
     text: "What is the chemical symbol for Helium?",
@@ -456,14 +302,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["1991","1989","2001","1945"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-824",
-    category: "Geography",
-    text: "How many continents are there usually?",
-    options: ["5","6","7","8"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-751",
     category: "General",
     text: "What number is the Roman numeral I?",
@@ -491,28 +330,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["pup","joey","owlet","calf"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-77",
-    category: "Geography",
-    text: "Which country has the capital Budapest?",
-    options: ["Japan","Croatia","Bulgaria","Hungary"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-en-172",
     category: "Science",
     text: "What is the chemical symbol for Platinum?",
     options: ["Pt","Ag","P","Al"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-108",
-    category: "Geography",
-    text: "Which country has the capital Baghdad?",
-    options: ["Thailand","New Zealand","Iraq","Spain"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-164",
     category: "Science",
     text: "What is the chemical symbol for Cobalt?",
@@ -526,14 +351,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["1","8","4","6"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-7",
-    category: "Geography",
-    text: "What is the capital of France?",
-    options: ["Jakarta","Abuja","Paris","Ankara"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-132",
     category: "Science",
     text: "What is the chemical symbol for Silicon?",
@@ -547,28 +365,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Phosphorus","Nitrogen","Fluorine","Chlorine"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-11",
-    category: "Geography",
-    text: "What is the capital of Poland?",
-    options: ["Riyadh","New Delhi","Warsaw","Canberra"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-682",
     category: "Nature",
     text: "What is a baby crocodile called?",
     options: ["hatchling","owlet","eaglet","joey"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-88",
-    category: "Geography",
-    text: "Which country has the capital Lima?",
-    options: ["Peru","Norway","China","Iraq"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-en-694",
     category: "Sports",
     text: "How many players per team are on the court in handball?",
@@ -589,21 +393,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["July","May","February","September"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-91",
-    category: "Geography",
-    text: "Which country has the capital Beijing?",
-    options: ["China","Turkey","Norway","Netherlands"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-en-68",
-    category: "Geography",
-    text: "Which country has the capital Bern?",
-    options: ["Saudi Arabia","Ireland","Switzerland","Morocco"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "bulk-en-167",
     category: "Science",
     text: "What element has the symbol Cr?",
@@ -624,21 +414,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Oxygen","Copper","Helium","Mercury"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-75",
-    category: "Geography",
-    text: "Which country has the capital Moscow?",
-    options: ["Russia","Morocco","New Zealand","France"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-en-85",
-    category: "Geography",
-    text: "Which country has the capital Brasília?",
-    options: ["India","South Africa","Brazil","Serbia"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "bulk-en-124",
     category: "Science",
     text: "What is the chemical symbol for Neon?",
@@ -673,21 +449,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["1991","1776","1977","1989"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-34",
-    category: "Geography",
-    text: "What is the capital of Peru?",
-    options: ["Moscow","Lima","Pretoria","Buenos Aires"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-en-83",
-    category: "Geography",
-    text: "Which country has the capital Ottawa?",
-    options: ["Ireland","Belgium","Iraq","Canada"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "bulk-en-649",
     category: "History",
     text: "In which year: End of WWII in Europe?",
@@ -708,14 +470,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Silicon","Copper","Fluorine","Lithium"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-9",
-    category: "Geography",
-    text: "What is the capital of Italy?",
-    options: ["Rome","Prague","Madrid","Budapest"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-en-154",
     category: "Science",
     text: "What is the chemical symbol for Mercury?",
@@ -736,42 +491,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Ni","H","He","I"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-62",
-    category: "Geography",
-    text: "Which country has the capital Madrid?",
-    options: ["Finland","United Arab Emirates","Spain","Egypt"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-674",
     category: "Nature",
     text: "What is a baby shark called?",
     options: ["joey","pup","infant","foal"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-1",
-    category: "Geography",
-    text: "What is the capital of Sweden?",
-    options: ["Hanoi","Vienna","Ottawa","Stockholm"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-en-84",
-    category: "Geography",
-    text: "Which country has the capital Mexico City?",
-    options: ["Australia","Chile","Mexico","Argentina"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-en-152",
-    category: "Science",
-    text: "What is the chemical symbol for Gold?",
-    options: ["Mn","Au","Ca","O"],
-    correctIndex: 1,
-  },
-  {
+        {
     id: "bulk-en-187",
     category: "Science",
     text: "Which position from the Sun is Neptune?",
@@ -785,14 +512,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Hg","Li","Fe","F"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-59",
-    category: "Geography",
-    text: "Which country has the capital Reykjavik?",
-    options: ["Canada","Ukraine","Austria","Iceland"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-en-168",
     category: "Science",
     text: "What is the chemical symbol for Chromium?",
@@ -806,28 +526,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Titanium","Carbon","Silver","Gold"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-60",
-    category: "Geography",
-    text: "Which country has the capital Berlin?",
-    options: ["Norway","Germany","Italy","Australia"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-en-76",
-    category: "Geography",
-    text: "Which country has the capital Kyiv?",
-    options: ["Hungary","Nigeria","Spain","Ukraine"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-en-96",
-    category: "Geography",
-    text: "Which country has the capital Jakarta?",
-    options: ["Indonesia","France","New Zealand","Iraq"],
-    correctIndex: 0,
-  },
-  {
+        {
     id: "bulk-en-143",
     category: "Science",
     text: "What element has the symbol Fe?",
@@ -855,14 +554,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["disk","ball","shuttlecock","puck"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-53",
-    category: "Geography",
-    text: "What is the capital of Iran?",
-    options: ["Mexico City","Rome","Tehran","Tokyo"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-676",
     category: "Nature",
     text: "What is a baby dolphin called?",
@@ -883,28 +575,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["savanna","Antarctica","forest","jungle"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-3",
-    category: "Geography",
-    text: "What is the capital of Denmark?",
-    options: ["Abuja","Pretoria","Copenhagen","Tokyo"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-173",
     category: "Science",
     text: "Which position from the Sun is Mercury?",
     options: ["3","8","6","1"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-33",
-    category: "Geography",
-    text: "What is the capital of Chile?",
-    options: ["Santiago","Amsterdam","New Delhi","Rome"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-en-684",
     category: "Nature",
     text: "What is a baby giraffe called?",
@@ -918,84 +596,28 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Earth","Jupiter","Venus","Uranus"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-28",
-    category: "Geography",
-    text: "What is the capital of USA?",
-    options: ["Tehran","Washington, D.C.","Brussels","Bucharest"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-en-101",
-    category: "Geography",
-    text: "Which country has the capital Rabat?",
-    options: ["Austria","United Arab Emirates","New Zealand","Morocco"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-en-98",
-    category: "Geography",
-    text: "Which country has the capital Wellington?",
-    options: ["Israel","New Zealand","Romania","Egypt"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-en-12",
-    category: "Geography",
-    text: "What is the capital of Czech Republic?",
-    options: ["Tehran","Seoul","Prague","Oslo"],
-    correctIndex: 2,
-  },
-  {
+          {
     id: "bulk-en-693",
     category: "Sports",
     text: "What is primarily used in ice hockey?",
     options: ["disk","ball","puck","shuttlecock"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-72",
-    category: "Geography",
-    text: "Which country has the capital London?",
-    options: ["Kenya","United Kingdom","United Arab Emirates","Iraq"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-en-10",
-    category: "Geography",
-    text: "What is the capital of Portugal?",
-    options: ["Berlin","Rome","Lisbon","Reykjavik"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "bulk-en-165",
     category: "Science",
     text: "What element has the symbol Mn?",
     options: ["Manganese","Sulfur","Fluorine","Phosphorus"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-48",
-    category: "Geography",
-    text: "What is the capital of Nigeria?",
-    options: ["Abu Dhabi","Helsinki","Tehran","Abuja"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-en-184",
     category: "Science",
     text: "Which planet is #6 from the Sun?",
     options: ["Jupiter","Saturn","Mars","Neptune"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-15",
-    category: "Geography",
-    text: "What is the capital of Netherlands?",
-    options: ["Buenos Aires","Brussels","Amsterdam","Moscow"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-652",
     category: "History",
     text: "In which year: First human in space?",
@@ -1016,28 +638,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["cub","joey","calf","owlet"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-56",
-    category: "Geography",
-    text: "Which country has the capital Oslo?",
-    options: ["Norway","China","Colombia","Poland"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-en-661",
     category: "Nature",
     text: "Where does a lion typically live?",
     options: ["Antarctica","forest","mountains","savanna"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-97",
-    category: "Geography",
-    text: "Which country has the capital Canberra?",
-    options: ["Czech Republic","Egypt","Germany","Australia"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-en-690",
     category: "Sports",
     text: "How many players per team are on the field in soccer?",
@@ -1051,28 +659,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Mercury","Iron","Tin","Gold"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-57",
-    category: "Geography",
-    text: "Which country has the capital Copenhagen?",
-    options: ["Austria","Denmark","Poland","Vietnam"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-en-669",
     category: "Nature",
     text: "Where does a panda typically live?",
     options: ["bamboo forest","jungle","desert","ocean"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-51",
-    category: "Geography",
-    text: "What is the capital of Saudi Arabia?",
-    options: ["Bangkok","Riyadh","Jakarta","Cairo"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-en-148",
     category: "Science",
     text: "What is the chemical symbol for Zinc?",
@@ -1086,56 +680,21 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Lead","Cobalt","Sodium","Potassium"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-74",
-    category: "Geography",
-    text: "Which country has the capital Ankara?",
-    options: ["Iceland","Thailand","Bulgaria","Turkey"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-en-166",
     category: "Science",
     text: "What is the chemical symbol for Manganese?",
     options: ["Ni","He","I","Mn"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-61",
-    category: "Geography",
-    text: "Which country has the capital Paris?",
-    options: ["Sweden","Germany","Chile","France"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-en-188",
     category: "Science",
     text: "Which planet is #8 from the Sun?",
     options: ["Venus","Earth","Mars","Neptune"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-78",
-    category: "Geography",
-    text: "Which country has the capital Bucharest?",
-    options: ["Brazil","Sweden","Romania","Belgium"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-en-45",
-    category: "Geography",
-    text: "What is the capital of Egypt?",
-    options: ["Paris","Washington, D.C.","Cairo","Vienna"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-en-38",
-    category: "Geography",
-    text: "What is the capital of South Korea?",
-    options: ["Zagreb","Seoul","Berlin","Abu Dhabi"],
-    correctIndex: 1,
-  },
-  {
+        {
     id: "bulk-en-149",
     category: "Science",
     text: "What element has the symbol Ag?",
@@ -1156,35 +715,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["cub","calf","owlet","foal"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-22",
-    category: "Geography",
-    text: "What is the capital of Ukraine?",
-    options: ["Kyiv","Baghdad","Belgrade","Paris"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-en-46",
-    category: "Geography",
-    text: "What is the capital of South Africa?",
-    options: ["Pretoria","Athens","Ottawa","Baghdad"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "bulk-en-121",
     category: "Science",
     text: "What element has the symbol F?",
     options: ["Fluorine","Silver","Platinum","Gold"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-36",
-    category: "Geography",
-    text: "What is the capital of Japan?",
-    options: ["Zagreb","Riyadh","Helsinki","Tokyo"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-en-769",
     category: "General",
     text: "What number is the Roman numeral X?",
@@ -1205,21 +743,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Platinum","Chromium","Lithium","Neon"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-23",
-    category: "Geography",
-    text: "What is the capital of Hungary?",
-    options: ["Brussels","Cairo","Budapest","Paris"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-en-31",
-    category: "Geography",
-    text: "What is the capital of Brazil?",
-    options: ["Nairobi","Brasília","Belgrade","Stockholm"],
-    correctIndex: 1,
-  },
-  {
+      {
     id: "bulk-en-647",
     category: "History",
     text: "In which year: Start of WWI?",
@@ -1254,21 +778,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["P","Al","Cl","I"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-71",
-    category: "Geography",
-    text: "Which country has the capital Dublin?",
-    options: ["Ireland","Colombia","Serbia","Austria"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-en-14",
-    category: "Geography",
-    text: "What is the capital of Switzerland?",
-    options: ["Beijing","Budapest","Cairo","Bern"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "bulk-en-146",
     category: "Science",
     text: "What is the chemical symbol for Copper?",
@@ -1317,14 +827,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["1977","2001","1903","1989"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-87",
-    category: "Geography",
-    text: "Which country has the capital Santiago?",
-    options: ["South Africa","Germany","Chile","Russia"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-178",
     category: "Science",
     text: "Which planet is #3 from the Sun?",
@@ -1366,77 +869,28 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Li","Al","I","C"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-99",
-    category: "Geography",
-    text: "Which country has the capital Cairo?",
-    options: ["United Arab Emirates","New Zealand","Egypt","Nigeria"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-660",
     category: "Nature",
     text: "What is a baby lion called?",
     options: ["joey","pup","cub","calf"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-120",
-    category: "Science",
-    text: "What is the chemical symbol for Oxygen?",
-    options: ["Ni","Zn","O","Cr"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-147",
     category: "Science",
     text: "What element has the symbol Zn?",
     options: ["Tin","Zinc","Sodium","Lead"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-86",
-    category: "Geography",
-    text: "Which country has the capital Buenos Aires?",
-    options: ["Indonesia","Romania","Argentina","Morocco"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-en-27",
-    category: "Geography",
-    text: "What is the capital of Serbia?",
-    options: ["Bucharest","Riyadh","Budapest","Belgrade"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-en-81",
-    category: "Geography",
-    text: "Which country has the capital Belgrade?",
-    options: ["Serbia","South Korea","Austria","China"],
-    correctIndex: 0,
-  },
-  {
+        {
     id: "bulk-en-759",
     category: "General",
     text: "What number is the Roman numeral V?",
     options: ["5","8","20","2"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-8",
-    category: "Geography",
-    text: "What is the capital of Spain?",
-    options: ["Pretoria","Madrid","Baghdad","Kyiv"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-en-89",
-    category: "Geography",
-    text: "Which country has the capital Bogotá?",
-    options: ["Iraq","Ireland","China","Colombia"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "bulk-en-158",
     category: "Science",
     text: "What is the chemical symbol for Iodine?",
@@ -1450,14 +904,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["10","20","100","6"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-5",
-    category: "Geography",
-    text: "What is the capital of Iceland?",
-    options: ["Reykjavik","Lisbon","Stockholm","Moscow"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-en-701",
     category: "Sports",
     text: "What is primarily used in tennis?",
@@ -1499,42 +946,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Iodine","Magnesium","Lithium","Helium"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-69",
-    category: "Geography",
-    text: "Which country has the capital Amsterdam?",
-    options: ["Spain","Netherlands","Sweden","Ireland"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-en-17",
-    category: "Geography",
-    text: "What is the capital of Ireland?",
-    options: ["Reykjavik","Jakarta","Abuja","Dublin"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-en-39",
-    category: "Geography",
-    text: "What is the capital of India?",
-    options: ["Washington, D.C.","Sofia","Brussels","New Delhi"],
-    correctIndex: 3,
-  },
-  {
+        {
     id: "bulk-en-140",
     category: "Science",
     text: "What is the chemical symbol for Potassium?",
     options: ["Cu","K","Cl","S"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-4",
-    category: "Geography",
-    text: "What is the capital of Finland?",
-    options: ["Bangkok","Tokyo","Tehran","Helsinki"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-en-138",
     category: "Science",
     text: "What is the chemical symbol for Chlorine?",
@@ -1548,21 +967,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["mountains","forest","swamp","savanna"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-2",
-    category: "Geography",
-    text: "What is the capital of Norway?",
-    options: ["Oslo","Moscow","Canberra","Kyiv"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-en-30",
-    category: "Geography",
-    text: "What is the capital of Mexico?",
-    options: ["Mexico City","Tehran","Reykjavik","Helsinki"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "bulk-en-141",
     category: "Science",
     text: "What element has the symbol Ca?",
@@ -1576,14 +981,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["calf","chick","cub","pup"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-6",
-    category: "Geography",
-    text: "What is the capital of Germany?",
-    options: ["Jakarta","Amsterdam","Dublin","Berlin"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-en-155",
     category: "Science",
     text: "What element has the symbol Pb?",
@@ -1604,28 +1002,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Jupiter","Venus","Mercury","Earth"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-29",
-    category: "Geography",
-    text: "What is the capital of Canada?",
-    options: ["Canberra","Ottawa","Wellington","Dublin"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-en-103",
-    category: "Geography",
-    text: "Which country has the capital Nairobi?",
-    options: ["Colombia","United Kingdom","Kenya","Morocco"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-en-82",
-    category: "Geography",
-    text: "Which country has the capital Washington, D.C.?",
-    options: ["Iran","USA","Australia","United Kingdom"],
-    correctIndex: 1,
-  },
-  {
+        {
     id: "bulk-en-789",
     category: "General",
     text: "Which month comes after July?",
@@ -1667,28 +1044,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["1","6","2","5"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-43",
-    category: "Geography",
-    text: "What is the capital of Australia?",
-    options: ["Oslo","Athens","Brasília","Canberra"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-en-107",
-    category: "Geography",
-    text: "Which country has the capital Tehran?",
-    options: ["Iran","Argentina","Ireland","Romania"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-en-67",
-    category: "Geography",
-    text: "Which country has the capital Vienna?",
-    options: ["Ukraine","Turkey","Saudi Arabia","Austria"],
-    correctIndex: 3,
-  },
-  {
+        {
     id: "bulk-en-753",
     category: "General",
     text: "What number is the Roman numeral II?",
@@ -1702,49 +1058,21 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["cub","hatchling","pup","joey"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-100",
-    category: "Geography",
-    text: "Which country has the capital Pretoria?",
-    options: ["Australia","Colombia","Kenya","South Africa"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-en-93",
-    category: "Geography",
-    text: "Which country has the capital New Delhi?",
-    options: ["Canada","Romania","India","Bulgaria"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "bulk-en-171",
     category: "Science",
     text: "What element has the symbol Pt?",
     options: ["Manganese","Carbon","Chromium","Platinum"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-105",
-    category: "Geography",
-    text: "Which country has the capital Riyadh?",
-    options: ["Romania","Saudi Arabia","France","Russia"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-en-695",
     category: "Sports",
     text: "What is primarily used in handball?",
     options: ["disk","puck","shuttlecock","ball"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-94",
-    category: "Geography",
-    text: "Which country has the capital Bangkok?",
-    options: ["Thailand","Kenya","Austria","Egypt"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-en-705",
     category: "Sports",
     text: "What is primarily used in baseball?",
@@ -1765,56 +1093,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Nitrogen","Phosphorus","Zinc","Lithium"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-104",
-    category: "Geography",
-    text: "Which country has the capital Jerusalem?",
-    options: ["Iran","Ireland","Israel","Mexico"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-en-16",
-    category: "Geography",
-    text: "What is the capital of Belgium?",
-    options: ["Lisbon","Madrid","Helsinki","Brussels"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-en-64",
-    category: "Geography",
-    text: "Which country has the capital Lisbon?",
-    options: ["Portugal","Mexico","United Kingdom","Morocco"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-en-21",
-    category: "Geography",
-    text: "What is the capital of Russia?",
-    options: ["Moscow","Tokyo","Amsterdam","Pretoria"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-en-58",
-    category: "Geography",
-    text: "Which country has the capital Helsinki?",
-    options: ["Israel","Finland","Denmark","Egypt"],
-    correctIndex: 1,
-  },
-  {
+            {
     id: "bulk-en-125",
     category: "Science",
     text: "What element has the symbol Na?",
     options: ["Lithium","Tin","Sodium","Sulfur"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-92",
-    category: "Geography",
-    text: "Which country has the capital Seoul?",
-    options: ["India","Spain","South Korea","Indonesia"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-678",
     category: "Nature",
     text: "What is a baby eagle called?",
@@ -1828,49 +1114,21 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["November","March","January","July"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-en-54",
-    category: "Geography",
-    text: "What is the capital of Iraq?",
-    options: ["Rome","Baghdad","Rabat","Prague"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-en-781",
     category: "General",
     text: "Which month comes after March?",
     options: ["November","April","August","March"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-13",
-    category: "Geography",
-    text: "What is the capital of Austria?",
-    options: ["Vienna","Tokyo","Dublin","Amsterdam"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-en-18",
-    category: "Geography",
-    text: "What is the capital of United Kingdom?",
-    options: ["Abu Dhabi","Hanoi","Washington, D.C.","London"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "bulk-en-679",
     category: "Nature",
     text: "Where does an eagle typically live?",
     options: ["savanna","forest","jungle","mountains"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-42",
-    category: "Geography",
-    text: "What is the capital of Indonesia?",
-    options: ["Budapest","Riyadh","Jakarta","Washington, D.C."],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-161",
     category: "Science",
     text: "What element has the symbol Ni?",
@@ -1891,14 +1149,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["S","Ti","Cl","Sn"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-en-80",
-    category: "Geography",
-    text: "Which country has the capital Zagreb?",
-    options: ["Finland","South Africa","Croatia","Turkey"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-en-116",
     category: "Science",
     text: "What is the chemical symbol for Carbon?",
@@ -1912,14 +1163,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["July","December","April","February"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-en-55",
-    category: "Geography",
-    text: "Which country has the capital Stockholm?",
-    options: ["United Arab Emirates","Sweden","Mexico","Austria"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-en-653",
     category: "History",
     text: "In which year: First powered flight?",
@@ -1933,21 +1177,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Portugal","Italy","New Zealand","Ireland"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-en-25",
-    category: "Geography",
-    text: "What is the capital of Bulgaria?",
-    options: ["Ankara","Tehran","Brasília","Sofia"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-en-70",
-    category: "Geography",
-    text: "Which country has the capital Brussels?",
-    options: ["Finland","Thailand","Belgium","Colombia"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "bulk2-en-367",
     category: "General",
     text: "What position in the alphabet is the letter O?",
@@ -2178,42 +1408,14 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Jane Austen","F. Scott Fitzgerald","Homer","J.R.R. Tolkien"],
     correctIndex: 3,
   },
-  {
-    id: "tri-en-11",
-    category: "Culture",
-    text: "Who wrote 1984?",
-    options: ["J.R.R. Tolkien","William Shakespeare","George Orwell","F. Scott Fitzgerald"],
-    correctIndex: 2,
-  },
-  {
-    id: "tri-en-12",
-    category: "Culture",
-    text: "Who wrote Pride and Prejudice?",
-    options: ["George Orwell","J.K. Rowling","F. Scott Fitzgerald","Jane Austen"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "tri-en-13",
     category: "Culture",
     text: "Who wrote The Great Gatsby?",
     options: ["Mary Shelley","J.R.R. Tolkien","F. Scott Fitzgerald","Jane Austen"],
     correctIndex: 2,
   },
-  {
-    id: "tri-en-14",
-    category: "Culture",
-    text: "Who wrote Romeo and Juliet?",
-    options: ["William Shakespeare","J.R.R. Tolkien","J.K. Rowling","George Orwell"],
-    correctIndex: 0,
-  },
-  {
-    id: "tri-en-15",
-    category: "Culture",
-    text: "Who wrote The Odyssey?",
-    options: ["Homer","J.K. Rowling","J.R.R. Tolkien","F. Scott Fitzgerald"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tri-en-16",
     category: "Culture",
     text: "Who wrote Frankenstein?",
@@ -2416,21 +1618,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Christopher Nolan","Francis Ford Coppola","James Cameron","Steven Spielberg"],
     correctIndex: 2,
   },
-  {
-    id: "tri-en-45",
-    category: "Movies & TV",
-    text: "Who directed Inception?",
-    options: ["Steven Spielberg","Christopher Nolan","Quentin Tarantino","James Cameron"],
-    correctIndex: 1,
-  },
-  {
-    id: "tri-en-46",
-    category: "Movies & TV",
-    text: "Who directed Jurassic Park?",
-    options: ["Quentin Tarantino","Christopher Nolan","Francis Ford Coppola","Steven Spielberg"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "tri-en-47",
     category: "Movies & TV",
     text: "Who directed Pulp Fiction?",
@@ -2682,42 +1870,21 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["10","11","9","12"],
     correctIndex: 1,
   },
-  {
-    id: "tri-en-83",
-    category: "Sports",
-    text: "How often are the Summer Olympics held?",
-    options: ["Every 5 years","Every year","Every 4 years","Every 2 years"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "tri-en-84",
     category: "Sports",
     text: "What does ice hockey use instead of a ball?",
     options: ["A ring","A puck","A disk","A stick only"],
     correctIndex: 1,
   },
-  {
-    id: "tri-en-85",
-    category: "Sports",
-    text: "Which sport is played at Wimbledon?",
-    options: ["Squash","Tennis","Cricket","Golf"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "tri-en-86",
     category: "Sports",
     text: "How long is a marathon (approx)?",
     options: ["50 km","21 km","10 km","42 km"],
     correctIndex: 3,
   },
-  {
-    id: "tri-en-87",
-    category: "Geography",
-    text: "What is the largest ocean?",
-    options: ["Pacific","Indian","Atlantic","Arctic"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tri-en-88",
     category: "Geography",
     text: "What is the longest river often debated with Amazon?",
@@ -2731,14 +1898,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Kalahari","Sahara","Mojave","Gobi"],
     correctIndex: 1,
   },
-  {
-    id: "tri-en-90",
-    category: "Geography",
-    text: "Which country has the most people?",
-    options: ["USA","China","Indonesia","India"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "tri-en-91",
     category: "Nature",
     text: "What is the largest animal?",
@@ -2752,14 +1912,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Chameleon","Gecko","Lizard","Iguana"],
     correctIndex: 0,
   },
-  {
-    id: "tri-en-93",
-    category: "Nature",
-    text: "What do koalas mainly eat?",
-    options: ["Eucalyptus","Fish","Grass","Bamboo"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tri-en-94",
     category: "Nature",
     text: "How many legs does a spider have?",
@@ -2773,56 +1926,28 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Mercury","Venus","Jupiter","Mars"],
     correctIndex: 3,
   },
-  {
-    id: "tri-en-96",
-    category: "Science",
-    text: "What is H2O?",
-    options: ["Hydrogen","Oxygen","Water","Salt"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "tri-en-97",
     category: "Science",
     text: "Which organ pumps blood?",
     options: ["Heart","Liver","Lung","Kidney"],
     correctIndex: 0,
   },
-  {
-    id: "tri-en-98",
-    category: "History",
-    text: "In which year did the Berlin Wall fall?",
-    options: ["1991","1989","1987","1985"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "tri-en-99",
     category: "History",
     text: "In which year did Apollo 11 land on the Moon?",
     options: ["1965","1961","1972","1969"],
     correctIndex: 3,
   },
-  {
-    id: "tri-en-100",
-    category: "History",
-    text: "Who painted the Mona Lisa?",
-    options: ["Leonardo da Vinci","Michelangelo","Raphael","Donatello"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tri-en-101",
     category: "Music",
     text: "Which band made Bohemian Rhapsody?",
     options: ["ABBA","Queen","Led Zeppelin","The Beatles"],
     correctIndex: 1,
   },
-  {
-    id: "tri-en-102",
-    category: "Pop Culture",
-    text: "What color is Pikachu?",
-    options: ["Red","Yellow","Blue","Green"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "tri-en-103",
     category: "Pop Culture",
     text: "What is Mario's brother called?",
@@ -3074,21 +2199,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Kenya","Morocco","Azerbaijan","South Africa"],
     correctIndex: 2,
   },
-  {
-    id: "tri2-en-17",
-    category: "Geography",
-    text: "What is the capital of Bangladesh?",
-    options: ["Havana","Dhaka","Sarajevo","Riyadh"],
-    correctIndex: 1,
-  },
-  {
-    id: "tri2-en-18",
-    category: "Geography",
-    text: "Which country has the capital Dhaka?",
-    options: ["Cyprus","Serbia","Vietnam","Bangladesh"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "tri2-en-19",
     category: "Geography",
     text: "What is the capital of Belarus?",
@@ -3144,21 +2255,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Costa Rica","Poland","Spain","United Arab Emirates"],
     correctIndex: 0,
   },
-  {
-    id: "tri2-en-43",
-    category: "Geography",
-    text: "What is the capital of Cuba?",
-    options: ["Sofia","Havana","Caracas","Ankara"],
-    correctIndex: 1,
-  },
-  {
-    id: "tri2-en-44",
-    category: "Geography",
-    text: "Which country has the capital Havana?",
-    options: ["Cuba","Ethiopia","Brazil","Sweden"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tri2-en-45",
     category: "Geography",
     text: "What is the capital of Cyprus?",
@@ -3242,21 +2339,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Albania","Ghana","Kenya","Colombia"],
     correctIndex: 1,
   },
-  {
-    id: "tri2-en-89",
-    category: "Geography",
-    text: "What is the capital of Jamaica?",
-    options: ["Kingston","Lisbon","Ankara","Paris"],
-    correctIndex: 0,
-  },
-  {
-    id: "tri2-en-90",
-    category: "Geography",
-    text: "Which country has the capital Kingston?",
-    options: ["Bulgaria","Jamaica","Albania","Bangladesh"],
-    correctIndex: 1,
-  },
-  {
+      {
     id: "tri2-en-93",
     category: "Geography",
     text: "What is the capital of Jordan?",
@@ -3340,21 +2423,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Indonesia","North Macedonia","Luxembourg","Denmark"],
     correctIndex: 2,
   },
-  {
-    id: "tri2-en-107",
-    category: "Geography",
-    text: "What is the capital of Malaysia?",
-    options: ["Quito","Warsaw","Luxembourg","Kuala Lumpur"],
-    correctIndex: 3,
-  },
-  {
-    id: "tri2-en-108",
-    category: "Geography",
-    text: "Which country has the capital Kuala Lumpur?",
-    options: ["Malaysia","Uzbekistan","Romania","Bolivia"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tri2-en-109",
     category: "Geography",
     text: "What is the capital of Malta?",
@@ -3410,49 +2479,7 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Cyprus","North Macedonia","United Kingdom","Moldova"],
     correctIndex: 1,
   },
-  {
-    id: "tri2-en-129",
-    category: "Geography",
-    text: "What is the capital of Pakistan?",
-    options: ["Islamabad","Kabul","Zagreb","Paris"],
-    correctIndex: 0,
-  },
-  {
-    id: "tri2-en-130",
-    category: "Geography",
-    text: "Which country has the capital Islamabad?",
-    options: ["Nigeria","Romania","Pakistan","Venezuela"],
-    correctIndex: 2,
-  },
-  {
-    id: "tri2-en-133",
-    category: "Geography",
-    text: "What is the capital of Philippines?",
-    options: ["Stockholm","Cairo","Manila","Amman"],
-    correctIndex: 2,
-  },
-  {
-    id: "tri2-en-134",
-    category: "Geography",
-    text: "Which country has the capital Manila?",
-    options: ["Denmark","Spain","Austria","Philippines"],
-    correctIndex: 3,
-  },
-  {
-    id: "tri2-en-147",
-    category: "Geography",
-    text: "What is the capital of Singapore?",
-    options: ["Singapore","Prague","Dublin","New Delhi"],
-    correctIndex: 0,
-  },
-  {
-    id: "tri2-en-148",
-    category: "Geography",
-    text: "Which country has the capital Singapore?",
-    options: ["Tunisia","Kenya","Bulgaria","Singapore"],
-    correctIndex: 3,
-  },
-  {
+              {
     id: "tri2-en-149",
     category: "Geography",
     text: "What is the capital of Slovakia?",
@@ -3774,84 +2801,28 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Dmitri Mendeleev","Alexander Fleming","Marie Curie","Albert Einstein"],
     correctIndex: 3,
   },
-  {
-    id: "tri2-en-218",
-    category: "Science",
-    text: "Who is most associated with evolution by natural selection?",
-    options: ["Charles Darwin","Isaac Newton","Dmitri Mendeleev","Marie Curie"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tri2-en-219",
     category: "Science",
     text: "Who is most associated with classical gravity / laws of motion?",
     options: ["Charles Darwin","Dmitri Mendeleev","Alexander Fleming","Isaac Newton"],
     correctIndex: 3,
   },
-  {
-    id: "tri2-en-220",
-    category: "Science",
-    text: "Who is most associated with penicillin?",
-    options: ["Isaac Newton","Alexander Fleming","Dmitri Mendeleev","Marie Curie"],
-    correctIndex: 1,
-  },
-  {
-    id: "tri2-en-221",
-    category: "Science",
-    text: "Who is most associated with the periodic table?",
-    options: ["Albert Einstein","Isaac Newton","Dmitri Mendeleev","Charles Darwin"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "tri2-en-222",
     category: "Science",
     text: "Who is most associated with radioactivity research?",
     options: ["Marie Curie","Charles Darwin","Dmitri Mendeleev","Albert Einstein"],
     correctIndex: 0,
   },
-  {
-    id: "tri2-en-223",
-    category: "Sports",
-    text: "Which sport is Wimbledon associated with?",
-    options: ["basketball","soccer","tennis","cycling"],
-    correctIndex: 2,
-  },
-  {
-    id: "tri2-en-224",
-    category: "Sports",
-    text: "Which sport is Tour de France associated with?",
-    options: ["American football","soccer","basketball","cycling"],
-    correctIndex: 3,
-  },
-  {
-    id: "tri2-en-225",
-    category: "Sports",
-    text: "Which sport is Super Bowl associated with?",
-    options: ["multi-sport","tennis","American football","soccer"],
-    correctIndex: 2,
-  },
-  {
+        {
     id: "tri2-en-226",
     category: "Sports",
     text: "Which sport is Champions League associated with?",
     options: ["tennis","ice hockey","soccer","cycling"],
     correctIndex: 2,
   },
-  {
-    id: "tri2-en-227",
-    category: "Sports",
-    text: "Which sport is NBA Finals associated with?",
-    options: ["soccer","basketball","tennis","Alt 3"],
-    correctIndex: 1,
-  },
-  {
-    id: "tri2-en-228",
-    category: "Sports",
-    text: "Which sport is Stanley Cup associated with?",
-    options: ["American football","tennis","soccer","ice hockey"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "tri2-en-229",
     category: "Sports",
     text: "Which sport is Olympic Games associated with?",
@@ -3921,49 +2892,21 @@ export const BULK_EN_QUESTIONS: Question[] = [
     options: ["Sony","Pixar","Illumination","DreamWorks"],
     correctIndex: 1,
   },
-  {
-    id: "tri2-en-239",
-    category: "Music",
-    text: "How many strings does a standard guitar have?",
-    options: ["5","6","7","4"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "tri2-en-240",
     category: "Music",
     text: "Which band made Yesterday?",
     options: ["Queen","ABBA","The Rolling Stones","The Beatles"],
     correctIndex: 3,
   },
-  {
-    id: "tri2-en-241",
-    category: "Tech",
-    text: "Which company makes the iPhone?",
-    options: ["Apple","Microsoft","Samsung","Google"],
-    correctIndex: 0,
-  },
-  {
-    id: "tri2-en-242",
-    category: "Tech",
-    text: "What does WWW stand for?",
-    options: ["Wireless Web","Wide Web World","World Wide Web","Web World Wide"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "tri2-en-243",
     category: "Nature",
     text: "Which animal has black and white stripes?",
     options: ["Panda","Tiger","Zebra","Skunk"],
     correctIndex: 2,
   },
-  {
-    id: "tri2-en-244",
-    category: "Nature",
-    text: "What is a group of lions called?",
-    options: ["A school","A pride","A pack","A flock"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "tri2-en-245",
     category: "History",
     text: "Which empire built the Colosseum?",
@@ -4004,5 +2947,5 @@ export const BULK_EN_QUESTIONS: Question[] = [
     text: "What color is Sonic?",
     options: ["Yellow","Red","Blue","Green"],
     correctIndex: 2,
-  },
+  }
 ]

@@ -210,5 +210,5 @@ export const SV_MORE_QUESTIONS: Question[] = [
     text: "Vad heter den svenska kungafamiljens efternamn?",
     options: ["Bernadotte","Vasa","Folkunga","Holstein"],
     correctIndex: 0,
-  },
+  }
 ]

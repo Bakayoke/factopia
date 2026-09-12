@@ -184,12 +184,12 @@ export const MODE_SV_QUESTIONS: Question[] = [
   {
     id: 'msv-d8',
     category: 'Teknik',
-    text: 'Vad står HTTP för (ungefär)?',
+    text: 'Vad står HTTP för?',
     options: [
       'HyperText Transfer Protocol',
       'High Tech Transfer Program',
       'Host Transfer Text Path',
-      'Hyper Tool Transport Packet',
+      'Hyper Tool Transport Packet'
     ],
     correctIndex: 0,
     mode: 'double',
@@ -243,7 +243,7 @@ export const MODE_SV_QUESTIONS: Question[] = [
   {
     id: 'msv-n5',
     category: 'Sport',
-    text: 'I vilken sport används en shuttlecock?',
+    text: 'I vilken sport används en fjäderboll?',
     options: ['Tennis', 'Badminton', 'Squash', 'Bordtennis'],
     correctIndex: 1,
   },
@@ -491,7 +491,7 @@ export const MODE_SV_QUESTIONS: Question[] = [
     text: 'Vilken är världens största ö?',
     options: ['Madagaskar', 'Grönland', 'Island', 'Borneo'],
     correctIndex: 1,
-  },
+  }
 ]
 
 /** Fresh EN bank — lightning + double seeds + normals. */
@@ -665,7 +665,7 @@ export const MODE_EN_QUESTIONS: Question[] = [
       'HyperText Transfer Protocol',
       'High Tech Transfer Program',
       'Host Transfer Text Path',
-      'Hyper Tool Transport Packet',
+      'Hyper Tool Transport Packet'
     ],
     correctIndex: 0,
     mode: 'double',
@@ -982,5 +982,5 @@ export const MODE_EN_QUESTIONS: Question[] = [
     text: 'In Star Wars, what color is Luke’s first lightsaber?',
     options: ['Red', 'Blue', 'Green', 'Purple'],
     correctIndex: 1,
-  },
+  }
 ]

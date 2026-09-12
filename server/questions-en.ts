@@ -8,14 +8,7 @@ export const EN_QUESTIONS: Question[] = [
     options: ["Lyon","Paris","Marseille","Nice"],
     correctIndex: 1,
   },
-  {
-    id: "en-geo-2",
-    category: "Geography",
-    text: "Which ocean is the largest?",
-    options: ["Atlantic","Indian","Pacific","Arctic"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "en-geo-3",
     category: "Geography",
     text: "Which country has the most people?",
@@ -43,14 +36,7 @@ export const EN_QUESTIONS: Question[] = [
     options: ["Gobi","Sahara","Kalahari","Mojave"],
     correctIndex: 1,
   },
-  {
-    id: "en-geo-7",
-    category: "Geography",
-    text: "What is the capital of Japan?",
-    options: ["Osaka","Kyoto","Tokyo","Nagoya"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "en-geo-8",
     category: "Geography",
     text: "Which country is both in Europe and Asia?",
@@ -71,14 +57,7 @@ export const EN_QUESTIONS: Question[] = [
     options: ["Florida","Hawaii","Alaska","California"],
     correctIndex: 1,
   },
-  {
-    id: "en-geo-11",
-    category: "Geography",
-    text: "What is the capital of Canada?",
-    options: ["Toronto","Ottawa","Vancouver","Montreal"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "en-geo-12",
     category: "Geography",
     text: "Which sea separates Europe and Africa?",
@@ -197,14 +176,7 @@ export const EN_QUESTIONS: Question[] = [
     options: ["Marie Antoinette","Joan of Arc","Catherine","Elizabeth"],
     correctIndex: 1,
   },
-  {
-    id: "en-his-9",
-    category: "History",
-    text: "The Titanic sank in which year?",
-    options: ["1910","1912","1914","1918"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "en-his-10",
     category: "History",
     text: "Who was the first person on the Moon?",
@@ -456,14 +428,7 @@ export const EN_QUESTIONS: Question[] = [
     options: ["Pixar","Illumination","DreamWorks","Disney"],
     correctIndex: 1,
   },
-  {
-    id: "en-mus-1",
-    category: "Music",
-    text: "How many strings does a standard guitar have?",
-    options: ["4","5","6","7"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "en-mus-2",
     category: "Music",
     text: "Which band sang Bohemian Rhapsody?",
@@ -582,21 +547,7 @@ export const EN_QUESTIONS: Question[] = [
     options: ["156","206","256","306"],
     correctIndex: 1,
   },
-  {
-    id: "en-sci-4",
-    category: "Science",
-    text: "What gas do plants absorb for photosynthesis?",
-    options: ["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],
-    correctIndex: 1,
-  },
-  {
-    id: "en-sci-5",
-    category: "Science",
-    text: "What is the chemical symbol for gold?",
-    options: ["Ag","Au","Go","Gd"],
-    correctIndex: 1,
-  },
-  {
+      {
     id: "en-sci-6",
     category: "Science",
     text: "Light travels fastest through?",
@@ -617,14 +568,7 @@ export const EN_QUESTIONS: Question[] = [
     options: ["2nd","3rd","4th","5th"],
     correctIndex: 1,
   },
-  {
-    id: "en-sci-9",
-    category: "Science",
-    text: "What do bees collect to make honey?",
-    options: ["Pollen","Nectar","Sap","Dew"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "en-sci-10",
     category: "Science",
     text: "What organ pumps blood?",
@@ -785,14 +729,7 @@ export const EN_QUESTIONS: Question[] = [
     options: ["Google","Apple","Samsung","Microsoft"],
     correctIndex: 1,
   },
-  {
-    id: "en-tec-3",
-    category: "Tech",
-    text: "What does WWW stand for?",
-    options: ["World Wide Web","Web World Wide","Wide Web World","Wireless Web World"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "en-tec-4",
     category: "Tech",
     text: "Which language runs in web browsers natively?",
@@ -897,14 +834,7 @@ export const EN_QUESTIONS: Question[] = [
     options: ["45","90","180","360"],
     correctIndex: 1,
   },
-  {
-    id: "en-gen-5",
-    category: "General",
-    text: "What color do you get mixing blue and yellow?",
-    options: ["Purple","Green","Orange","Brown"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "en-gen-6",
     category: "General",
     text: "How many seconds in a minute?",
@@ -939,14 +869,7 @@ export const EN_QUESTIONS: Question[] = [
     options: ["48","52","54","56"],
     correctIndex: 1,
   },
-  {
-    id: "en-gen-11",
-    category: "General",
-    text: "What is the opposite of north?",
-    options: ["East","South","West","Up"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "en-gen-12",
     category: "General",
     text: "How many hours in two days?",
@@ -967,14 +890,7 @@ export const EN_QUESTIONS: Question[] = [
     options: ["Kitten","Puppy","Cub","Calf"],
     correctIndex: 1,
   },
-  {
-    id: "en-gen-15",
-    category: "General",
-    text: "How many wheels does a typical car have?",
-    options: ["2","3","4","6"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "en-gen-16",
     category: "General",
     text: "What is the square root of 64?",
@@ -1106,5 +1022,5 @@ export const EN_QUESTIONS: Question[] = [
     text: "Who lives in a pineapple under the sea?",
     options: ["Patrick","SpongeBob","Squidward","Mr. Krabs"],
     correctIndex: 1,
-  },
+  }
 ]

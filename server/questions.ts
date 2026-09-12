@@ -120,14 +120,7 @@ const BASE_QUESTIONS: Question[] = [
     options: ['Leonardo da Vinci', 'Raphael', 'Michelangelo', 'Donatello'],
     correctIndex: 2,
   },
-  {
-    id: 'his-6',
-    category: 'Historia',
-    text: 'Vilket år blev Sverige medlem i EU?',
-    options: ['1991', '1995', '1999', '2001'],
-    correctIndex: 1,
-  },
-  {
+    {
     id: 'his-7',
     category: 'Historia',
     text: 'Vem upptäckte Amerika 1492 (ur europeiskt perspektiv)?',
@@ -157,14 +150,7 @@ const BASE_QUESTIONS: Question[] = [
   },
 
   // Sport
-  {
-    id: 'spo-1',
-    category: 'Sport',
-    text: 'Hur många spelare har ett fotbollslag på planen?',
-    options: ['9', '10', '11', '12'],
-    correctIndex: 2,
-  },
-  {
+    {
     id: 'spo-2',
     category: 'Sport',
     text: 'I vilken sport används en puck?',
@@ -357,14 +343,7 @@ const BASE_QUESTIONS: Question[] = [
     options: ['John Lennon', 'Paul McCartney', 'George Harrison', 'Ringo Starr'],
     correctIndex: 3,
   },
-  {
-    id: 'mus-9',
-    category: 'Musik',
-    text: 'Vilket instrument är Yo-Yo Ma mest känd för?',
-    options: ['Violin', 'Piano', 'Cello', 'Flöjt'],
-    correctIndex: 2,
-  },
-  {
+    {
     id: 'mus-10',
     category: 'Musik',
     text: 'Vilken låt vann Eurovision 2023 för Sverige?',
@@ -380,21 +359,7 @@ const BASE_QUESTIONS: Question[] = [
     options: ['CO2', 'H2O', 'O2', 'NaCl'],
     correctIndex: 1,
   },
-  {
-    id: 'sci-2',
-    category: 'Vetenskap',
-    text: 'Vilken planet är närmast solen?',
-    options: ['Venus', 'Merkurius', 'Mars', 'Jorden'],
-    correctIndex: 1,
-  },
-  {
-    id: 'sci-3',
-    category: 'Vetenskap',
-    text: 'Hur många ben har en vuxen människa ungefär?',
-    options: ['156', '206', '256', '306'],
-    correctIndex: 1,
-  },
-  {
+      {
     id: 'sci-4',
     category: 'Vetenskap',
     text: 'Vad kallas djur som äter både växter och kött?',
@@ -624,14 +589,7 @@ const BASE_QUESTIONS: Question[] = [
     options: ['Älg', 'Björn', 'Varg', 'Lodjur'],
     correctIndex: 0,
   },
-  {
-    id: 'mix-6',
-    category: 'Allmänt',
-    text: 'Hur många bokstäver har det svenska alfabetet?',
-    options: ['26', '28', '29', '30'],
-    correctIndex: 2,
-  },
-  {
+    {
     id: 'mix-7',
     category: 'Allmänt',
     text: 'Vad heter den svenska nationaldagen?',
@@ -652,14 +610,7 @@ const BASE_QUESTIONS: Question[] = [
     options: ['1', '2', '3', '4'],
     correctIndex: 2,
   },
-  {
-    id: 'mix-10',
-    category: 'Allmänt',
-    text: 'Vad kallas en grupp lejon?',
-    options: ['Flock', 'Svärm', 'Pride', 'Pack'],
-    correctIndex: 2,
-  },
-  {
+    {
     id: 'mix-11',
     category: 'Allmänt',
     text: 'Vilken månad har 28 dagar i vanliga år?',
@@ -790,7 +741,7 @@ const BASE_QUESTIONS: Question[] = [
   {
     id: 'pop-9',
     category: 'Popkultur',
-    text: 'Vad heter världens mest sålda spelkonsol genom tiderna (ungefär)?',
+    text: 'Vad är världens mest sålda spelkonsol genom tiderna?',
     options: ['PlayStation 2', 'Nintendo Switch', 'Xbox 360', 'Wii'],
     correctIndex: 0,
   },
@@ -800,7 +751,7 @@ const BASE_QUESTIONS: Question[] = [
     text: 'Vilken streaming-tjänst ägs av Disney?',
     options: ['Netflix', 'Disney+', 'HBO Max', 'Paramount+'],
     correctIndex: 1,
-  },
+  }
 ]
 
 export const QUESTIONS_SV: Question[] = [
@@ -809,13 +760,13 @@ export const QUESTIONS_SV: Question[] = [
   ...SV_MORE_QUESTIONS,
   ...BULK_SV_QUESTIONS,
   ...TP_SV_QUESTIONS,
-  ...MODE_SV_QUESTIONS,
+  ...MODE_SV_QUESTIONS
 ]
 export const QUESTIONS_EN: Question[] = [
   ...EN_QUESTIONS,
   ...BULK_EN_QUESTIONS,
   ...TP_EN_QUESTIONS,
-  ...MODE_EN_QUESTIONS,
+  ...MODE_EN_QUESTIONS
 ]
 /** @deprecated use QUESTIONS_SV / QUESTIONS_EN */
 export const QUESTIONS: Question[] = QUESTIONS_SV
@@ -847,6 +798,10 @@ function normalizeText(text: string): string {
     .toLowerCase()
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
+    .replace(
+      /\b(samtidigt|typiskt|vanligtvis|normalt|ungefar|oftast|egentligen|framst|mest|bland dessa|enligt skaparna|i folkmun|roughly|typically|usually|mainly|most)\b/g,
+      ' ',
+    )
     .replace(/[^a-z0-9åäö\s]/gi, ' ')
     .replace(/\s+/g, ' ')
     .trim()
@@ -867,10 +822,17 @@ function hasDuplicateOptions(q: Question): boolean {
 }
 
 function dedupePool(pool: Question[]): Question[] {
+  // Prefer mode-seeded questions so lightning/double banks survive text collisions.
+  const ranked = [...pool].sort((a, b) => {
+    const am = a.mode && a.mode !== 'normal' ? 0 : 1
+    const bm = b.mode && b.mode !== 'normal' ? 0 : 1
+    if (am !== bm) return am - bm
+    return 0
+  })
   const seenText = new Set<string>()
   const seenId = new Set<string>()
   const out: Question[] = []
-  for (const q of shuffle(pool)) {
+  for (const q of ranked) {
     if (hasDuplicateOptions(q)) continue
     if (seenId.has(q.id)) continue
     const key = normalizeText(q.text)
@@ -879,7 +841,7 @@ function dedupePool(pool: Question[]): Question[] {
     seenText.add(key)
     out.push(q)
   }
-  return out
+  return shuffle(out)
 }
 
 /** Prefer variety: round-robin across shuffled category buckets. */

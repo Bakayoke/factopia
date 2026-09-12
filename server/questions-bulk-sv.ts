@@ -4,46 +4,18 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "bulk-sv-517",
     category: "Sport",
-    text: "Vad används främst i ishockey?",
-    options: ["boll","shuttlecock","disk","puck"],
+    text: "Vad spelar man med i ishockey?",
+    options: ["boll","fjäderboll","diskus","puck"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-100",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Pretoria?",
-    options: ["Sydafrika","Spanien","Tyskland","Schweiz"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-sv-483",
     category: "Natur",
     text: "Var lever en älg?",
     options: ["savann","träsk","skog","hav"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-66",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Prag?",
-    options: ["Tjeckien","Schweiz","Serbien","Thailand"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-sv-32",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Argentina?",
-    options: ["Paris","Buenos Aires","Canberra","Warszawa"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-sv-80",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Zagreb?",
-    options: ["Belgien","Kroatien","USA","Ungern"],
-    correctIndex: 1,
-  },
-  {
+        {
     id: "bulk-sv-593",
     category: "Allmänt",
     text: "Vad är den romerska siffran X i arabiska tal?",
@@ -57,14 +29,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Jorden","Saturnus","Uranus","Mars"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-26",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Kroatien?",
-    options: ["Budapest","Seoul","Amsterdam","Zagreb"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-sv-507",
     category: "Natur",
     text: "Var lever en krokodil?",
@@ -92,49 +57,21 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["1963","1789","1492","1977"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-sv-67",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Wien?",
-    options: ["Österrike","Island","Finland","Portugal"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-sv-528",
     category: "Sport",
     text: "Hur många spelare har ett basebollag på planen samtidigt?",
     options: ["12","5","9","11"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-59",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Reykjavik?",
-    options: ["Island","Österrike","Australien","Schweiz"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-sv-156",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet för Bly?",
     options: ["Pb","Cr","Co","Sn"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-14",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Schweiz?",
-    options: ["Reykjavik","Lissabon","Bangkok","Bern"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-41",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Vietnam?",
-    options: ["Moskva","Ankara","Zagreb","Hanoi"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "bulk-sv-508",
     category: "Natur",
     text: "Vad kallas ungen till en giraff?",
@@ -148,42 +85,21 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Cl","He","Li","C"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-97",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Canberra?",
-    options: ["Australien","Israel","Irland","Thailand"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-sv-139",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet K?",
     options: ["Väte","Svavel","Kalium","Zink"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-37",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Kina?",
-    options: ["Santiago","Buenos Aires","Peking","Bryssel"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-sv-619",
     category: "Allmänt",
     text: "Vilken månad kommer efter oktober?",
     options: ["maj","september","november","januari"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-79",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Sofia?",
-    options: ["Bulgarien","Tyskland","Australien","Förenade Arabemiraten"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-sv-524",
     category: "Sport",
     text: "Hur många spelare spelar per sida i tennis (singel)?",
@@ -204,35 +120,14 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Co","K","H","I"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-43",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Australien?",
-    options: ["Riyadh","Canberra","Kairo","Abu Dhabi"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-113",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet Li?",
     options: ["Magnesium","Syre","Klor","Litium"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-36",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Japan?",
-    options: ["Lima","Berlin","Buenos Aires","Tokyo"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-6",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Tyskland?",
-    options: ["Rabat","Hanoi","Berlin","Lissabon"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "bulk-sv-185",
     category: "Vetenskap",
     text: "Vilken plats från solen har Uranus?",
@@ -257,7 +152,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     id: "bulk-sv-529",
     category: "Sport",
     text: "Vad används främst i baseboll?",
-    options: ["puck","disk","shuttlecock","boll"],
+    options: ["puck","diskus","fjäderboll","boll"],
     correctIndex: 3,
   },
   {
@@ -274,14 +169,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Väte","Svavel","Jod","Nickel"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-74",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Ankara?",
-    options: ["Turkiet","Iran","Rumänien","Finland"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-sv-476",
     category: "Historia",
     text: "Vilket år: Första människan i rymden?",
@@ -302,14 +190,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["1977","2001","1903","1989"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-144",
-    category: "Vetenskap",
-    text: "Vad är kemiska tecknet för Järn?",
-    options: ["Ag","Fe","Mn","Ca"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-489",
     category: "Natur",
     text: "Var lever en pingvin?",
@@ -330,14 +211,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["1914","1789","2001","1903"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-8",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Spanien?",
-    options: ["Madrid","Zagreb","Kiev","Canberra"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-sv-117",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet N?",
@@ -372,28 +246,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Kroatien","Sydkorea","Förenade Arabemiraten","Frankrike"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-39",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Indien?",
-    options: ["Moskva","Sofia","Lissabon","New Delhi"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-15",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Nederländerna?",
-    options: ["Köpenhamn","Peking","Amsterdam","Abuja"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-sv-91",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Peking?",
-    options: ["Sydafrika","Argentina","Brasilien","Kina"],
-    correctIndex: 3,
-  },
-  {
+        {
     id: "bulk-sv-485",
     category: "Natur",
     text: "Var lever ett lejon?",
@@ -449,14 +302,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Neptunus","Saturnus","Uranus","Jupiter"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-101",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Rabat?",
-    options: ["Egypten","Marocko","Mexiko","Ryssland"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-516",
     category: "Sport",
     text: "Hur många spelare (inkl. målvakt) har ett ishockeylag på isen samtidigt?",
@@ -533,49 +379,21 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["valp","elefantkalv","örnunge","pandunge"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-51",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Saudiarabien?",
-    options: ["Paris","Berlin","Riyadh","Sofia"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-sv-515",
     category: "Sport",
     text: "Vad används främst i fotboll?",
-    options: ["disk","shuttlecock","puck","boll"],
+    options: ["diskus","fjäderboll","puck","boll"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-27",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Serbien?",
-    options: ["Jerusalem","Peking","Kiev","Belgrad"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-sv-131",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet Si?",
     options: ["Mangan","Koppar","Titan","Kisel"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-77",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Budapest?",
-    options: ["Australien","Förenade Arabemiraten","Ungern","Kenya"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-sv-57",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Köpenhamn?",
-    options: ["Sydkorea","Tyskland","Colombia","Danmark"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "bulk-sv-158",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet för Jod?",
@@ -589,35 +407,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["pandunge","hajunge","älgkalv","valp"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-470",
-    category: "Historia",
-    text: "Vilket år: USA:s självständighetsförklaring?",
-    options: ["1991","1776","1977","1989"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-sv-105",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Riyadh?",
-    options: ["Finland","Serbien","Saudiarabien","Nigeria"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-sv-3",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Danmark?",
-    options: ["Bern","London","Paris","Köpenhamn"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-49",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Kenya?",
-    options: ["Paris","Peking","Bern","Nairobi"],
-    correctIndex: 3,
-  },
-  {
+          {
     id: "bulk-sv-491",
     category: "Natur",
     text: "Var lever en känguru?",
@@ -631,21 +421,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["1961","1492","1939","1991"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-sv-54",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Irak?",
-    options: ["New Delhi","Sofia","Bagdad","Madrid"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-sv-40",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Thailand?",
-    options: ["Bryssel","Wien","Bangkok","Pretoria"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "bulk-sv-183",
     category: "Vetenskap",
     text: "Vilken plats från solen har Saturnus?",
@@ -659,28 +435,14 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["8","2","7","5"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-sv-4",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Finland?",
-    options: ["Bagdad","Helsingfors","Warszawa","Ankara"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-166",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet för Mangan?",
     options: ["Mn","Ti","Fe","Cr"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-81",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Belgrad?",
-    options: ["Sydafrika","Serbien","Kina","Nederländerna"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-599",
     category: "Allmänt",
     text: "Vad är den romerska siffran C i arabiska tal?",
@@ -701,14 +463,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["april","maj","oktober","juli"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-71",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Dublin?",
-    options: ["Chile","Irland","Förenade Arabemiraten","Egypten"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-153",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet Hg?",
@@ -736,18 +491,11 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Helium","Litium","Kvicksilver","Jod"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-20",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Turkiet?",
-    options: ["Abuja","Jerusalem","Ankara","Aten"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-sv-490",
     category: "Natur",
     text: "Vad kallas ungen till en känguru?",
-    options: ["örnunge","zebrakalv","joey","pandunge"],
+    options: ["örnunge","zebrakalv","känguruunge","pandunge"],
     correctIndex: 2,
   },
   {
@@ -778,21 +526,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["C","Zn","N","Ag"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-87",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Santiago?",
-    options: ["Japan","Chile","Saudiarabien","Ukraina"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-sv-96",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Jakarta?",
-    options: ["Indonesien","Colombia","Grekland","Finland"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "bulk-sv-610",
     category: "Allmänt",
     text: "Hur många dagar har juni (vanligt år)?",
@@ -820,14 +554,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Hg","Sn","Al","C"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-30",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Mexiko?",
-    options: ["Jerusalem","Rabat","Mexico City","Pretoria"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-sv-152",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet för Guld?",
@@ -869,49 +596,21 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["6","3","100","50"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-24",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Rumänien?",
-    options: ["Bukarest","Madrid","Budapest","Reykjavik"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-sv-499",
     category: "Natur",
     text: "Var lever en haj?",
     options: ["skog","träsk","hav","savann"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-46",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Sydafrika?",
-    options: ["Abu Dhabi","Pretoria","Kiev","Washington D.C."],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-sv-83",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Ottawa?",
-    options: ["Island","Sydkorea","Nigeria","Kanada"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "bulk-sv-498",
     category: "Natur",
     text: "Vad kallas ungen till en haj?",
     options: ["hajunge","giraffkalv","ugglaunge","elefantkalv"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-104",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Jerusalem?",
-    options: ["Australien","Norge","Grekland","Israel"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-sv-137",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet Cl?",
@@ -932,53 +631,18 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Svavel","Kvicksilver","Zink","Jod"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-50",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Israel?",
-    options: ["Aten","Bukarest","Bangkok","Jerusalem"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-sv-479",
     category: "Historia",
     text: "Vilket år: Sovjetunionens upplösning?",
     options: ["1977","1939","1991","1789"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-9",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Italien?",
-    options: ["Aten","Budapest","Paris","Rom"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-68",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Bern?",
-    options: ["Schweiz","Ryssland","Sydafrika","Chile"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-sv-98",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Wellington?",
-    options: ["Finland","Vietnam","Brasilien","Nya Zeeland"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-85",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Brasília?",
-    options: ["Mexiko","Portugal","Brasilien","Israel"],
-    correctIndex: 2,
-  },
-  {
+          {
     id: "bulk-sv-525",
     category: "Sport",
     text: "Vad används främst i tennis?",
-    options: ["boll","disk","shuttlecock","puck"],
+    options: ["boll","diskus","fjäderboll","puck"],
     correctIndex: 0,
   },
   {
@@ -988,14 +652,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["gorillaunge","örnunge","krokodilunge","pingvinunge"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-76",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Kiev?",
-    options: ["Brasilien","Thailand","Ukraina","USA"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-sv-487",
     category: "Natur",
     text: "Var lever en elefant?",
@@ -1037,14 +694,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Ni","K","He","Sn"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-sv-64",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Lissabon?",
-    options: ["Vietnam","Tjeckien","Chile","Portugal"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-sv-143",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet Fe?",
@@ -1065,14 +715,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Ag","O","Mg","Pt"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-sv-62",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Madrid?",
-    options: ["Indien","Spanien","Norge","Sverige"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-620",
     category: "Allmänt",
     text: "Hur många dagar har november (vanligt år)?",
@@ -1093,14 +736,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Pt","K","Cu","P"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-2",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Norge?",
-    options: ["Buenos Aires","Sofia","Oslo","Rabat"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-sv-484",
     category: "Natur",
     text: "Vad kallas ungen till ett lejon?",
@@ -1114,14 +750,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["1492","1903","1789","1914"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-sv-34",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Peru?",
-    options: ["Amsterdam","Belgrad","Lima","Kiev"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-sv-480",
     category: "Historia",
     text: "Vilket år: Första iPhone lanseras?",
@@ -1139,7 +768,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     id: "bulk-sv-519",
     category: "Sport",
     text: "Vad används främst i handboll?",
-    options: ["shuttlecock","disk","puck","boll"],
+    options: ["fjäderboll","diskus","puck","boll"],
     correctIndex: 3,
   },
   {
@@ -1170,28 +799,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Kobolt","Guld","Kalium","Syre"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-10",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Portugal?",
-    options: ["Teheran","Kairo","Berlin","Lissabon"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-99",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Kairo?",
-    options: ["Kanada","Ungern","Spanien","Egypten"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-28",
-    category: "Geografi",
-    text: "Vad är huvudstaden i USA?",
-    options: ["Bukarest","Washington D.C.","Wien","Riyadh"],
-    correctIndex: 1,
-  },
-  {
+        {
     id: "bulk-sv-503",
     category: "Natur",
     text: "Var lever en örn?",
@@ -1226,189 +834,63 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Litium","Zink","Kobolt","Nickel"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-47",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Marocko?",
-    options: ["Abuja","Tokyo","Pretoria","Rabat"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-82",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Washington D.C.?",
-    options: ["Indonesien","USA","Nederländerna","Brasilien"],
-    correctIndex: 1,
-  },
-  {
+      {
     id: "bulk-sv-497",
     category: "Natur",
     text: "Var lever en björn?",
     options: ["skog","berg","savann","djungel"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-23",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Ungern?",
-    options: ["Ottawa","Budapest","Jakarta","Rabat"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-142",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet för Kalcium?",
     options: ["Ca","Mn","Co","He"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-61",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Paris?",
-    options: ["Frankrike","Egypten","Spanien","Italien"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-sv-589",
     category: "Allmänt",
     text: "Vad är den romerska siffran VIII i arabiska tal?",
     options: ["100","8","4","6"],
     correctIndex: 1,
   },
-  {
-    id: "bulk-sv-33",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Chile?",
-    options: ["Lima","Peking","Santiago","Hanoi"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-sv-94",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Bangkok?",
-    options: ["Nya Zeeland","Thailand","Sydafrika","Marocko"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-sv-58",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Helsingfors?",
-    options: ["Saudiarabien","Rumänien","Finland","Frankrike"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-sv-86",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Buenos Aires?",
-    options: ["Ryssland","Marocko","Argentina","Serbien"],
-    correctIndex: 2,
-  },
-  {
+          {
     id: "bulk-sv-118",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet för Kväve?",
     options: ["Ca","Al","N","Ti"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-42",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Indonesien?",
-    options: ["Sofia","Zagreb","Reykjavik","Jakarta"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-31",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Brasilien?",
-    options: ["Brasília","Oslo","Seoul","Canberra"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-sv-13",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Österrike?",
-    options: ["Zagreb","Wien","Brasília","Santiago"],
-    correctIndex: 1,
-  },
-  {
+        {
     id: "bulk-sv-523",
     category: "Sport",
     text: "Vad används främst i volleyboll?",
-    options: ["boll","shuttlecock","puck","disk"],
+    options: ["boll","fjäderboll","puck","diskus"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-22",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Ukraina?",
-    options: ["Kiev","Bagdad","Jerusalem","Brasília"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-sv-25",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Bulgarien?",
-    options: ["Sofia","Belgrad","Seoul","Warszawa"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-sv-5",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Island?",
-    options: ["Lima","Bogotá","Reykjavik","New Delhi"],
-    correctIndex: 2,
-  },
-  {
+        {
     id: "bulk-sv-496",
     category: "Natur",
     text: "Vad kallas ungen till en björn?",
     options: ["ugglaunge","pandunge","valp","björnunge"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-53",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Iran?",
-    options: ["Köpenhamn","Bangkok","Teheran","Lima"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-sv-623",
     category: "Allmänt",
     text: "Vilken månad kommer efter december?",
     options: ["september","november","januari","juli"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-19",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Grekland?",
-    options: ["Rabat","Tokyo","New Delhi","Aten"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-sv-145",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet Cu?",
     options: ["Helium","Klor","Koppar","Kalcium"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-95",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Hanoi?",
-    options: ["Ryssland","Peru","Vietnam","Tyskland"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-sv-60",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Berlin?",
-    options: ["Nederländerna","Tjeckien","Tyskland","Irak"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "bulk-sv-600",
     category: "Allmänt",
     text: "Hur många dagar har januari (vanligt år)?",
@@ -1492,56 +974,21 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["7","8","2","9"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-35",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Colombia?",
-    options: ["Mexico City","Washington D.C.","Budapest","Bogotá"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-38",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Sydkorea?",
-    options: ["Köpenhamn","Abuja","Buenos Aires","Seoul"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "bulk-sv-583",
     category: "Allmänt",
     text: "Vad är den romerska siffran V i arabiska tal?",
     options: ["5","8","20","2"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-72",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden London?",
-    options: ["Tyskland","Storbritannien","Frankrike","Schweiz"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-500",
     category: "Natur",
     text: "Vad kallas ungen till en delfin?",
     options: ["gorillaunge","krokodilunge","ugglaunge","delfinunge"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-102",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Abuja?",
-    options: ["Storbritannien","Danmark","Nigeria","Iran"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-sv-21",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Ryssland?",
-    options: ["Reykjavik","Moskva","Bogotá","Rabat"],
-    correctIndex: 1,
-  },
-  {
+      {
     id: "bulk-sv-513",
     category: "Natur",
     text: "Var lever en gorilla?",
@@ -1552,38 +999,10 @@ export const BULK_SV_QUESTIONS: Question[] = [
     id: "bulk-sv-527",
     category: "Sport",
     text: "Vad används främst i golf?",
-    options: ["boll","puck","disk","shuttlecock"],
+    options: ["boll","puck","diskus","fjäderboll"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-48",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Nigeria?",
-    options: ["Zagreb","Abuja","Dublin","Bogotá"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-sv-90",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Tokyo?",
-    options: ["Sverige","Japan","Brasilien","Serbien"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-sv-84",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Mexico City?",
-    options: ["Mexiko","Nederländerna","Spanien","Marocko"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-sv-45",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Egypten?",
-    options: ["Abu Dhabi","Lima","Jakarta","Kairo"],
-    correctIndex: 3,
-  },
-  {
+          {
     id: "bulk-sv-155",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet Pb?",
@@ -1597,14 +1016,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Seoul","Bukarest","Abu Dhabi","Bryssel"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-107",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Teheran?",
-    options: ["Indonesien","Nederländerna","Iran","Island"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-sv-154",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet för Kvicksilver?",
@@ -1618,14 +1030,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Pt","Ti","He","Ag"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-75",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Moskva?",
-    options: ["Norge","Ryssland","Belgien","Danmark"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-603",
     category: "Allmänt",
     text: "Vilken månad kommer efter februari?",
@@ -1646,14 +1051,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["4","7","9","50"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-514",
-    category: "Sport",
-    text: "Hur många spelare har ett fotbollslag på planen samtidigt?",
-    options: ["12","11","5","8"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-115",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet C?",
@@ -1667,42 +1065,14 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["1","8","4","6"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-88",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Lima?",
-    options: ["Tyskland","Mexiko","Tjeckien","Peru"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-78",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Bukarest?",
-    options: ["Chile","Brasilien","Rumänien","Grekland"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-sv-108",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Bagdad?",
-    options: ["Tjeckien","Nya Zeeland","Storbritannien","Irak"],
-    correctIndex: 3,
-  },
-  {
+        {
     id: "bulk-sv-133",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet P?",
     options: ["Kisel","Krom","Bly","Fosfor"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-17",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Irland?",
-    options: ["Dublin","Köpenhamn","Brasília","Teheran"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "bulk-sv-522",
     category: "Sport",
     text: "Hur många spelare har ett volleybollag på planen samtidigt?",
@@ -1730,21 +1100,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["5","10","6","8"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-7",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Frankrike?",
-    options: ["Bagdad","Rom","Paris","Amsterdam"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-sv-89",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Bogotá?",
-    options: ["Storbritannien","Spanien","Frankrike","Colombia"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "bulk-sv-587",
     category: "Allmänt",
     text: "Vad är den romerska siffran VII i arabiska tal?",
@@ -1765,14 +1121,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["P","Ag","Sn","Al"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-29",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Kanada?",
-    options: ["Warszawa","London","Ottawa","Bukarest"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-sv-148",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet för Zink?",
@@ -1786,70 +1135,21 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Jorden","Jupiter","Venus","Neptunus"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-16",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Belgien?",
-    options: ["Bryssel","Pretoria","Ottawa","Reykjavik"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-sv-518",
-    category: "Sport",
-    text: "Hur många spelare har ett handbollslag på planen samtidigt?",
-    options: ["9","11","6","7"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-92",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Seoul?",
-    options: ["Japan","Sydkorea","Grekland","Marocko"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-sv-63",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Rom?",
-    options: ["Israel","Island","Colombia","Italien"],
-    correctIndex: 3,
-  },
-  {
+          {
     id: "bulk-sv-128",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet för Magnesium?",
     options: ["Mg","H","Pt","Cr"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-12",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Tjeckien?",
-    options: ["Tokyo","Brasília","Abuja","Prag"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "bulk-sv-114",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet för Litium?",
     options: ["Ca","C","Ni","Li"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-73",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Aten?",
-    options: ["Chile","Grekland","Norge","Nederländerna"],
-    correctIndex: 1,
-  },
-  {
-    id: "bulk-sv-1",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Sverige?",
-    options: ["Buenos Aires","Jerusalem","Stockholm","Lissabon"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "bulk-sv-614",
     category: "Allmänt",
     text: "Hur många dagar har augusti (vanligt år)?",
@@ -1863,42 +1163,21 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Merkurius","Neptunus","Saturnus","Jorden"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-103",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Nairobi?",
-    options: ["Australien","Serbien","Kenya","Ukraina"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk-sv-494",
     category: "Natur",
     text: "Vad kallas ungen till en varg?",
     options: ["gorillaunge","lejonunge","älgkalv","valp"],
     correctIndex: 3,
   },
-  {
-    id: "bulk-sv-69",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Amsterdam?",
-    options: ["Kina","Nederländerna","Vietnam","Thailand"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-521",
     category: "Sport",
     text: "Vad används främst i basket?",
-    options: ["shuttlecock","puck","boll","disk"],
+    options: ["fjäderboll","puck","boll","diskus"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-18",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Storbritannien?",
-    options: ["Moskva","London","Zagreb","Warszawa"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-495",
     category: "Natur",
     text: "Var lever en varg?",
@@ -1912,14 +1191,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["1991","1989","2001","1945"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-56",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Oslo?",
-    options: ["Mexiko","Norge","Danmark","Kroatien"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "bulk-sv-168",
     category: "Vetenskap",
     text: "Vad är kemiska tecknet för Krom?",
@@ -1961,56 +1233,14 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Bly","Platina","Tenn","Koppar"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-11",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Polen?",
-    options: ["Warszawa","Berlin","Brasília","Riyadh"],
-    correctIndex: 0,
-  },
-  {
-    id: "bulk-sv-93",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden New Delhi?",
-    options: ["Rumänien","Indien","Polen","Peru"],
-    correctIndex: 1,
-  },
-  {
+      {
     id: "bulk-sv-601",
     category: "Allmänt",
     text: "Vilken månad kommer efter januari?",
     options: ["februari","mars","september","juni"],
     correctIndex: 0,
   },
-  {
-    id: "bulk-sv-44",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Nya Zeeland?",
-    options: ["Wien","Nairobi","Hanoi","Wellington"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-55",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Stockholm?",
-    options: ["Kina","Island","Sverige","Tjeckien"],
-    correctIndex: 2,
-  },
-  {
-    id: "bulk-sv-65",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Warszawa?",
-    options: ["Argentina","Förenade Arabemiraten","Ukraina","Polen"],
-    correctIndex: 3,
-  },
-  {
-    id: "bulk-sv-611",
-    category: "Allmänt",
-    text: "Vilken månad kommer efter juni?",
-    options: ["september","januari","juli","augusti"],
-    correctIndex: 2,
-  },
-  {
+          {
     id: "bulk-sv-509",
     category: "Natur",
     text: "Var lever en giraff?",
@@ -2024,14 +1254,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["björnunge","delfinunge","örnunge","elefantkalv"],
     correctIndex: 2,
   },
-  {
-    id: "bulk-sv-70",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Bryssel?",
-    options: ["Kina","Sydafrika","Belgien","Sverige"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "bulk2-sv-661",
     category: "Allmänt",
     text: "Vilken plats i alfabetet har bokstaven G?",
@@ -2202,109 +1425,81 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-1",
     category: "Historia",
-    text: "Vem uppfann/upptäckte telefonen?",
+    text: "Vem uppfann telefonen?",
     options: ["Alexander Graham Bell","Thomas Edison","Marie Curie","Bröderna Wright"],
     correctIndex: 0,
   },
   {
     id: "tri-sv-2",
     category: "Historia",
-    text: "Vem uppfann/upptäckte glödlampan?",
+    text: "Vem uppfann glödlampan?",
     options: ["Alfred Nobel","Thomas Edison","Bröderna Wright","Alexander Graham Bell"],
     correctIndex: 1,
   },
   {
     id: "tri-sv-3",
     category: "Historia",
-    text: "Vem uppfann/upptäckte dynamiten?",
+    text: "Vem uppfann dynamiten?",
     options: ["Alfred Nobel","Alexander Fleming","Marie Curie","Alexander Graham Bell"],
     correctIndex: 0,
   },
   {
     id: "tri-sv-4",
     category: "Historia",
-    text: "Vem uppfann/upptäckte penicillinet?",
+    text: "Vem upptäckte penicillinet?",
     options: ["Alexander Fleming","Karl Benz","Bröderna Wright","Alfred Nobel"],
     correctIndex: 0,
   },
   {
     id: "tri-sv-5",
     category: "Historia",
-    text: "Vem uppfann/upptäckte världens första bil (ungefär)?",
+    text: "Vem brukar räknas som bilens uppfinnare?",
     options: ["Marie Curie","Karl Benz","Alexander Fleming","Alfred Nobel"],
     correctIndex: 1,
   },
   {
     id: "tri-sv-6",
     category: "Historia",
-    text: "Vem uppfann/upptäckte boktryckarkonsten i Europa?",
+    text: "Vem introducerade boktryckarkonsten i Europa?",
     options: ["Bröderna Wright","Alfred Nobel","Johannes Gutenberg","Alexander Fleming"],
     correctIndex: 2,
   },
   {
     id: "tri-sv-7",
     category: "Historia",
-    text: "Vem uppfann/upptäckte flygplanet?",
+    text: "Vem brukar räknas som flygplanets uppfinnare?",
     options: ["Alexander Fleming","Bröderna Wright","Marie Curie","Alexander Graham Bell"],
     correctIndex: 1,
   },
   {
     id: "tri-sv-8",
     category: "Historia",
-    text: "Vem uppfann/upptäckte radioaktivitet (upptäckt)?",
+    text: "Vem upptäckte radioaktiviteten?",
     options: ["Karl Benz","Johannes Gutenberg","Thomas Edison","Marie Curie"],
     correctIndex: 3,
   },
-  {
-    id: "tri-sv-9",
-    category: "Kultur",
-    text: "Vem skrev Pippi Långstrump?",
-    options: ["Hjalmar Söderberg","Selma Lagerlöf","August Strindberg","Astrid Lindgren"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "tri-sv-10",
     category: "Kultur",
     text: "Vem skrev Nils Holgersson?",
     options: ["August Strindberg","Selma Lagerlöf","Astrid Lindgren","—3"],
     correctIndex: 1,
   },
-  {
-    id: "tri-sv-11",
-    category: "Kultur",
-    text: "Vem skrev Ronja Rövardotter?",
-    options: ["Selma Lagerlöf","August Strindberg","Hjalmar Söderberg","Astrid Lindgren"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "tri-sv-12",
     category: "Kultur",
     text: "Vem skrev Doktor Glas?",
     options: ["Astrid Lindgren","Selma Lagerlöf","Hjalmar Söderberg","August Strindberg"],
     correctIndex: 2,
   },
-  {
-    id: "tri-sv-13",
-    category: "Kultur",
-    text: "Vem skrev Röda Rummet?",
-    options: ["Selma Lagerlöf","Astrid Lindgren","August Strindberg","—3"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "tri-sv-14",
     category: "Musik",
     text: "Hur många strängar har en gitarr vanligtvis?",
     options: ["8","6","7","4"],
     correctIndex: 1,
   },
-  {
-    id: "tri-sv-15",
-    category: "Musik",
-    text: "Hur många strängar har en violin vanligtvis?",
-    options: ["5","3","4","8"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "tri-sv-16",
     category: "Musik",
     text: "Hur många strängar har en cello vanligtvis?",
@@ -2325,21 +1520,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["4","7","5","3"],
     correctIndex: 0,
   },
-  {
-    id: "tri-sv-19",
-    category: "Mat & Dryck",
-    text: "Vilket land förknippas mest med pizza?",
-    options: ["Frankrike","Sverige","Italien","Indien"],
-    correctIndex: 2,
-  },
-  {
-    id: "tri-sv-20",
-    category: "Mat & Dryck",
-    text: "Vilket land förknippas mest med sushi?",
-    options: ["Thailand","USA","Japan","Mexiko"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "tri-sv-21",
     category: "Mat & Dryck",
     text: "Vilket land förknippas mest med tacos?",
@@ -2353,28 +1534,14 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Indien","Frankrike","Japan","Kina"],
     correctIndex: 0,
   },
-  {
-    id: "tri-sv-23",
-    category: "Mat & Dryck",
-    text: "Vilket land förknippas mest med croissant?",
-    options: ["Mexiko","USA","Frankrike","Sverige"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "tri-sv-24",
     category: "Mat & Dryck",
     text: "Vilket land förknippas mest med moussaka?",
     options: ["Thailand","Grekland","Frankrike","Turkiet"],
     correctIndex: 1,
   },
-  {
-    id: "tri-sv-25",
-    category: "Mat & Dryck",
-    text: "Vilket land förknippas mest med paella?",
-    options: ["Spanien","Italien","Mexiko","Sverige"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tri-sv-26",
     category: "Mat & Dryck",
     text: "Vilket land förknippas mest med hamburgare?",
@@ -2412,7 +1579,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-31",
     category: "Geografi",
-    text: "I vilken stad/område finns Eiffeltornet?",
+    text: "I vilken stad finns Eiffeltornet?",
     options: ["Kairo","New York","Paris","Pisa"],
     correctIndex: 2,
   },
@@ -2426,7 +1593,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-33",
     category: "Geografi",
-    text: "I vilken stad/område finns Colosseum?",
+    text: "I vilken stad finns Colosseum?",
     options: ["Rom","Sydney","New York","London"],
     correctIndex: 0,
   },
@@ -2440,7 +1607,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-35",
     category: "Geografi",
-    text: "I vilken stad/område finns Pyramiderna i Giza?",
+    text: "I vilken stad finns Pyramiderna i Giza?",
     options: ["Kairo","New York","Peking","Paris"],
     correctIndex: 0,
   },
@@ -2454,7 +1621,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-37",
     category: "Geografi",
-    text: "I vilken stad/område finns Kinesiska muren?",
+    text: "I vilken stad finns Kinesiska muren?",
     options: ["Rom","Paris","Aten","Peking"],
     correctIndex: 3,
   },
@@ -2468,7 +1635,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-39",
     category: "Geografi",
-    text: "I vilken stad/område finns Taj Mahal?",
+    text: "I vilken stad finns Taj Mahal?",
     options: ["Agra","Kairo","Sydney","Aten"],
     correctIndex: 0,
   },
@@ -2482,7 +1649,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-41",
     category: "Geografi",
-    text: "I vilken stad/område finns Operahuset?",
+    text: "I vilken stad finns Operahuset?",
     options: ["Pisa","Sydney","Peking","Paris"],
     correctIndex: 1,
   },
@@ -2496,7 +1663,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-43",
     category: "Geografi",
-    text: "I vilken stad/område finns Frihetsgudinnan?",
+    text: "I vilken stad finns Frihetsgudinnan?",
     options: ["Paris","Sydney","New York","Peking"],
     correctIndex: 2,
   },
@@ -2510,7 +1677,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-45",
     category: "Geografi",
-    text: "I vilken stad/område finns Big Ben?",
+    text: "I vilken stad finns Big Ben?",
     options: ["London","Agra","Paris","Peking"],
     correctIndex: 0,
   },
@@ -2524,7 +1691,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-47",
     category: "Geografi",
-    text: "I vilken stad/område finns Akropolis?",
+    text: "I vilken stad finns Akropolis?",
     options: ["Sydney","Paris","Aten","Peking"],
     correctIndex: 2,
   },
@@ -2538,7 +1705,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri-sv-49",
     category: "Geografi",
-    text: "I vilken stad/område finns Det lutande tornet?",
+    text: "I vilken stad finns Det lutande tornet?",
     options: ["Pisa","Kairo","Aten","Agra"],
     correctIndex: 0,
   },
@@ -2556,28 +1723,14 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Christopher Nolan","Francis Ford Coppola","James Cameron","Steven Spielberg"],
     correctIndex: 2,
   },
-  {
-    id: "tri-sv-52",
-    category: "Film & TV",
-    text: "Vem regisserade Inception?",
-    options: ["Steven Spielberg","Christopher Nolan","Quentin Tarantino","James Cameron"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "tri-sv-53",
     category: "Film & TV",
     text: "Vem regisserade Jurassic Park?",
     options: ["Quentin Tarantino","Christopher Nolan","Francis Ford Coppola","Steven Spielberg"],
     correctIndex: 3,
   },
-  {
-    id: "tri-sv-54",
-    category: "Film & TV",
-    text: "Vem regisserade Pulp Fiction?",
-    options: ["Christopher Nolan","Francis Ford Coppola","James Cameron","Quentin Tarantino"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "tri-sv-55",
     category: "Film & TV",
     text: "Vem regisserade Avatar?",
@@ -2731,14 +1884,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Kväve","Kvicksilver","Natrium","Syre"],
     correctIndex: 1,
   },
-  {
-    id: "tri-sv-89",
-    category: "Sport",
-    text: "Hur många spelare har ett fotbollslag på planen?",
-    options: ["12","10","9","11"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "tri-sv-90",
     category: "Sport",
     text: "Hur ofta hålls sommar-OS?",
@@ -2749,7 +1895,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     id: "tri-sv-91",
     category: "Sport",
     text: "Vad används i ishockey istället för boll?",
-    options: ["Stav","Disk","Ring","Puck"],
+    options: ["Stav","Diskus","Ring","Puck"],
     correctIndex: 3,
   },
   {
@@ -2766,14 +1912,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Squash","Cricket","Tennis","Golf"],
     correctIndex: 2,
   },
-  {
-    id: "tri-sv-94",
-    category: "Geografi",
-    text: "Vilket är världens största hav?",
-    options: ["Stilla havet","Atlanten","Indiska oceanen","Ishavet"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tri-sv-95",
     category: "Geografi",
     text: "Vilket är Europas högsta berg?",
@@ -2787,14 +1926,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Amazonas","Kongo","Nilen","Donau"],
     correctIndex: 2,
   },
-  {
-    id: "tri-sv-97",
-    category: "Geografi",
-    text: "Vilken är världens största ö?",
-    options: ["Madagaskar","Grönland","Australien","Borneo"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "tri-sv-98",
     category: "Geografi",
     text: "Vilket land har flest invånare?",
@@ -2808,35 +1940,14 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Giraff","Haj","Blåval","Elefant"],
     correctIndex: 2,
   },
-  {
-    id: "tri-sv-100",
-    category: "Natur",
-    text: "Vilket djur är känt för att byta färg?",
-    options: ["Ödla","Iguana","Kameleont","Gecko"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "tri-sv-101",
     category: "Natur",
     text: "Vad äter koalan främst?",
     options: ["Bambu","Gräs","Fisk","Eukalyptus"],
     correctIndex: 3,
   },
-  {
-    id: "tri-sv-102",
-    category: "Natur",
-    text: "Hur många ben har en spindel?",
-    options: ["6","10","8","12"],
-    correctIndex: 2,
-  },
-  {
-    id: "tri-sv-103",
-    category: "Natur",
-    text: "Vilket djur har snabel?",
-    options: ["Noshörning","Tapir","Elefant","Flodhäst"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "tri-sv-104",
     category: "Vetenskap",
     text: "Vilken planet kallas den röda?",
@@ -2850,42 +1961,14 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Syre","Väte","Vatten","Salt"],
     correctIndex: 2,
   },
-  {
-    id: "tri-sv-106",
-    category: "Vetenskap",
-    text: "Vilket organ pumpar blod?",
-    options: ["Hjärtat","Njure","Lunga","Lever"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tri-sv-107",
     category: "Vetenskap",
     text: "Vad kallas djur som äter växter?",
     options: ["Omnivorer","Herbivorer","Insekter","Karnivorer"],
     correctIndex: 1,
   },
-  {
-    id: "tri-sv-108",
-    category: "Historia",
-    text: "När föll Berlinmuren?",
-    options: ["1989","1985","1987","1991"],
-    correctIndex: 0,
-  },
-  {
-    id: "tri-sv-109",
-    category: "Historia",
-    text: "Vilket år landade Apollo 11 på månen?",
-    options: ["1969","1965","1961","1972"],
-    correctIndex: 0,
-  },
-  {
-    id: "tri-sv-110",
-    category: "Historia",
-    text: "Vem målade Mona Lisa?",
-    options: ["Leonardo da Vinci","Donatello","Michelangelo","Raphael"],
-    correctIndex: 0,
-  },
-  {
+        {
     id: "tri-sv-111",
     category: "Musik",
     text: "Vilket band gjorde Bohemian Rhapsody?",
@@ -2899,28 +1982,14 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Ace of Base","Europe","ABBA","Roxette"],
     correctIndex: 2,
   },
-  {
-    id: "tri-sv-113",
-    category: "Popkultur",
-    text: "Vilken färg är Pikachu?",
-    options: ["Röd","Gul","Blå","Grön"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "tri-sv-114",
     category: "Popkultur",
     text: "Vad heter Marios bror?",
     options: ["Toad","Yoshi","Wario","Luigi"],
     correctIndex: 3,
   },
-  {
-    id: "tri-sv-115",
-    category: "Popkultur",
-    text: "Vad heter Harry Potters skola?",
-    options: ["Beauxbatons","Ilvermorny","Hogwarts","Durmstrang"],
-    correctIndex: 2,
-  },
-  {
+    {
     id: "tri-sv-116",
     category: "Sverige",
     text: "Vad är Sveriges huvudstad?",
@@ -2941,21 +2010,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Björn","Varg","Älg","Lodjur"],
     correctIndex: 2,
   },
-  {
-    id: "tri-sv-119",
-    category: "Sverige",
-    text: "Vad heter den största ön i Sverige?",
-    options: ["Orust","Gotland","Tjörn","Öland"],
-    correctIndex: 1,
-  },
-  {
-    id: "tri-sv-120",
-    category: "Sverige",
-    text: "Vad är IKEA mest känt för?",
-    options: ["Kläder","Bilar","Telefoner","Möbler"],
-    correctIndex: 3,
-  },
-  {
+      {
     id: "tri-sv-121",
     category: "Historia",
     text: "Vilket år förknippas med Apollo 11?",
@@ -3193,21 +2248,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Tyskland","Tjeckien","Azerbajdzjan","Uzbekistan"],
     correctIndex: 2,
   },
-  {
-    id: "tri2-sv-15",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Bangladesh?",
-    options: ["Jerevan","Rom","Wien","Dhaka"],
-    correctIndex: 3,
-  },
-  {
-    id: "tri2-sv-16",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Dhaka?",
-    options: ["Bangladesh","Bosnien","Saudiarabien","Costa Rica"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tri2-sv-17",
     category: "Geografi",
     text: "Vad är huvudstaden i Belarus?",
@@ -3263,21 +2304,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Nya Zeeland","Grekland","Syrien","Costa Rica"],
     correctIndex: 3,
   },
-  {
-    id: "tri2-sv-37",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Kuba?",
-    options: ["Bryssel","Havanna","Paris","Hanoi"],
-    correctIndex: 1,
-  },
-  {
-    id: "tri2-sv-38",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Havanna?",
-    options: ["Afghanistan","Indien","Kuba","Malta"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "tri2-sv-39",
     category: "Geografi",
     text: "Vad är huvudstaden i Cypern?",
@@ -3361,21 +2388,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Estland","Ghana","Uzbekistan","Slovenien"],
     correctIndex: 1,
   },
-  {
-    id: "tri2-sv-83",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Jamaica?",
-    options: ["Jakarta","Alger","Prag","Kingston"],
-    correctIndex: 3,
-  },
-  {
-    id: "tri2-sv-84",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Kingston?",
-    options: ["Jamaica","Mexiko","Irland","Argentina"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tri2-sv-87",
     category: "Geografi",
     text: "Vad är huvudstaden i Jordanien?",
@@ -3459,21 +2472,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Kroatien","Saudiarabien","Luxemburg","Tyskland"],
     correctIndex: 2,
   },
-  {
-    id: "tri2-sv-101",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Malaysia?",
-    options: ["Kuala Lumpur","Chisinau","Bukarest","Helsingfors"],
-    correctIndex: 0,
-  },
-  {
-    id: "tri2-sv-102",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Kuala Lumpur?",
-    options: ["Ukraina","Bosnien","Malaysia","Ryssland"],
-    correctIndex: 2,
-  },
-  {
+      {
     id: "tri2-sv-103",
     category: "Geografi",
     text: "Vad är huvudstaden i Malta?",
@@ -3529,49 +2528,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Mexiko","Bulgarien","Malta","Nordmakedonien"],
     correctIndex: 3,
   },
-  {
-    id: "tri2-sv-123",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Pakistan?",
-    options: ["Kairo","Luxemburg","Islamabad","Bratislava"],
-    correctIndex: 2,
-  },
-  {
-    id: "tri2-sv-124",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Islamabad?",
-    options: ["Zimbabwe","Mongolia","Jordanien","Pakistan"],
-    correctIndex: 3,
-  },
-  {
-    id: "tri2-sv-127",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Filippinerna?",
-    options: ["Manila","Astana","Peking","Amsterdam"],
-    correctIndex: 0,
-  },
-  {
-    id: "tri2-sv-128",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Manila?",
-    options: ["Etiopien","Filippinerna","Sverige","Ungern"],
-    correctIndex: 1,
-  },
-  {
-    id: "tri2-sv-141",
-    category: "Geografi",
-    text: "Vad är huvudstaden i Singapore?",
-    options: ["Wellington","Astana","Singapore","Bern"],
-    correctIndex: 2,
-  },
-  {
-    id: "tri2-sv-142",
-    category: "Geografi",
-    text: "Vilket land har huvudstaden Singapore?",
-    options: ["Libanon","Singapore","Irland","Chile"],
-    correctIndex: 1,
-  },
-  {
+              {
     id: "tri2-sv-143",
     category: "Geografi",
     text: "Vad är huvudstaden i Slovakien?",
@@ -3735,7 +2692,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
   {
     id: "tri2-sv-196",
     category: "Allmänt",
-    text: "Vilken valuta förknippas med EU/Eurozonen?",
+    text: "Vilken valuta används i eurozonen?",
     options: ["pound","lira","franc","euro"],
     correctIndex: 3,
   },
@@ -3795,14 +2752,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["krona","rand","real","franc"],
     correctIndex: 1,
   },
-  {
-    id: "tri2-sv-205",
-    category: "Allmänt",
-    text: "Vilket språk talas främst i Brasilien?",
-    options: ["portugisiska","spanska","svenska","japanska"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tri2-sv-206",
     category: "Allmänt",
     text: "Vilket språk talas främst i Mexiko?",
@@ -3879,14 +2829,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["spanska","polska","kinesiska","grekiska"],
     correctIndex: 3,
   },
-  {
-    id: "tri2-sv-217",
-    category: "Vetenskap",
-    text: "Vem förknippas mest med relativitetsteorin?",
-    options: ["Alexander Fleming","Albert Einstein","Charles Darwin","Dmitrij Mendelejev"],
-    correctIndex: 1,
-  },
-  {
+    {
     id: "tri2-sv-218",
     category: "Vetenskap",
     text: "Vem förknippas mest med evolutionsteorin?",
@@ -3907,14 +2850,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Isaac Newton","Albert Einstein","Alexander Fleming","Dmitrij Mendelejev"],
     correctIndex: 2,
   },
-  {
-    id: "tri2-sv-221",
-    category: "Vetenskap",
-    text: "Vem förknippas mest med periodiska systemet?",
-    options: ["Marie Curie","Isaac Newton","Alexander Fleming","Dmitrij Mendelejev"],
-    correctIndex: 3,
-  },
-  {
+    {
     id: "tri2-sv-222",
     category: "Vetenskap",
     text: "Vem förknippas mest med radioaktivitet?",
@@ -4019,28 +2955,7 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Afrodite","Zeus","Tor","Ra"],
     correctIndex: 2,
   },
-  {
-    id: "tri2-sv-237",
-    category: "Film & TV",
-    text: "Vad heter lejonungen i Lejonkungen?",
-    options: ["Nala","Simba","Mufasa","Scar"],
-    correctIndex: 1,
-  },
-  {
-    id: "tri2-sv-238",
-    category: "Film & TV",
-    text: "Vilken studio gjorde Toy Story?",
-    options: ["Sony","DreamWorks","Pixar","Illumination"],
-    correctIndex: 2,
-  },
-  {
-    id: "tri2-sv-239",
-    category: "Musik",
-    text: "Hur många strängar har en standardgitarr?",
-    options: ["6","7","5","4"],
-    correctIndex: 0,
-  },
-  {
+        {
     id: "tri2-sv-240",
     category: "Musik",
     text: "Vilket band gjorde Yesterday?",
@@ -4061,56 +2976,14 @@ export const BULK_SV_QUESTIONS: Question[] = [
     options: ["Wide Web World","Wireless Web","Web World Wide","World Wide Web"],
     correctIndex: 3,
   },
-  {
-    id: "tri2-sv-243",
-    category: "Natur",
-    text: "Vilket djur är känt för svarta och vita ränder?",
-    options: ["Panda","Skunk","Zebra","Tiger"],
-    correctIndex: 2,
-  },
-  {
-    id: "tri2-sv-244",
-    category: "Natur",
-    text: "Vad kallas en grupp lejon?",
-    options: ["Pride","Stim","Pack","Flock"],
-    correctIndex: 0,
-  },
-  {
-    id: "tri2-sv-245",
-    category: "Historia",
-    text: "Vilket imperium byggde Colosseum?",
-    options: ["Grekiska","Persiska","Osmanska","Romerska"],
-    correctIndex: 3,
-  },
-  {
+        {
     id: "tri2-sv-246",
     category: "Historia",
     text: "Vem var drottning Elizabeth I av?",
     options: ["England","Skottland","Spanien","Frankrike"],
     correctIndex: 0,
   },
-  {
-    id: "tri2-sv-247",
-    category: "Sverige",
-    text: "Vad heter Sveriges största sjö?",
-    options: ["Vänern","Vättern","Hjälmaren","Mälaren"],
-    correctIndex: 0,
-  },
-  {
-    id: "tri2-sv-248",
-    category: "Sverige",
-    text: "Vad firas på Lucia?",
-    options: ["24 december","6 juni","13 december","1 maj"],
-    correctIndex: 2,
-  },
-  {
-    id: "tri2-sv-249",
-    category: "Popkultur",
-    text: "Vad heter Batmans butler?",
-    options: ["Gordon","Lucius","Jarvis","Alfred"],
-    correctIndex: 3,
-  },
-  {
+        {
     id: "tri2-sv-250",
     category: "Popkultur",
     text: "Vilken färg är Sonic?",
@@ -4123,12 +2996,5 @@ export const BULK_SV_QUESTIONS: Question[] = [
     text: "Varifrån kommer sushi?",
     options: ["Korea","Kina","Japan","Thailand"],
     correctIndex: 2,
-  },
-  {
-    id: "tri2-sv-252",
-    category: "Mat & Dryck",
-    text: "Vad är huvudingrediensen i guacamole?",
-    options: ["Paprika","Tomat","Avokado","Lök"],
-    correctIndex: 2,
-  },
-]
+  }
+  ]

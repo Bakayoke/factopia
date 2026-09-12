@@ -71,14 +71,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["Iceland","Poland","Sweden","South Korea"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-cap-11",
-    category: "Geography",
-    text: "What is the capital of France?",
-    options: ["Paris","Ottawa","Islamabad","Tokyo"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-land-12",
     category: "Geography",
     text: "Which country has the capital Paris?",
@@ -379,14 +372,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["Russia","Indonesia","Israel","Singapore"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-cap-55",
-    category: "Geography",
-    text: "What is the capital of Japan?",
-    options: ["Tokyo","Oslo","Ottawa","Beijing"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-land-56",
     category: "Geography",
     text: "Which country has the capital Tokyo?",
@@ -407,14 +393,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["China","Russia","Switzerland","France"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-cap-59",
-    category: "Geography",
-    text: "What is the capital of South Korea?",
-    options: ["Seoul","Bangkok","Ottawa","Riyadh"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-land-60",
     category: "Geography",
     text: "Which country has the capital Seoul?",
@@ -505,14 +484,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["New Zealand","Nigeria","Canada","Indonesia"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-cap-73",
-    category: "Geography",
-    text: "What is the capital of Canada?",
-    options: ["Ottawa","Amsterdam","Manila","Ankara"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-land-74",
     category: "Geography",
     text: "Which country has the capital Ottawa?",
@@ -547,14 +519,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["Mexico","Russia","Saudi Arabia","Ukraine"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-cap-79",
-    category: "Geography",
-    text: "What is the capital of Brazil?",
-    options: ["Brasília","Dublin","Wellington","Madrid"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-land-80",
     category: "Geography",
     text: "Which country has the capital Brasília?",
@@ -617,14 +582,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["Colombia","Turkey","Iceland","Argentina"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-cap-89",
-    category: "Geography",
-    text: "What is the capital of Egypt?",
-    options: ["Cairo","London","Baghdad","Brasília"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-land-90",
     category: "Geography",
     text: "Which country has the capital Cairo?",
@@ -1023,14 +981,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["basketball","American football","tennis","football/soccer"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-sci-167",
-    category: "Science",
-    text: "What is the chemical symbol for gold?",
-    options: ["Au","Ag","Fe","Pb"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-sci-168",
     category: "Science",
     text: "What is the chemical symbol for iron?",
@@ -1093,14 +1044,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["double helix","single spiral","cube","pyramid"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-x-177",
-    category: "History",
-    text: "Who was the first person on the Moon?",
-    options: ["Neil Armstrong","Buzz Aldrin","Yuri Gagarin","John Glenn"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-x-178",
     category: "History",
     text: "Who was the first human in space?",
@@ -1149,14 +1093,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["New York","Los Angeles","Chicago","Boston"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-x-185",
-    category: "Science",
-    text: "About how many bones does an adult human have?",
-    options: ["206","156","256","306"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-x-186",
     category: "Science",
     text: "Which organ pumps blood through the body?",
@@ -1226,28 +1163,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["Argentina","France","Brazil","Spain"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-x-196",
-    category: "Music",
-    text: "How many strings does a standard guitar have?",
-    options: ["6","4","5","7"],
-    correctIndex: 0,
-  },
-  {
-    id: "tp-en-x-197",
-    category: "Movies & TV",
-    text: "Who plays Iron Man in the MCU?",
-    options: ["Robert Downey Jr.","Chris Evans","Chris Hemsworth","Mark Ruffalo"],
-    correctIndex: 0,
-  },
-  {
-    id: "tp-en-x-198",
-    category: "Movies & TV",
-    text: "Who plays Jack Sparrow?",
-    options: ["Johnny Depp","Orlando Bloom","Brad Pitt","Tom Cruise"],
-    correctIndex: 0,
-  },
-  {
+        {
     id: "tp-en-x-199",
     category: "Movies & TV",
     text: "In which city is Friends mainly set?",
@@ -1289,28 +1205,14 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["Vincent van Gogh","Edvard Munch","Paul Gauguin","Henri Matisse"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-x-205",
-    category: "Tech",
-    text: "What does CPU stand for?",
-    options: ["Central Processing Unit","Computer Power Unit","Core Process Utility","Central Program Upload"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-x-206",
     category: "Tech",
     text: "Which company made the iPhone?",
     options: ["Apple","Samsung","Google","Microsoft"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-x-207",
-    category: "Tech",
-    text: "What is Google’s mobile OS called?",
-    options: ["Android","iOS","Windows Phone","Symbian"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-x-208",
     category: "Food",
     text: "Chocolate comes from which bean?",
@@ -1345,21 +1247,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["1648","1618","1718","1814"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-more-3",
-    category: "History",
-    text: "Who was the first President of the United States?",
-    options: ["George Washington","Thomas Jefferson","Abraham Lincoln","John Adams"],
-    correctIndex: 0,
-  },
-  {
-    id: "tp-en-more-4",
-    category: "History",
-    text: "Who was known as the Maid of Orléans?",
-    options: ["Joan of Arc","Marie Antoinette","Catherine the Great","Elizabeth I"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tp-en-more-5",
     category: "History",
     text: "Which wall divided Berlin during the Cold War?",
@@ -1387,14 +1275,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["Pacific Ocean","Atlantic Ocean","Indian Ocean","Arctic Ocean"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-more-9",
-    category: "Geography",
-    text: "Which country has the most people?",
-    options: ["India","China","USA","Indonesia"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-more-10",
     category: "Geography",
     text: "Which desert covers much of northern Africa?",
@@ -1478,14 +1359,7 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["90 minutes","80","100","60"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-more-22",
-    category: "Sports",
-    text: "How many periods are in a standard ice hockey game?",
-    options: ["3","2","4","5"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-more-23",
     category: "Music",
     text: "Which instrument has black and white keys?",
@@ -1548,28 +1422,14 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["The Louvre","Prado","Uffizi","MoMA"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-more-32",
-    category: "Tech",
-    text: "What does USB stand for?",
-    options: ["Universal Serial Bus","Ultra Speed Band","United System Bridge","User Soft Button"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-more-33",
     category: "Tech",
     text: "Which company owns Instagram?",
     options: ["Meta","Google","Amazon","Apple"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-more-34",
-    category: "Tech",
-    text: "What is Apple’s voice assistant called?",
-    options: ["Siri","Alexa","Cortana","Google Assistant"],
-    correctIndex: 0,
-  },
-  {
+    {
     id: "tp-en-more-35",
     category: "Food",
     text: "What grain is risotto mainly made from?",
@@ -1583,25 +1443,11 @@ export const TP_EN_QUESTIONS: Question[] = [
     options: ["Camellia sinensis (tea plant)","Coffee plant","Cocoa tree","Mint"],
     correctIndex: 0,
   },
-  {
-    id: "tp-en-more-37",
-    category: "General",
-    text: "How many seconds are in a minute?",
-    options: ["60","100","30","90"],
-    correctIndex: 0,
-  },
-  {
-    id: "tp-en-more-38",
-    category: "General",
-    text: "How many days are in a leap year?",
-    options: ["366","365","364","367"],
-    correctIndex: 0,
-  },
-  {
+      {
     id: "tp-en-more-39",
     category: "General",
     text: "Which planet is third from the Sun?",
     options: ["Earth","Mars","Venus","Mercury"],
     correctIndex: 0,
-  },
+  }
 ]
