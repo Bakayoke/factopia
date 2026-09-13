@@ -342,6 +342,20 @@ button {
   color: #c2410c;
 }
 
+.sister-game.kluddkrig {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #1e3a8a 20%, var(--surface)), color-mix(in srgb, #dc2626 14%, var(--surface)));
+  border-color: color-mix(in srgb, #2563eb 35%, transparent);
+}
+
+.sister-game.kluddkrig:hover {
+  border-color: color-mix(in srgb, #ef4444 55%, transparent);
+}
+
+.sister-game.kluddkrig em {
+  color: #1d4ed8;
+}
+
 .party-unlock-banner {
   margin: 0 0 0.75rem;
   text-align: center;

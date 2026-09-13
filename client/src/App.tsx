@@ -43,6 +43,7 @@ const SABOTEXT_URL = 'https://sabotext.com'
 const SCOURGEBORN_URL = 'https://scourgeborn.com'
 const YOUR_TASK_IS_URL = 'https://yourtaskis.com'
 const KLOTTERKAOS_URL = 'https://klotterkaos.com'
+const KLUDDKRIG_URL = 'https://kluddkrig.com'
 
 const PACKS: { id: CategoryPackId; labelKey: keyof ReturnType<typeof t> }[] = [
   { id: 'mixed', labelKey: 'packMixed' },
@@ -350,6 +351,16 @@ export default function App() {
               <strong>Klotterkaos</strong>
               <span>{ui.klotterkaosPitch}</span>
               <em>{ui.klotterkaosCta}</em>
+            </a>
+            <a
+              className="sister-game kluddkrig"
+              href={KLUDDKRIG_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Kluddkrig</strong>
+              <span>{ui.kluddkrigPitch}</span>
+              <em>{ui.kluddkrigCta}</em>
             </a>
           </div>
         )}
@@ -1446,6 +1457,16 @@ function WinnerView({
         <strong>Klotterkaos</strong>
         <span>{ui.klotterkaosPitch}</span>
         <em>{ui.klotterkaosCta}</em>
+      </a>
+      <a
+        className="sister-game compact kluddkrig"
+        href={KLUDDKRIG_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <strong>Kluddkrig</strong>
+        <span>{ui.kluddkrigPitch}</span>
+        <em>{ui.kluddkrigCta}</em>
       </a>
       <button className="btn btn-ghost" type="button" onClick={onLeave}>
         {ui.leaveRoom}
