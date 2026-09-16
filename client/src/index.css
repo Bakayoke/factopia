@@ -356,6 +356,20 @@ button {
   color: #1d4ed8;
 }
 
+.sister-game.pulsekaos {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #831843 18%, var(--surface)), color-mix(in srgb, #22d3ee 14%, var(--surface)));
+  border-color: color-mix(in srgb, #ec4899 40%, transparent);
+}
+
+.sister-game.pulsekaos:hover {
+  border-color: color-mix(in srgb, #22d3ee 55%, transparent);
+}
+
+.sister-game.pulsekaos em {
+  color: #be185d;
+}
+
 .drama-line {
   margin: 0;
   text-align: center;
