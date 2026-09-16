@@ -5,6 +5,7 @@ import { trackFunnel } from './metrics.js'
 import {
   QUESTION_MS,
   REVEAL_MS,
+  SUDDEN_DEATH_MARGIN,
   normalizeMode,
   questionDurationMs,
   scoreCorrectAnswer,
@@ -21,6 +22,7 @@ import type {
   Player,
   PublicRoom,
   QuizLanguage,
+  RankDrama,
   Room,
   RoomStatus,
   RoundResult,
@@ -128,6 +130,12 @@ export function createRoom(
     endsAt: 0,
     revealCorrectIndex: null,
     lastRound: null,
+    streaks: {},
+    nextPackVotes: {},
+    optionCounts: null,
+    rankDrama: null,
+    suddenDeath: false,
+    suddenDeathDone: false,
     updatedAt: Date.now(),
   }
 
@@ -480,6 +488,12 @@ export function startGame(code: string, playerId: string): Room | { error: strin
   room.players.forEach((p) => {
     p.score = 0
   })
+  room.streaks = {}
+  room.nextPackVotes = {}
+  room.optionCounts = null
+  room.rankDrama = null
+  room.suddenDeath = false
+  room.suddenDeathDone = false
   advanceToQuestion(room)
   touch(room)
   trackFunnel('game_start', code)
@@ -502,6 +516,12 @@ export function rematch(code: string, playerId: string): Room | { error: string 
   room.endsAt = 0
   room.revealCorrectIndex = null
   room.lastRound = null
+  room.streaks = {}
+  room.nextPackVotes = {}
+  room.optionCounts = null
+  room.rankDrama = null
+  room.suddenDeath = false
+  room.suddenDeathDone = false
   room.players.forEach((p) => {
     p.score = 0
     // Late spectators become players for the next round (host keeps their preference)
@@ -511,23 +531,95 @@ export function rematch(code: string, playerId: string): Room | { error: string 
   return room
 }
 
+function playingRanked(room: Room): Player[] {
+  return room.players.filter((p) => p.playing).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
+}
+
+function shouldSuddenDeath(room: Room): boolean {
+  if (room.suddenDeathDone) return false
+  const ranked = playingRanked(room)
+  if (ranked.length < 2) return false
+  const lead = ranked[0]!.score - ranked[1]!.score
+  return lead <= SUDDEN_DEATH_MARGIN
+}
+
+function majorityPack(votes: Record<string, CategoryPackId>): CategoryPackId | null {
+  const counts = new Map<CategoryPackId, number>()
+  for (const pack of Object.values(votes)) {
+    counts.set(pack, (counts.get(pack) ?? 0) + 1)
+  }
+  let best: CategoryPackId | null = null
+  let bestN = 0
+  for (const [pack, n] of counts) {
+    if (n > bestN) {
+      best = pack
+      bestN = n
+    }
+  }
+  return best
+}
+
+function applyPackVotes(room: Room) {
+  const pack = majorityPack(room.nextPackVotes)
+  room.nextPackVotes = {}
+  if (!pack) return
+  room.categoryPack = pack
+  const exclude = new Set(room.recentQuestionIds)
+  for (const q of room.questions) exclude.add(q.id)
+  const categories = categoriesForPack(pack, room.language)
+  const [fresh] = pickQuestions(1, room.language, [], { excludeIds: exclude, categories })
+  if (!fresh) return
+  const nextIdx = room.currentIndex + 1
+  if (nextIdx >= 0 && nextIdx < room.questions.length) {
+    room.questions[nextIdx] = fresh
+    room.recentQuestionIds = [...room.recentQuestionIds, fresh.id].slice(-200)
+  }
+}
+
+function appendSuddenDeathQuestion(room: Room) {
+  const exclude = new Set(room.recentQuestionIds)
+  for (const q of room.questions) exclude.add(q.id)
+  const categories = categoriesForPack(room.categoryPack, room.language)
+  const [q] = pickQuestions(1, room.language, [], { excludeIds: exclude, categories })
+  if (!q) return false
+  q.mode = 'lightning'
+  room.questions.push(q)
+  room.recentQuestionIds = [...room.recentQuestionIds, q.id].slice(-200)
+  room.suddenDeath = true
+  room.suddenDeathDone = true
+  return true
+}
+
 function advanceToQuestion(room: Room) {
+  applyPackVotes(room)
   room.currentIndex += 1
   room.answers = {}
   room.answerTimes = {}
   room.revealCorrectIndex = null
   room.lastRound = null
+  room.optionCounts = null
+  room.rankDrama = null
 
   if (room.currentIndex >= room.questions.length) {
-    room.status = 'finished'
-    room.endsAt = 0
-    trackFunnel('game_finished', room.code)
-    return
+    if (shouldSuddenDeath(room) && appendSuddenDeathQuestion(room)) {
+      // stay on the new last index via fall-through after push
+    } else {
+      room.status = 'finished'
+      room.endsAt = 0
+      room.suddenDeath = false
+      trackFunnel('game_finished', room.code)
+      return
+    }
   }
 
   room.status = 'question'
   room.questionStartedAt = Date.now()
   const q = room.questions[room.currentIndex]
+  if (room.suddenDeath && room.currentIndex === room.questions.length - 1 && room.suddenDeathDone) {
+    // keep suddenDeath flag true for the bonus question UI
+  } else if (room.currentIndex < room.questions.length - 1 || !room.suddenDeathDone) {
+    room.suddenDeath = false
+  }
   room.endsAt = room.questionStartedAt + questionDurationMs(q?.mode)
 }
 
@@ -556,12 +648,41 @@ export function submitAnswer(
   return room
 }
 
+export function voteNextPack(
+  code: string,
+  playerId: string,
+  packId: CategoryPackId | string,
+): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.status !== 'reveal') return { error: 'Kan bara rösta mellan frågor' }
+  const player = room.players.find((p) => p.id === playerId)
+  if (!player?.playing) return { error: 'Bara spelare kan rösta' }
+  if (room.currentIndex + 1 >= room.questions.length && !shouldSuddenDeath(room)) {
+    return { error: 'Ingen nästa fråga' }
+  }
+  room.nextPackVotes[playerId] = normalizePackId(packId)
+  touch(room)
+  return room
+}
+
 export function revealQuestion(room: Room) {
   if (room.status !== 'question') return
   const q = room.questions[room.currentIndex]
+  if (!q) return
+
+  const before = playingRanked(room)
+  const prevLeader = before[0] ?? null
+
   room.status = 'reveal'
   room.revealCorrectIndex = q.correctIndex
   room.endsAt = room.advanceMode === 'manual' ? 0 : Date.now() + REVEAL_MS
+
+  const counts: [number, number, number, number] = [0, 0, 0, 0]
+  for (const ans of Object.values(room.answers)) {
+    if (ans >= 0 && ans <= 3) counts[ans] += 1
+  }
+  room.optionCounts = counts
 
   const results: RoundResult[] = []
   for (const player of room.players) {
@@ -569,11 +690,16 @@ export function revealQuestion(room: Room) {
     const ans = room.answers[player.id]
     let gained = 0
     const correct = ans === q.correctIndex
+    let streak = 0
     if (correct) {
+      streak = (room.streaks[player.id] ?? 0) + 1
+      room.streaks[player.id] = streak
       const answeredAt = room.answerTimes[player.id] ?? Date.now()
       const elapsed = answeredAt - room.questionStartedAt
-      gained = scoreCorrectAnswer(elapsed, q.mode)
+      gained = scoreCorrectAnswer(elapsed, q.mode, streak)
       player.score += gained
+    } else {
+      room.streaks[player.id] = 0
     }
     results.push({
       playerId: player.id,
@@ -581,10 +707,35 @@ export function revealQuestion(room: Room) {
       correct,
       gained,
       answerIndex: ans ?? null,
+      streak,
     })
   }
-  results.sort((a, b) => b.gained - a.gained || b.correct.toString().localeCompare(a.correct.toString()))
+  results.sort((a, b) => b.gained - a.gained || Number(b.correct) - Number(a.correct))
   room.lastRound = results
+
+  const after = playingRanked(room)
+  const leader = after[0] ?? null
+  const second = after[1]
+  let drama: RankDrama | null = null
+  if (leader) {
+    const margin = second ? leader.score - second.score : leader.score
+    if (prevLeader && prevLeader.id !== leader.id) {
+      drama = {
+        kind: 'stole_lead',
+        leaderName: leader.name,
+        previousLeaderName: prevLeader.name,
+        margin,
+      }
+    } else if (second && margin <= SUDDEN_DEATH_MARGIN) {
+      drama = {
+        kind: 'neck_and_neck',
+        leaderName: leader.name,
+        previousLeaderName: prevLeader?.name ?? null,
+        margin,
+      }
+    }
+  }
+  room.rankDrama = drama
 }
 
 export function nextQuestion(code: string, playerId: string): Room | { error: string } {
@@ -608,6 +759,10 @@ export function endGame(code: string, playerId: string): Room | { error: string 
   room.questionStartedAt = 0
   room.revealCorrectIndex = null
   room.lastRound = null
+  room.optionCounts = null
+  room.rankDrama = null
+  room.nextPackVotes = {}
+  room.suddenDeath = false
   touch(room)
   trackFunnel('game_finished', code)
   return room
@@ -729,6 +884,13 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
     answeredCount: Object.keys(room.answers).length,
     playingCount: playing.length,
     lastRound: room.status === 'reveal' ? room.lastRound : null,
+    optionCounts: room.status === 'reveal' ? room.optionCounts : null,
+    rankDrama: room.status === 'reveal' ? room.rankDrama : null,
+    suddenDeath: Boolean(room.suddenDeath),
+    nextPackVotes: room.status === 'reveal' ? { ...room.nextPackVotes } : {},
+    yourPackVote:
+      playerId && room.status === 'reveal' ? (room.nextPackVotes[playerId] ?? null) : null,
+    yourStreak: playerId ? (room.streaks[playerId] ?? 0) : 0,
     premiumTier: tier,
     premiumExpiresAt: room.premiumExpiresAt,
     limits,
@@ -791,6 +953,12 @@ export function hydrateRooms(saved: Room[]) {
       questionStartedAt: 0,
       revealCorrectIndex: null,
       lastRound: null,
+      streaks: raw.streaks && typeof raw.streaks === 'object' ? raw.streaks : {},
+      nextPackVotes: {},
+      optionCounts: null,
+      rankDrama: null,
+      suddenDeath: false,
+      suddenDeathDone: Boolean(raw.suddenDeathDone),
       updatedAt: raw.updatedAt ?? now,
     }
     rooms.set(room.code, room)

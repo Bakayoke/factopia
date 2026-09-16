@@ -43,6 +43,14 @@ export type RoundResult = {
   correct: boolean
   gained: number
   answerIndex: number | null
+  streak?: number
+}
+
+export type RankDrama = {
+  kind: 'stole_lead' | 'held_lead' | 'neck_and_neck'
+  leaderName: string
+  previousLeaderName: string | null
+  margin: number
 }
 
 export type PublicCustomQuestion = {
@@ -69,6 +77,12 @@ export type PublicRoom = {
   answeredCount: number
   playingCount: number
   lastRound: RoundResult[] | null
+  optionCounts?: [number, number, number, number] | null
+  rankDrama?: RankDrama | null
+  suddenDeath?: boolean
+  nextPackVotes?: Partial<Record<string, CategoryPackId>>
+  yourPackVote?: CategoryPackId | null
+  yourStreak?: number
   premiumTier: PremiumTier
   premiumExpiresAt: number | null
   limits: PremiumLimits

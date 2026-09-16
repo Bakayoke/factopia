@@ -17,9 +17,11 @@ import {
   setHostPlaying,
   setLanguage,
   setPublicLobby,
+  setRoomTitle,
   startGame,
   submitAnswer,
   trackMetric,
+  voteNextPack,
 } from './api'
 import { detectPreferredLanguage, rememberLanguage, t } from './i18n'
 import type {
@@ -28,9 +30,22 @@ import type {
   PublicLobbyCard,
   PublicRoom,
   QuizLanguage,
+  RankDrama,
 } from './types'
 import { Confetti, useCountdown } from './ui'
 import { renderResultsImage } from './shareCard'
+import {
+  isMuted,
+  loadMute,
+  setMuted,
+  sfxCorrect,
+  sfxLightning,
+  sfxLockIn,
+  sfxReveal,
+  sfxWin,
+  sfxWrong,
+} from './sfx'
+import { recordGameResult, rematchTaunt, rivalryBlurb } from './rivalry'
 
 type Screen = 'home' | 'create' | 'join' | 'find' | 'play'
 
@@ -703,11 +718,16 @@ function Lobby({
   }
 
   async function shareInvite() {
+    const title = room.roomTitle?.trim() || 'Factopia'
+    const text =
+      room.language === 'en'
+        ? `Join ${title}: ${room.code}`
+        : `Gå med i ${title}: ${room.code}`
     if (typeof navigator.share === 'function') {
       try {
         await navigator.share({
-          title: 'Factopia',
-          text: room.language === 'en' ? `Join my Factopia quiz: ${room.code}` : `Gå med i mitt Factopia-quiz: ${room.code}`,
+          title,
+          text,
           url: invite,
         })
         return
@@ -716,6 +736,12 @@ function Lobby({
       }
     }
     await copyInvite()
+  }
+
+  async function changeTitle(title: string) {
+    if (!isHost) return
+    const res = await setRoomTitle(title)
+    if (res.error) onError(res.error)
   }
 
   async function changeCount(n: number) {
@@ -878,6 +904,17 @@ function Lobby({
       {isHost && showSettings && (
         <div className={`lobby-settings${tvMode ? ' tv-settings-panel' : ''}`}>
           <div>
+            <label htmlFor="room-title">{ui.roomTitle}</label>
+            <input
+              id="room-title"
+              type="text"
+              maxLength={40}
+              defaultValue={room.roomTitle}
+              placeholder={ui.roomTitlePlaceholder}
+              onBlur={(e) => void changeTitle(e.target.value)}
+            />
+          </div>
+          <div>
             <label style={{ marginBottom: '0.4rem' }}>{ui.vibe}</label>
             <div className="choice-row pack-row">
               {PACKS.map((p) => (
@@ -1019,6 +1056,19 @@ function Lobby({
   )
 }
 
+function dramaText(drama: RankDrama | null | undefined, ui: ReturnType<typeof t>): string | null {
+  if (!drama) return null
+  if (drama.kind === 'stole_lead') {
+    return ui.stoleLead.replace('{name}', drama.leaderName)
+  }
+  if (drama.kind === 'neck_and_neck') {
+    return ui.neckAndNeck
+      .replace('{name}', drama.leaderName)
+      .replace('{margin}', String(drama.margin))
+  }
+  return ui.heldLead.replace('{name}', drama.leaderName)
+}
+
 function QuestionView({
   room,
   playerId,
@@ -1050,6 +1100,31 @@ function QuestionView({
   const isLast = q ? q.index + 1 >= q.total : false
   const [busyNext, setBusyNext] = useState(false)
   const [busyEnd, setBusyEnd] = useState(false)
+  const [mute, setMuteState] = useState(() => loadMute())
+  const prevStatus = useRef(room.status)
+  const prevAnswer = useRef(room.yourAnswer)
+
+  useEffect(() => {
+    if (prevAnswer.current === null && room.yourAnswer !== null && !revealing) {
+      sfxLockIn()
+    }
+    prevAnswer.current = room.yourAnswer
+  }, [room.yourAnswer, revealing])
+
+  useEffect(() => {
+    if (prevStatus.current !== 'reveal' && revealing) {
+      sfxReveal()
+      const mine = room.lastRound?.find((r) => r.playerId === playerId)
+      if (mine) {
+        if (mine.correct) sfxCorrect()
+        else sfxWrong()
+      }
+    }
+    if (prevStatus.current !== 'question' && room.status === 'question' && q?.mode === 'lightning') {
+      sfxLightning()
+    }
+    prevStatus.current = room.status
+  }, [revealing, room.status, room.lastRound, playerId, q?.mode])
 
   async function answer(i: number) {
     if (locked) return
@@ -1071,29 +1146,53 @@ function QuestionView({
     if (res.error) onError(res.error)
   }
 
+  async function onVotePack(pack: CategoryPackId) {
+    const res = await voteNextPack(pack)
+    if (res.error) onError(res.error)
+  }
+
+  function toggleMute() {
+    const next = !mute
+    setMuted(next)
+    setMuteState(next)
+  }
+
   if (!q) return null
 
   const correctText =
     room.revealCorrectIndex !== null ? q.options[room.revealCorrectIndex] : null
+  const totalVotes = room.optionCounts?.reduce((a, b) => a + b, 0) ?? 0
+  const drama = dramaText(room.rankDrama, ui)
+  const canVotePack = revealing && !isSpectator && !isLast
+  const voteCount = Object.keys(room.nextPackVotes ?? {}).length
 
   return (
     <div className={`card stack${tvMode ? ' tv-mode' : ''}`}>
-      {isHost && (
-        <button className="btn-tiny" type="button" onClick={onToggleTv}>
-          {tvMode ? ui.tvModeOff : ui.tvModeOn}
+      <div className="meta-toolbar">
+        {isHost && (
+          <button className="btn-tiny" type="button" onClick={onToggleTv}>
+            {tvMode ? ui.tvModeOff : ui.tvModeOn}
+          </button>
+        )}
+        <button className="btn-tiny" type="button" onClick={toggleMute}>
+          {mute || isMuted() ? ui.soundOff : ui.soundOn}
         </button>
-      )}
+      </div>
       <div className="meta">
         <span className="category">{q.category}</span>
         {q.mode === 'double' && <span className="mode-badge mode-double">{ui.modeDouble}</span>}
         {q.mode === 'lightning' && (
           <span className="mode-badge mode-lightning">{ui.modeLightning}</span>
         )}
+        {room.suddenDeath && <span className="mode-badge mode-sudden">{ui.suddenDeathBanner}</span>}
         <span>
           {q.index + 1}/{q.total}
         </span>
       </div>
 
+      {room.suddenDeath && !revealing && (
+        <p className="mode-hint sudden-hint">{ui.suddenDeathBanner}</p>
+      )}
       {!revealing && q.mode === 'lightning' && (
         <p className="mode-hint lightning-hint">{ui.modeLightningHint}</p>
       )}
@@ -1103,11 +1202,12 @@ function QuestionView({
 
       {!revealing && (
         <>
-          <div className={`progress${q.mode === 'lightning' ? ' lightning-bar' : ''}`} aria-hidden>
+          <div className={`progress${q.mode === 'lightning' || room.suddenDeath ? ' lightning-bar' : ''}`} aria-hidden>
             <span style={{ width: `${ratio * 100}%` }} />
           </div>
           <p className="meta" style={{ justifyContent: 'center', margin: 0 }}>
             {seconds}s · {room.answeredCount}/{room.playingCount} {ui.answered}
+            {(room.yourStreak ?? 0) > 1 && !isSpectator ? ` · ${ui.streakLabel.replace('{n}', String(room.yourStreak))}` : ''}
           </p>
         </>
       )}
@@ -1121,11 +1221,33 @@ function QuestionView({
         </div>
       )}
 
+      {revealing && drama && <p className="drama-line">{drama}</p>}
+
+      {revealing && room.optionCounts && totalVotes > 0 && (
+        <ul className={`option-bars${tvMode ? ' tv-bars' : ''}`}>
+          {q.options.map((opt, i) => {
+            const n = room.optionCounts?.[i] ?? 0
+            const pct = Math.round((n / totalVotes) * 100)
+            const isCorrect = room.revealCorrectIndex === i
+            return (
+              <li key={i} className={isCorrect ? 'is-correct' : undefined}>
+                <div className="option-bar-label">
+                  <span>{opt}</span>
+                  <strong>{pct}%</strong>
+                </div>
+                <div className="option-bar-track">
+                  <span style={{ width: `${pct}%` }} />
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+
       {isSpectator && !revealing && (
         <p className="waiting">{isHost ? ui.hosting : ui.spectating}</p>
       )}
 
-      {/* TV mode: hide options until reveal (anti-spoiler for the big screen) */}
       {!revealing && !tvMode && (
         <div className="answers">
           {q.options.map((opt, i) => {
@@ -1168,12 +1290,34 @@ function QuestionView({
                 <span className="who">
                   {r.name}
                   {r.playerId === playerId ? ` (${ui.you})` : ''}
+                  {r.streak && r.streak > 1 ? ` · ${ui.streakLabel.replace('{n}', String(r.streak))}` : ''}
                 </span>
                 <span className="gain">{r.correct ? `+${r.gained}` : '0'}</span>
               </li>
             ))}
           </ul>
         </>
+      )}
+
+      {canVotePack && (
+        <div className="pack-vote">
+          <p className="section-title">
+            {ui.voteNextVibe}
+            {voteCount > 0 ? ` · ${voteCount}` : ''}
+          </p>
+          <div className="choice-row pack-row">
+            {PACKS.filter((p) => p.id !== 'mixed').slice(0, 5).map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                className={`choice ${room.yourPackVote === p.id ? 'selected' : ''}`}
+                onClick={() => void onVotePack(p.id)}
+              >
+                {ui[p.labelKey]}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
       {revealing && (
@@ -1252,6 +1396,39 @@ function WinnerView({
   const [shareFlash, setShareFlash] = useState('')
   const [showShareNudge, setShowShareNudge] = useState(true)
   const invite = joinUrl(room.code)
+  const nightTitle = room.roomTitle?.trim() || 'Factopia'
+  const houseLine = me ? rivalryBlurb(me.name, room.language) : null
+  const taunt = me && winner ? rematchTaunt(me.name, winner.name, room.language) : null
+  const recorded = useRef(false)
+  const autoShared = useRef(false)
+
+  useEffect(() => {
+    sfxWin()
+  }, [])
+
+  useEffect(() => {
+    if (recorded.current || !me) return
+    recorded.current = true
+    recordGameResult({
+      myName: me.name,
+      winnerName: winner?.name ?? '',
+      myScore: me.score,
+      played: me.playing,
+    })
+  }, [me, winner?.name])
+
+  useEffect(() => {
+    if (autoShared.current || hostedOnly) return
+    autoShared.current = true
+    const timer = window.setTimeout(() => {
+      if (typeof navigator.share === 'function') {
+        void shareResults(true)
+      }
+    }, 1400)
+    return () => window.clearTimeout(timer)
+    // shareResults is stable enough for mount-once prompt
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function onRematch() {
     setBusy(true)
@@ -1261,23 +1438,24 @@ function WinnerView({
     if (res.error) onError(res.error)
   }
 
-  async function shareResults() {
+  async function shareResults(fromAuto = false) {
     const lines = ranked.map((p, i) => `${i + 1}. ${p.name} — ${p.score}`)
     const text = ui.shareChallengeText
       .replace('{lines}', lines.join('\n'))
       .replace('{invite}', invite)
-    void trackMetric('share_results', room.code)
+    void trackMetric('share_results', fromAuto ? `auto:${room.code}` : room.code)
     setShowShareNudge(false)
     try {
       if (typeof navigator.share === 'function') {
-        await navigator.share({ title: 'Factopia', text, url: invite })
+        await navigator.share({ title: nightTitle, text, url: invite })
         setShareFlash(ui.resultsCopied)
         window.setTimeout(() => setShareFlash(''), 2000)
         return
       }
     } catch {
-      // fall through
+      if (fromAuto) return
     }
+    if (fromAuto) return
     try {
       await navigator.clipboard.writeText(text)
       setShareFlash(ui.resultsCopied)
@@ -1290,12 +1468,12 @@ function WinnerView({
   async function shareInviteMore() {
     const text =
       room.language === 'en'
-        ? `Join our Factopia rematch: ${room.code}\n${invite}`
-        : `Gå med i vår Factopia-omstart: ${room.code}\n${invite}`
+        ? `Join our rematch (${nightTitle}): ${room.code}\n${invite}`
+        : `Gå med i omstarten (${nightTitle}): ${room.code}\n${invite}`
     void trackMetric('share_results', `invite:${room.code}`)
     try {
       if (typeof navigator.share === 'function') {
-        await navigator.share({ title: 'Factopia', text, url: invite })
+        await navigator.share({ title: nightTitle, text, url: invite })
         return
       }
     } catch {
@@ -1313,7 +1491,9 @@ function WinnerView({
   async function shareImage() {
     const blob = await renderResultsImage({
       title: winner ? `${ui.winnerIs} ${winner.name}` : ui.standings,
-      subtitle: `${winner?.score ?? 0} ${ui.points}`,
+      subtitle: room.roomTitle?.trim()
+        ? `${room.roomTitle} · ${winner?.score ?? 0} ${ui.points}`
+        : `${winner?.score ?? 0} ${ui.points}`,
       rows: ranked.map((p, i) => ({
         rank: i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`,
         name: p.name,
@@ -1334,7 +1514,7 @@ function WinnerView({
       if (typeof navigator.share === 'function' && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: 'Factopia',
+          title: nightTitle,
           text,
         })
         return
@@ -1352,24 +1532,29 @@ function WinnerView({
     window.setTimeout(() => setShareFlash(''), 2000)
   }
 
+  const podium = ranked.slice(0, 3)
+
   return (
     <div className="card winner-screen">
       <Confetti />
       <span className="trophy" aria-hidden>
         🏆
       </span>
+      {room.roomTitle?.trim() ? <p className="night-title">{room.roomTitle}</p> : null}
       <h2>{hostedOnly ? ui.winnerIs : isYou ? ui.youWon : ui.winnerIs}</h2>
       <p className="name">{winner?.name ?? '—'}</p>
       <p className="score">
         {winner?.score ?? 0} {ui.points}
       </p>
+      {houseLine && <p className="rivalry-line">{houseLine}</p>}
+      {taunt && <p className="rivalry-line taunt">{taunt}</p>}
 
       {showShareNudge && (
-        <p className="party-unlock-banner share-nudge">{ui.shareViralHint}</p>
+        <p className="party-unlock-banner share-nudge">{ui.autoShareHint}</p>
       )}
 
       <div className="party-plans viral-share">
-        <button className="btn btn-primary" type="button" onClick={() => void shareResults()}>
+        <button className="btn btn-primary" type="button" onClick={() => void shareResults(false)}>
           {shareFlash || ui.challengeShare}
         </button>
         <button className="btn btn-accent" type="button" onClick={() => void shareImage()}>
@@ -1378,13 +1563,10 @@ function WinnerView({
       </div>
 
       <p className="section-title">{ui.standings}</p>
-      <ol className="scoreboard">
-        {ranked.map((p, i) => (
-          <li
-            key={p.id}
-            className={i === 0 ? 'place-1' : i === 1 ? 'place-2' : i === 2 ? 'place-3' : undefined}
-          >
-            <span className="rank">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}</span>
+      <ol className="podium">
+        {podium.map((p, i) => (
+          <li key={p.id}>
+            <span className="rank">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span>
             <span>
               {p.name}
               {p.id === playerId ? ` (${ui.you})` : ''}
@@ -1395,6 +1577,22 @@ function WinnerView({
           </li>
         ))}
       </ol>
+      {ranked.length > 3 && (
+        <ol className="scoreboard">
+          {ranked.slice(3).map((p, i) => (
+            <li key={p.id}>
+              <span className="rank">{i + 4}.</span>
+              <span>
+                {p.name}
+                {p.id === playerId ? ` (${ui.you})` : ''}
+              </span>
+              <span className="pts">
+                {p.score} {room.language === 'en' ? 'pts' : 'p'}
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
 
       {isHost ? (
         <>
@@ -1408,62 +1606,32 @@ function WinnerView({
       ) : (
         <p className="waiting">{ui.waitingRematch}</p>
       )}
-      <a
-        className="sister-game compact"
-        href={PARTY_PATHS_URL}
-        target="_blank"
-        rel="noreferrer"
-      >
+      <a className="sister-game compact" href={PARTY_PATHS_URL} target="_blank" rel="noreferrer">
         <strong>Party Paths</strong>
         <span>{ui.partyPathsPitch}</span>
         <em>{ui.partyPathsCta}</em>
       </a>
-      <a
-        className="sister-game compact sabotext"
-        href={SABOTEXT_URL}
-        target="_blank"
-        rel="noreferrer"
-      >
+      <a className="sister-game compact sabotext" href={SABOTEXT_URL} target="_blank" rel="noreferrer">
         <strong>Sabotext</strong>
         <span>{ui.sabotextPitch}</span>
         <em>{ui.sabotextCta}</em>
       </a>
-      <a
-        className="sister-game compact scourgeborn"
-        href={SCOURGEBORN_URL}
-        target="_blank"
-        rel="noreferrer"
-      >
+      <a className="sister-game compact scourgeborn" href={SCOURGEBORN_URL} target="_blank" rel="noreferrer">
         <strong>Scourgeborn</strong>
         <span>{ui.scourgebornPitch}</span>
         <em>{ui.scourgebornCta}</em>
       </a>
-      <a
-        className="sister-game compact yourtaskis"
-        href={YOUR_TASK_IS_URL}
-        target="_blank"
-        rel="noreferrer"
-      >
+      <a className="sister-game compact yourtaskis" href={YOUR_TASK_IS_URL} target="_blank" rel="noreferrer">
         <strong>Your Task Is</strong>
         <span>{ui.yourTaskIsPitch}</span>
         <em>{ui.yourTaskIsCta}</em>
       </a>
-      <a
-        className="sister-game compact klotterkaos"
-        href={KLOTTERKAOS_URL}
-        target="_blank"
-        rel="noreferrer"
-      >
+      <a className="sister-game compact klotterkaos" href={KLOTTERKAOS_URL} target="_blank" rel="noreferrer">
         <strong>Klotterkaos</strong>
         <span>{ui.klotterkaosPitch}</span>
         <em>{ui.klotterkaosCta}</em>
       </a>
-      <a
-        className="sister-game compact kluddkrig"
-        href={KLUDDKRIG_URL}
-        target="_blank"
-        rel="noreferrer"
-      >
+      <a className="sister-game compact kluddkrig" href={KLUDDKRIG_URL} target="_blank" rel="noreferrer">
         <strong>Kluddkrig</strong>
         <span>{ui.kluddkrigPitch}</span>
         <em>{ui.kluddkrigCta}</em>
@@ -1474,3 +1642,4 @@ function WinnerView({
     </div>
   )
 }
+

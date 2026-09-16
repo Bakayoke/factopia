@@ -27,6 +27,7 @@ import {
   listPublicLobbies,
   startGame,
   submitAnswer,
+  voteNextPack,
   nextQuestion,
   endGame,
   rematch,
@@ -247,6 +248,15 @@ io.on('connection', (socket) => {
     const binding = getBinding(socket.id)
     if (!binding) return ack?.({ error: 'Inte ansluten' })
     const result = setCategoryPack(binding.code, binding.playerId, String(pack ?? 'mixed'))
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
+  socket.on('voteNextPack', ({ pack }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = voteNextPack(binding.code, binding.playerId, String(pack ?? 'mixed'))
     if ('error' in result) return ack?.({ error: result.error })
     ack?.({ ok: true })
     broadcastRoom(result.code)

@@ -212,6 +212,10 @@ export function setCategoryPack(pack: CategoryPackId) {
   return emitAck<{ ok?: boolean }>('setCategoryPack', { pack })
 }
 
+export function voteNextPack(pack: CategoryPackId) {
+  return emitAck<{ ok?: boolean }>('voteNextPack', { pack })
+}
+
 export function setPublicLobby(isPublic: boolean) {
   return emitAck<{ ok?: boolean }>('setPublicLobby', { isPublic })
 }

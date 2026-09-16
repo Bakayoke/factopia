@@ -12,14 +12,23 @@ export function questionDurationMs(mode?: QuestionMode): number {
   return normalizeMode(mode) === 'lightning' ? LIGHTNING_MS : QUESTION_MS
 }
 
-/** Base 1000 + up to 500 speed; double mode ×2. */
-export function scoreCorrectAnswer(elapsedMs: number, mode?: QuestionMode): number {
+/** Base 1000 + up to 500 speed; double mode ×2; streak bonus from 2+ correct in a row. */
+export function scoreCorrectAnswer(
+  elapsedMs: number,
+  mode?: QuestionMode,
+  streak = 1,
+): number {
   const m = normalizeMode(mode)
   const window = questionDurationMs(m)
   const speedBonus = Math.max(0, Math.round(500 * (1 - elapsedMs / window)))
-  const base = 1000 + speedBonus
-  return m === 'double' ? base * 2 : base
+  let base = 1000 + speedBonus
+  if (m === 'double') base *= 2
+  const streakMult = 1 + 0.15 * Math.min(Math.max(streak - 1, 0), 4)
+  return Math.round(base * streakMult)
 }
+
+/** Top two within this many points → sudden-death bonus question. */
+export const SUDDEN_DEATH_MARGIN = 400
 
 const EASY_SV = new Set([
   'allmänt',
