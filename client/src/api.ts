@@ -6,11 +6,19 @@ import type {
   PublicLobbyCard,
   PublicRoom,
   QuizLanguage,
+  TeamId,
 } from './types'
 
 const SESSION_KEY = 'factopia-session'
 
 export type Session = { code: string; playerId: string; name: string }
+export type ReactionEvent = { emoji: string; from: string; at: number }
+
+type ConnectionHandlers = {
+  onRoom?: (room: PublicRoom) => void
+  onConnection?: (ok: boolean) => void
+  onReaction?: (reaction: ReactionEvent) => void
+}
 
 export function loadSession(): Session | null {
   try {
@@ -32,11 +40,6 @@ export function clearSession() {
 let socket: Socket | null = null
 let rejoinInFlight: Promise<Ack<{ playerId: string; room: PublicRoom }>> | null = null
 let connectionListenersAttached = false
-
-type ConnectionHandlers = {
-  onRoom?: (room: PublicRoom) => void
-  onConnection?: (connected: boolean) => void
-}
 
 const handlers: ConnectionHandlers = {}
 
@@ -70,6 +73,9 @@ export function getSocket() {
     socket.on('room', (room: PublicRoom) => {
       handlers.onRoom?.(room)
     })
+    socket.on('reaction', (payload: ReactionEvent) => {
+      handlers.onReaction?.(payload)
+    })
   }
 
   return socket
@@ -78,6 +84,7 @@ export function getSocket() {
 export function bindSocketHandlers(next: ConnectionHandlers) {
   handlers.onRoom = next.onRoom
   handlers.onConnection = next.onConnection
+  handlers.onReaction = next.onReaction
   getSocket()
 }
 
@@ -226,6 +233,18 @@ export function setRoomTitle(title: string) {
 
 export function setCustomQuestions(questions: PublicCustomQuestion[]) {
   return emitAck<{ ok?: boolean }>('setCustomQuestions', { questions })
+}
+
+export function setTeamMode(enabled: boolean) {
+  return emitAck<{ ok?: boolean }>('setTeamMode', { enabled })
+}
+
+export function setPlayerTeam(targetPlayerId: string, teamId: TeamId | null) {
+  return emitAck<{ ok?: boolean }>('setPlayerTeam', { targetPlayerId, teamId })
+}
+
+export function sendReaction(emoji: string) {
+  return emitAck<{ ok?: boolean }>('reaction', { emoji })
 }
 
 export function startGame() {

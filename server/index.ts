@@ -34,6 +34,8 @@ import {
   toPublicRoom,
   setRoomTitle,
   setCustomQuestions,
+  setTeamMode,
+  setPlayerTeam,
 } from './rooms.js'
 import { allPasses, restorePasses, setPassPersistHook } from './premium.js'
 import { weekThemePack } from './packs.js'
@@ -173,6 +175,42 @@ io.on('connection', (socket) => {
     if ('error' in result) return ack?.({ error: result.error })
     ack?.({ ok: true })
     broadcastRoom(result.code)
+  })
+
+  socket.on('setTeamMode', ({ enabled }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const result = setTeamMode(binding.code, binding.playerId, Boolean(enabled))
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
+  socket.on('setPlayerTeam', ({ targetPlayerId, teamId }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const tid = teamId === 'a' || teamId === 'b' ? teamId : null
+    const result = setPlayerTeam(binding.code, binding.playerId, String(targetPlayerId ?? ''), tid)
+    if ('error' in result) return ack?.({ error: result.error })
+    ack?.({ ok: true })
+    broadcastRoom(result.code)
+  })
+
+  socket.on('reaction', ({ emoji }, ack) => {
+    const binding = getBinding(socket.id)
+    if (!binding) return ack?.({ error: 'Inte ansluten' })
+    const room = getRoom(binding.code)
+    if (!room) return ack?.({ error: 'Rummet finns inte' })
+    const player = room.players.find((p) => p.id === binding.playerId)
+    if (!player) return ack?.({ error: 'Inte i rummet' })
+    const safe = String(emoji ?? '').slice(0, 8)
+    if (!safe) return ack?.({ error: 'Ogiltig reaktion' })
+    io.to(binding.code).emit('reaction', {
+      emoji: safe,
+      from: player.name,
+      at: Date.now(),
+    })
+    ack?.({ ok: true })
   })
 
   socket.on('join', ({ code, name }, ack) => {

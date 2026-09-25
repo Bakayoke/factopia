@@ -10,6 +10,8 @@ export type Question = {
   mode?: QuestionMode
 }
 
+export type TeamId = 'a' | 'b'
+
 export type Player = {
   id: string
   name: string
@@ -17,6 +19,8 @@ export type Player = {
   connected: boolean
   /** false = hostar bara, svarar inte på frågor */
   playing: boolean
+  /** Set when room.teamMode is on; null for spectators / host-only */
+  teamId: TeamId | null
 }
 
 export type RoomStatus = 'lobby' | 'question' | 'reveal' | 'finished'
@@ -100,6 +104,8 @@ export type Room = {
   rankDrama: RankDrama | null
   suddenDeath: boolean
   suddenDeathDone: boolean
+  /** Two-team party mode — scores still per player, totals derived */
+  teamMode: boolean
   /** Last activity — used when pruning persisted rooms */
   updatedAt: number
 }
@@ -134,6 +140,8 @@ export type PublicRoom = {
   nextPackVotes: Record<string, CategoryPackId>
   yourPackVote: CategoryPackId | null
   yourStreak: number
+  teamMode: boolean
+  teamScores: { a: number; b: number }
   premiumTier: PremiumTier
   premiumExpiresAt: number | null
   limits: PremiumLimits

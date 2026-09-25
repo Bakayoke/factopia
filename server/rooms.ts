@@ -14,6 +14,7 @@ import {
   limitsFor,
   lookupPass,
   redeemPassCode,
+  sanitizeCustomQuestions,
   tierFromExpiry,
   type CustomQuestionInput,
 } from './premium.js'
@@ -105,6 +106,7 @@ export function createRoom(
     score: 0,
     connected: true,
     playing: hostPlays,
+    teamId: null,
   }
 
   const room: Room = {
@@ -136,6 +138,7 @@ export function createRoom(
     rankDrama: null,
     suddenDeath: false,
     suddenDeathDone: false,
+    teamMode: false,
     updatedAt: Date.now(),
   }
 
@@ -201,12 +204,17 @@ export function joinRoom(
   const playerId = crypto.randomUUID()
   // Mid-game joiners watch; finished/lobby joiners play (ready for rematch)
   const playing = room.status === 'lobby' || room.status === 'finished'
+  let teamId: import('./types.js').TeamId | null = null
+  if (room.teamMode && playing) {
+    teamId = pickBalancedTeam(room)
+  }
   room.players.push({
     id: playerId,
     name: displayName,
     score: 0,
     connected: true,
     playing,
+    teamId,
   })
   // Clear from waitlist if they got in
   room.waitlist = room.waitlist.filter((w) => w.name.toLowerCase() !== displayName.toLowerCase())
@@ -249,6 +257,8 @@ export function setHostPlaying(
   const host = room.players.find((p) => p.id === playerId)
   if (!host) return { error: 'Värden hittades inte' }
   host.playing = playing
+  if (!playing) host.teamId = null
+  else if (room.teamMode) host.teamId = pickBalancedTeam(room)
   touch(room)
   return room
 }
@@ -450,12 +460,65 @@ export function setRoomTitle(
   return room
 }
 
+const MAX_CUSTOM_QUESTIONS = 40
+
 export function setCustomQuestions(
-  _code: string,
-  _playerId: string,
-  _input: CustomQuestionInput[],
+  code: string,
+  playerId: string,
+  input: CustomQuestionInput[],
 ): Room | { error: string } {
-  return { error: 'Egna frågor är borttagna — Factopia ger frågorna åt dig' }
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan sätta egna frågor' }
+  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+  const sanitized = sanitizeCustomQuestions(input, MAX_CUSTOM_QUESTIONS)
+  if ('error' in sanitized) return sanitized
+  room.customQuestions = sanitized.questions
+  touch(room)
+  return room
+}
+
+export function setTeamMode(
+  code: string,
+  playerId: string,
+  enabled: boolean,
+): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan ändra lagläge' }
+  if (room.status !== 'lobby') return { error: 'Spelet har redan startat' }
+  room.teamMode = Boolean(enabled)
+  if (room.teamMode) {
+    rebalanceTeams(room)
+  } else {
+    for (const p of room.players) p.teamId = null
+  }
+  touch(room)
+  return room
+}
+
+export function setPlayerTeam(
+  code: string,
+  playerId: string,
+  targetPlayerId: string,
+  teamId: import('./types.js').TeamId | null,
+): Room | { error: string } {
+  const room = rooms.get(code)
+  if (!room) return { error: 'Rummet finns inte' }
+  if (room.hostId !== playerId) return { error: 'Bara värden kan flytta spelare' }
+  if (!room.teamMode) return { error: 'Lagläge är av' }
+  if (room.status !== 'lobby' && room.status !== 'finished') {
+    return { error: 'Kan bara byta lag i lobbyn' }
+  }
+  const target = room.players.find((p) => p.id === targetPlayerId)
+  if (!target) return { error: 'Spelaren hittades inte' }
+  if (!target.playing) return { error: 'Åskådare har inget lag' }
+  if (teamId !== 'a' && teamId !== 'b' && teamId !== null) {
+    return { error: 'Ogiltigt lag' }
+  }
+  target.teamId = teamId
+  touch(room)
+  return room
 }
 
 export function startGame(code: string, playerId: string): Room | { error: string } {
@@ -469,7 +532,6 @@ export function startGame(code: string, playerId: string): Room | { error: strin
 
   if (room.premiumExpiresAt && room.premiumExpiresAt <= Date.now()) {
     room.premiumExpiresAt = null
-    room.customQuestions = []
     room.isPublic = false
     room.questionCount = clampQuestionCount(room.questionCount, roomLimits(room).questionCounts)
   }
@@ -531,12 +593,55 @@ export function rematch(code: string, playerId: string): Room | { error: string 
   return room
 }
 
+
+function pickBalancedTeam(room: Room): import('./types.js').TeamId {
+  let a = 0
+  let b = 0
+  for (const p of room.players) {
+    if (!p.playing) continue
+    if (p.teamId === 'a') a += 1
+    else if (p.teamId === 'b') b += 1
+  }
+  return a <= b ? 'a' : 'b'
+}
+
+function rebalanceTeams(room: Room) {
+  const playing = room.players.filter((p) => p.playing)
+  playing.forEach((p, i) => {
+    p.teamId = i % 2 === 0 ? 'a' : 'b'
+  })
+  for (const p of room.players) {
+    if (!p.playing) p.teamId = null
+  }
+}
+
+function deriveTeamScores(room: Room): { a: number; b: number } {
+  let a = 0
+  let b = 0
+  for (const p of room.players) {
+    if (!p.playing) continue
+    if (p.teamId === 'a') a += p.score
+    else if (p.teamId === 'b') b += p.score
+  }
+  return { a, b }
+}
+
+function teamLabel(team: import('./types.js').TeamId, language: QuizLanguage) {
+  if (language === 'en') return team === 'a' ? 'Team A' : 'Team B'
+  return team === 'a' ? 'Lag A' : 'Lag B'
+}
+
 function playingRanked(room: Room): Player[] {
   return room.players.filter((p) => p.playing).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
 }
 
 function shouldSuddenDeath(room: Room): boolean {
   if (room.suddenDeathDone) return false
+  if (room.teamMode) {
+    const { a, b } = deriveTeamScores(room)
+    if (a === 0 && b === 0) return false
+    return Math.abs(a - b) <= SUDDEN_DEATH_MARGIN
+  }
   const ranked = playingRanked(room)
   if (ranked.length < 2) return false
   const lead = ranked[0]!.score - ranked[1]!.score
@@ -713,25 +818,48 @@ export function revealQuestion(room: Room) {
   results.sort((a, b) => b.gained - a.gained || Number(b.correct) - Number(a.correct))
   room.lastRound = results
 
-  const after = playingRanked(room)
-  const leader = after[0] ?? null
-  const second = after[1]
   let drama: RankDrama | null = null
-  if (leader) {
-    const margin = second ? leader.score - second.score : leader.score
-    if (prevLeader && prevLeader.id !== leader.id) {
+  if (room.teamMode) {
+    const scores = deriveTeamScores(room)
+    const leadTeam: import('./types.js').TeamId = scores.a >= scores.b ? 'a' : 'b'
+    const trailTeam: import('./types.js').TeamId = leadTeam === 'a' ? 'b' : 'a'
+    const margin = Math.abs(scores.a - scores.b)
+    const prevLeadTeam = prevLeader?.teamId
+    if (prevLeadTeam && prevLeadTeam !== leadTeam) {
       drama = {
         kind: 'stole_lead',
-        leaderName: leader.name,
-        previousLeaderName: prevLeader.name,
+        leaderName: teamLabel(leadTeam, room.language),
+        previousLeaderName: teamLabel(prevLeadTeam, room.language),
         margin,
       }
-    } else if (second && margin <= SUDDEN_DEATH_MARGIN) {
+    } else if (margin <= SUDDEN_DEATH_MARGIN) {
       drama = {
         kind: 'neck_and_neck',
-        leaderName: leader.name,
-        previousLeaderName: prevLeader?.name ?? null,
+        leaderName: teamLabel(leadTeam, room.language),
+        previousLeaderName: teamLabel(trailTeam, room.language),
         margin,
+      }
+    }
+  } else {
+    const after = playingRanked(room)
+    const leader = after[0] ?? null
+    const second = after[1]
+    if (leader) {
+      const margin = second ? leader.score - second.score : leader.score
+      if (prevLeader && prevLeader.id !== leader.id) {
+        drama = {
+          kind: 'stole_lead',
+          leaderName: leader.name,
+          previousLeaderName: prevLeader.name,
+          margin,
+        }
+      } else if (second && margin <= SUDDEN_DEATH_MARGIN) {
+        drama = {
+          kind: 'neck_and_neck',
+          leaderName: leader.name,
+          previousLeaderName: prevLeader?.name ?? null,
+          margin,
+        }
       }
     }
   }
@@ -891,6 +1019,8 @@ export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
     yourPackVote:
       playerId && room.status === 'reveal' ? (room.nextPackVotes[playerId] ?? null) : null,
     yourStreak: playerId ? (room.streaks[playerId] ?? 0) : 0,
+    teamMode: Boolean(room.teamMode),
+    teamScores: deriveTeamScores(room),
     premiumTier: tier,
     premiumExpiresAt: room.premiumExpiresAt,
     limits,
@@ -941,7 +1071,12 @@ export function hydrateRooms(saved: Room[]) {
       isPublic: Boolean(raw.isPublic),
       waitlist: Array.isArray(raw.waitlist) ? raw.waitlist : [],
       recentQuestionIds: Array.isArray(raw.recentQuestionIds) ? raw.recentQuestionIds : [],
-      players: (raw.players ?? []).map((p) => ({ ...p, connected: false })),
+      players: (raw.players ?? []).map((p) => ({
+        ...p,
+        connected: false,
+        teamId: p.teamId === 'a' || p.teamId === 'b' ? p.teamId : null,
+      })),
+      teamMode: Boolean(raw.teamMode),
       answers: {},
       answerTimes: {},
       // Mid-question rooms resume safer from lobby if timers are stale

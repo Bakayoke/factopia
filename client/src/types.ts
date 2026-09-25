@@ -4,6 +4,7 @@ export type Player = {
   score: number
   connected: boolean
   playing: boolean
+  teamId?: 'a' | 'b' | null
 }
 
 export type RoomStatus = 'lobby' | 'question' | 'reveal' | 'finished'
@@ -17,6 +18,7 @@ export type CategoryPackId =
   | 'historySport'
   | 'party'
   | 'food'
+export type TeamId = 'a' | 'b'
 
 export type PremiumLimits = {
   /** 0 = unlimited */
@@ -83,6 +85,8 @@ export type PublicRoom = {
   nextPackVotes?: Partial<Record<string, CategoryPackId>>
   yourPackVote?: CategoryPackId | null
   yourStreak?: number
+  teamMode?: boolean
+  teamScores?: { a: number; b: number }
   premiumTier: PremiumTier
   premiumExpiresAt: number | null
   limits: PremiumLimits

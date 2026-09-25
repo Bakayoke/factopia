@@ -463,6 +463,129 @@ button {
   color: var(--accent-deep);
 }
 
+.team-standings {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.team-score-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.team-card {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+  background: var(--bg);
+  text-align: center;
+  font-weight: 800;
+}
+
+.team-card.leading {
+  background: color-mix(in srgb, var(--accent) 28%, var(--bg));
+}
+
+.team-card span {
+  font-size: 1.4rem;
+}
+
+.team-assign .team-btns {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.team-btns .btn-tiny.selected {
+  outline: 2px solid var(--accent);
+}
+
+.reaction-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.reaction-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-right: 0.25rem;
+}
+
+.reaction-btn {
+  border: none;
+  background: color-mix(in srgb, var(--surface) 80%, #000);
+  border-radius: 999px;
+  font-size: 1.25rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  cursor: pointer;
+}
+
+.reaction-overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.card {
+  position: relative;
+}
+
+.reaction-float {
+  position: absolute;
+  bottom: 12%;
+  display: grid;
+  justify-items: center;
+  animation: float-react 2.6s ease-out forwards;
+  font-size: 2rem;
+}
+
+.reaction-float em {
+  font-style: normal;
+  font-size: 0.75rem;
+  font-weight: 800;
+  opacity: 0.85;
+}
+
+@keyframes float-react {
+  0% { transform: translateY(20px) scale(0.8); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(-120px) scale(1.15); opacity: 0; }
+}
+
+.tv-mode .big-seconds {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 8vw, 4.5rem);
+  letter-spacing: 0.02em;
+}
+
+.tv-mode .tv-countdown,
+.tv-mode .tv-wait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.answer-pulse {
+  animation: answer-pop 0.45s ease;
+}
+
+@keyframes answer-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
 .party-unlock-banner {
   margin: 0 0 0.75rem;
   text-align: center;

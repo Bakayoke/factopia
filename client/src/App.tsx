@@ -22,6 +22,7 @@ import {
   submitAnswer,
   trackMetric,
   voteNextPack,
+  type ReactionEvent,
 } from './api'
 import { detectPreferredLanguage, rememberLanguage, t } from './i18n'
 import type {
@@ -46,6 +47,8 @@ import {
   sfxWrong,
 } from './sfx'
 import { recordGameResult, rematchTaunt, rivalryBlurb } from './rivalry'
+import { LobbyTeamAndCustoms, TeamStandings } from './LobbyExtras'
+import { ReactionBar, ReactionOverlay } from './reactions'
 
 type Screen = 'home' | 'create' | 'join' | 'find' | 'play'
 
@@ -94,6 +97,7 @@ export default function App() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [connected, setConnected] = useState(true)
+  const [reactions, setReactions] = useState<ReactionEvent[]>([])
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [lobbies, setLobbies] = useState<PublicLobbyCard[]>([])
   const [activity, setActivity] = useState({
@@ -159,6 +163,14 @@ export default function App() {
     bindSocketHandlers({
       onRoom: (next) => setRoom(next),
       onConnection: (ok) => setConnected(ok),
+      onReaction: (r) => {
+        setReactions((prev) => [...prev.slice(-14), r])
+        window.setTimeout(() => {
+          setReactions((prev) =>
+            prev.filter((x) => !(x.at === r.at && x.from === r.from && x.emoji === r.emoji)),
+          )
+        }, 2800)
+      },
     })
 
     const session = loadSession()
@@ -564,6 +576,7 @@ export default function App() {
             onError={setError}
             error={error}
             startInTvMode={hostTvDefault}
+            reactions={reactions}
           />
         )}
       </div>
@@ -578,6 +591,7 @@ function PlayView({
   onError,
   error,
   startInTvMode,
+  reactions,
 }: {
   room: PublicRoom
   playerId: string
@@ -585,6 +599,7 @@ function PlayView({
   onError: (msg: string) => void
   error: string
   startInTvMode?: boolean
+  reactions: ReactionEvent[]
 }) {
   const isHost = room.hostId === playerId
   const ui = t(room.language)
@@ -637,6 +652,7 @@ function PlayView({
         onLeave={onLeave}
         tvMode={tvMode}
         onToggleTv={() => setTvMode((v) => !v)}
+        reactions={reactions}
       />
       </>
     )
@@ -652,6 +668,8 @@ function PlayView({
         isHost={isHost}
         onLeave={onLeave}
         onError={onError}
+        tvMode={tvMode}
+        reactions={reactions}
       />
       </>
     )
@@ -672,6 +690,7 @@ function PlayView({
       onLeave={onLeave}
       tvMode={tvMode}
       onToggleTv={() => setTvMode((v) => !v)}
+      reactions={reactions}
     />
     </>
   )
@@ -686,6 +705,7 @@ function Lobby({
   onLeave,
   tvMode,
   onToggleTv,
+  reactions,
 }: {
   room: PublicRoom
   playerId: string
@@ -695,6 +715,7 @@ function Lobby({
   onLeave: () => void
   tvMode: boolean
   onToggleTv: () => void
+  reactions: ReactionEvent[]
 }) {
   const [busy, setBusy] = useState(false)
   const [shareFlash, setShareFlash] = useState('')
@@ -805,6 +826,7 @@ function Lobby({
 
   return (
     <div className={`card stack${tvMode ? ' tv-mode' : ''}`}>
+      {tvMode && <ReactionOverlay reactions={reactions} />}
       <div className="code-display host-focus">
         <span>{ui.gameCode}</span>
         <strong>{room.code}</strong>
@@ -825,14 +847,14 @@ function Lobby({
         </div>
       </div>
 
-      {isHost && (
-        <div className={`host-control-bar${tvMode ? ' tv-host-bar' : ''}`}>
+      {isHost && !tvMode && (
+        <div className="host-control-bar">
           <button
-            className={`btn ${tvMode ? 'btn-secondary' : 'btn-accent'}`}
+            className="btn btn-accent"
             type="button"
             onClick={onToggleTv}
           >
-            {tvMode ? ui.tvModeOff : ui.showOnTv}
+            {ui.showOnTv}
           </button>
           <button
             className={`btn ${showSettings ? 'btn-primary' : 'btn-secondary'}`}
@@ -842,6 +864,10 @@ function Lobby({
             {showSettings ? ui.hideSettings : ui.editSettings}
           </button>
         </div>
+      )}
+
+      {tvMode && isHost && (
+        <p className="waiting tv-wait">{ui.waitingForPlayers}</p>
       )}
 
       <div className={`lobby-roster${participants.length === 0 ? ' is-waiting' : ' has-players'}`}>
@@ -876,7 +902,11 @@ function Lobby({
           <ul className={`players${tvMode ? ' tv-players' : ''}`}>
             {participants.map((p) => (
               <li key={p.id}>
-                <span>{p.name}</span>
+                <span>
+                  {p.name}
+                  {room.teamMode && p.teamId === 'a' ? ` · ${ui.teamA}` : ''}
+                  {room.teamMode && p.teamId === 'b' ? ` · ${ui.teamB}` : ''}
+                </span>
                 {p.id === playerId && <span className="you">{ui.you}</span>}
               </li>
             ))}
@@ -912,8 +942,8 @@ function Lobby({
         </p>
       )}
 
-      {isHost && showSettings && (
-        <div className={`lobby-settings${tvMode ? ' tv-settings-panel' : ''}`}>
+      {isHost && showSettings && !tvMode && (
+        <div className="lobby-settings">
           <div>
             <label htmlFor="room-title">{ui.roomTitle}</label>
             <input
@@ -925,6 +955,16 @@ function Lobby({
               onBlur={(e) => void changeTitle(e.target.value)}
             />
           </div>
+          <LobbyTeamAndCustoms
+            room={room}
+            isHost={isHost}
+            ui={ui}
+            onError={onError}
+            onFlash={(msg) => {
+              setShareFlash(msg)
+              window.setTimeout(() => setShareFlash(''), 2000)
+            }}
+          />
           <div>
             <label style={{ marginBottom: '0.4rem' }}>{ui.vibe}</label>
             <div className="choice-row pack-row">
@@ -1048,7 +1088,7 @@ function Lobby({
 
       {error && <p className="error">{error}</p>}
 
-      {isHost && (
+      {isHost && !tvMode && (
         <button
           className="btn btn-primary"
           type="button"
@@ -1062,6 +1102,9 @@ function Lobby({
         <button className="btn btn-ghost" type="button" onClick={onLeave}>
           {ui.endQuiz}
         </button>
+      )}
+      {!tvMode && room.status === 'lobby' && (
+        <ReactionBar label={ui.reactBar} />
       )}
     </div>
   )
@@ -1088,6 +1131,7 @@ function QuestionView({
   onLeave,
   tvMode,
   onToggleTv,
+  reactions,
 }: {
   room: PublicRoom
   playerId: string
@@ -1096,6 +1140,7 @@ function QuestionView({
   onLeave: () => void
   tvMode: boolean
   onToggleTv: () => void
+  reactions: ReactionEvent[]
 }) {
   const ui = t(room.language)
   const q = room.question
@@ -1136,6 +1181,19 @@ function QuestionView({
     }
     prevStatus.current = room.status
   }, [revealing, room.status, room.lastRound, playerId, q?.mode])
+
+  const [answerPulse, setAnswerPulse] = useState(false)
+  const prevAnswered = useRef(room.answeredCount)
+
+  useEffect(() => {
+    if (room.answeredCount > prevAnswered.current) {
+      setAnswerPulse(true)
+      const t = window.setTimeout(() => setAnswerPulse(false), 450)
+      prevAnswered.current = room.answeredCount
+      return () => window.clearTimeout(t)
+    }
+    prevAnswered.current = room.answeredCount
+  }, [room.answeredCount])
 
   async function answer(i: number) {
     if (locked) return
@@ -1179,16 +1237,19 @@ function QuestionView({
 
   return (
     <div className={`card stack${tvMode ? ' tv-mode' : ''}`}>
-      <div className="meta-toolbar">
-        {isHost && (
-          <button className="btn-tiny" type="button" onClick={onToggleTv}>
-            {tvMode ? ui.tvModeOff : ui.tvModeOn}
+      {tvMode && <ReactionOverlay reactions={reactions} />}
+      {!tvMode && (
+        <div className="meta-toolbar">
+          {isHost && (
+            <button className="btn-tiny" type="button" onClick={onToggleTv}>
+              {ui.tvModeOn}
+            </button>
+          )}
+          <button className="btn-tiny" type="button" onClick={toggleMute}>
+            {mute || isMuted() ? ui.soundOff : ui.soundOn}
           </button>
-        )}
-        <button className="btn-tiny" type="button" onClick={toggleMute}>
-          {mute || isMuted() ? ui.soundOff : ui.soundOn}
-        </button>
-      </div>
+        </div>
+      )}
       <div className="meta">
         <span className="category">{q.category}</span>
         {q.mode === 'double' && <span className="mode-badge mode-double">{ui.modeDouble}</span>}
@@ -1216,9 +1277,14 @@ function QuestionView({
           <div className={`progress${q.mode === 'lightning' || room.suddenDeath ? ' lightning-bar' : ''}`} aria-hidden>
             <span style={{ width: `${ratio * 100}%` }} />
           </div>
-          <p className="meta" style={{ justifyContent: 'center', margin: 0 }}>
-            {seconds}s · {room.answeredCount}/{room.playingCount} {ui.answered}
-            {(room.yourStreak ?? 0) > 1 && !isSpectator ? ` · ${ui.streakLabel.replace('{n}', String(room.yourStreak))}` : ''}
+          <p className={`meta tv-countdown${answerPulse ? ' answer-pulse' : ''}`} style={{ justifyContent: 'center', margin: 0 }}>
+            <strong className="big-seconds">{seconds}s</strong>
+            <span>
+              · {room.answeredCount}/{room.playingCount} {ui.answered}
+              {(room.yourStreak ?? 0) > 1 && !isSpectator
+                ? ` · ${ui.streakLabel.replace('{n}', String(room.yourStreak))}`
+                : ''}
+            </span>
           </p>
         </>
       )}
@@ -1233,6 +1299,7 @@ function QuestionView({
       )}
 
       {revealing && drama && <p className="drama-line">{drama}</p>}
+      {revealing && <TeamStandings room={room} ui={ui} />}
 
       {revealing && room.optionCounts && totalVotes > 0 && (
         <ul className={`option-bars${tvMode ? ' tv-bars' : ''}`}>
@@ -1280,8 +1347,11 @@ function QuestionView({
       )}
 
       {tvMode && !revealing && (
-        <p className="waiting tv-wait">
-          {seconds}s · {room.answeredCount}/{room.playingCount} {ui.answered}
+        <p className={`waiting tv-wait${answerPulse ? ' answer-pulse' : ''}`}>
+          <strong className="big-seconds">{seconds}s</strong>
+          <span>
+            · {room.answeredCount}/{room.playingCount} {ui.answered}
+          </span>
         </p>
       )}
 
@@ -1310,7 +1380,7 @@ function QuestionView({
         </>
       )}
 
-      {canVotePack && (
+      {canVotePack && !tvMode && (
         <div className="pack-vote">
           <p className="section-title">
             {ui.voteNextVibe}
@@ -1347,6 +1417,8 @@ function QuestionView({
                   <span>
                     {p.name}
                     {p.id === playerId ? ` (${ui.you})` : ''}
+                    {room.teamMode && p.teamId === 'a' ? ` · ${ui.teamA}` : ''}
+                    {room.teamMode && p.teamId === 'b' ? ` · ${ui.teamB}` : ''}
                   </span>
                   <span className="pts">
                     {p.score} {room.language === 'en' ? 'pts' : 'p'}
@@ -1357,7 +1429,7 @@ function QuestionView({
         </>
       )}
 
-      {revealing && manual && isHost && (
+      {revealing && manual && isHost && !tvMode && (
         <button className="btn btn-primary" type="button" onClick={onNext} disabled={busyNext}>
           {isLast ? ui.showWinner : ui.nextQuestion}
         </button>
@@ -1371,18 +1443,21 @@ function QuestionView({
         </p>
       )}
 
-      {isHost ? (
+      {!tvMode && <ReactionBar label={ui.reactBar} />}
+
+      {isHost && !tvMode ? (
         <button className="btn btn-ghost" type="button" onClick={onEnd} disabled={busyEnd}>
           {ui.endQuiz}
         </button>
-      ) : (
+      ) : !tvMode ? (
         <button className="btn btn-ghost" type="button" onClick={onLeave}>
           {ui.leave}
         </button>
-      )}
+      ) : null}
     </div>
   )
 }
+
 
 function WinnerView({
   room,
@@ -1390,12 +1465,16 @@ function WinnerView({
   isHost,
   onLeave,
   onError,
+  tvMode = false,
+  reactions = [],
 }: {
   room: PublicRoom
   playerId: string
   isHost: boolean
   onLeave: () => void
   onError: (msg: string) => void
+  tvMode?: boolean
+  reactions?: ReactionEvent[]
 }) {
   const ui = t(room.language)
   const ranked = [...room.players].filter((p) => p.playing).sort((a, b) => b.score - a.score)
@@ -1546,7 +1625,8 @@ function WinnerView({
   const podium = ranked.slice(0, 3)
 
   return (
-    <div className="card winner-screen">
+    <div className={`card winner-screen${tvMode ? ' tv-mode' : ''}`}>
+      {tvMode && <ReactionOverlay reactions={reactions} />}
       <Confetti />
       <span className="trophy" aria-hidden>
         🏆
@@ -1573,6 +1653,8 @@ function WinnerView({
         </button>
       </div>
 
+      <TeamStandings room={room} ui={ui} />
+      {!tvMode && <ReactionBar label={ui.reactBar} />}
       <p className="section-title">{ui.standings}</p>
       <ol className="podium">
         {podium.map((p, i) => (
