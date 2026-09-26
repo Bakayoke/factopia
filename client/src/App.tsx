@@ -62,7 +62,7 @@ const SCOURGEBORN_URL = 'https://scourgeborn.com'
 const YOUR_TASK_IS_URL = 'https://yourtaskis.com'
 const KLOTTERKAOS_URL = 'https://klotterkaos.com'
 const KLUDDKRIG_URL = 'https://kluddkrig.com'
-const PULSEKAOS_URL = 'https://pulsekaos.com'
+const PULSEKAOS_URL = 'https://pulskaos.com'
 
 const PACKS: { id: CategoryPackId; labelKey: keyof ReturnType<typeof t> }[] = [
   { id: 'mixed', labelKey: 'packMixed' },
@@ -396,7 +396,7 @@ export default function App() {
               target="_blank"
               rel="noreferrer"
             >
-              <strong>Pulsekaos</strong>
+              <strong>Pulskaos</strong>
               <span>{ui.pulsekaosPitch}</span>
               <em>{ui.pulsekaosCta}</em>
             </a>
@@ -1730,7 +1730,7 @@ function WinnerView({
         <em>{ui.kluddkrigCta}</em>
       </a>
       <a className="sister-game compact pulsekaos" href={PULSEKAOS_URL} target="_blank" rel="noreferrer">
-        <strong>Pulsekaos</strong>
+        <strong>Pulskaos</strong>
         <span>{ui.pulsekaosPitch}</span>
         <em>{ui.pulsekaosCta}</em>
       </a>
