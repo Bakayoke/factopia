@@ -2,6 +2,7 @@ import { customAlphabet } from 'nanoid'
 import { categoriesForPack, normalizePackId, type CategoryPackId } from './packs.js'
 import { pickQuestions } from './questions.js'
 import { trackFunnel } from './metrics.js'
+import { recordGameStart } from './stats.js'
 import {
   QUESTION_MS,
   REVEAL_MS,
@@ -559,6 +560,7 @@ export function startGame(code: string, playerId: string): Room | { error: strin
   advanceToQuestion(room)
   touch(room)
   trackFunnel('game_start', code)
+  void recordGameStart()
   return room
 }
 
