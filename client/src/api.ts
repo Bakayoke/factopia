@@ -79,8 +79,8 @@ export function getSocket() {
     })
     socket.on('room', (room: PublicRoom) => {
       const session = loadSession()
-      // Ignore room updates for rooms we're not bound to (stale dual-join)
-      if (session && room.code !== session.code) return
+      // No session (left / mid create) or wrong room → ignore (prevents home-screen yank)
+      if (!session || room.code !== session.code) return
       handlers.onRoom?.(room)
     })
     socket.on('reaction', (payload: ReactionEvent) => {
@@ -98,14 +98,15 @@ export function bindSocketHandlers(next: ConnectionHandlers) {
   getSocket()
 }
 
-function isRoomGoneError(error?: string) {
+function isSessionDeadError(error?: string) {
   if (!error) return false
   const e = error.toLowerCase()
   return (
     e.includes('finns inte') ||
     e.includes('hittades inte') ||
     e.includes('not found') ||
-    e.includes('hittade inget')
+    e.includes('hittade inget') ||
+    e.includes('spelaren hittades inte')
   )
 }
 
@@ -143,13 +144,13 @@ export async function ensureSessionBound(
         }
         return last
       }
-      if (isRoomGoneError(last.error)) {
+      if (isSessionDeadError(last.error)) {
         break
       }
       await new Promise((r) => setTimeout(r, 700 * (i + 1)))
     }
     if (sessionEpoch !== epochAtStart) return null
-    if (isRoomGoneError(last.error)) {
+    if (isSessionDeadError(last.error)) {
       const still = loadSession()
       if (still?.code === session.code && still.playerId === session.playerId) {
         clearSession()
@@ -222,6 +223,8 @@ export function createGame(
   language: QuizLanguage,
 ) {
   bumpSessionEpoch()
+  // Drop old session before create so a reconnect mid-flight cannot rejoin the previous room
+  clearSession()
   return emitAck<{ playerId: string; room: PublicRoom }>('create', {
     name,
     questionCount,
@@ -233,6 +236,7 @@ export function createGame(
 
 export function joinGame(code: string, name: string) {
   bumpSessionEpoch()
+  clearSession()
   return emitAck<{
     playerId: string
     room: PublicRoom

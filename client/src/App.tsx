@@ -164,7 +164,7 @@ export default function App() {
     bindSocketHandlers({
       onRoom: (next) => {
         const session = loadSession()
-        if (session && next.code !== session.code) return
+        if (!session || next.code !== session.code) return
         setRoom(next)
       },
       onConnection: (ok) => setConnected(ok),

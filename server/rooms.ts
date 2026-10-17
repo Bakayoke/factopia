@@ -73,6 +73,46 @@ function cancelHostTransferTimer(code: string) {
   }
 }
 
+function isPlayerStillBound(code: string, playerId: string) {
+  for (const b of socketToPlayer.values()) {
+    if (b.code === code && b.playerId === playerId) return true
+  }
+  return false
+}
+
+/** Immediate host handoff when the host goes offline (leave / switch room). */
+function transferHostIfNeeded(room: Room, formerHostId: string) {
+  if (room.hostId !== formerHostId) return
+  cancelHostTransferTimer(room.code)
+  const nextHost = room.players.find((p) => p.connected && p.id !== formerHostId)
+  if (nextHost) room.hostId = nextHost.id
+}
+
+/**
+ * Schedule host transfer after disconnect grace (cancellable on rejoin).
+ */
+function scheduleHostTransfer(
+  code: string,
+  formerHostId: string,
+  delayMs: number,
+  onSettled?: (room: Room) => void,
+) {
+  cancelHostTransferTimer(code)
+  const hostTimer = setTimeout(() => {
+    hostTransferTimers.delete(code)
+    const live = rooms.get(code)
+    if (!live || live.hostId !== formerHostId) return
+    const host = live.players.find((p) => p.id === formerHostId)
+    if (host?.connected) return
+    transferHostIfNeeded(live, formerHostId)
+    if (live.hostId !== formerHostId) {
+      touch(live)
+      onSettled?.(live)
+    }
+  }, delayMs)
+  hostTransferTimers.set(code, hostTimer)
+}
+
 /**
  * Detach a socket from any previous room/player before binding a new one.
  * Marks the old player offline immediately so leave→create doesn't leave ghosts.
@@ -83,18 +123,12 @@ export function detachSocket(socketId: string): { code: string } | null {
   socketToPlayer.delete(socketId)
   const room = rooms.get(prev.code)
   if (!room) return { code: prev.code }
-  // Only mark offline if no other socket still holds this player
-  let stillBound = false
-  for (const b of socketToPlayer.values()) {
-    if (b.code === prev.code && b.playerId === prev.playerId) {
-      stillBound = true
-      break
-    }
-  }
-  if (!stillBound) {
+  if (!isPlayerStillBound(prev.code, prev.playerId)) {
     cancelDisconnectTimer(prev.code, prev.playerId)
     const player = room.players.find((p) => p.id === prev.playerId)
     if (player) player.connected = false
+    // Host switched to another game — hand off so the old party isn't stuck
+    transferHostIfNeeded(room, prev.playerId)
     touch(room)
   }
   return { code: prev.code }
@@ -109,22 +143,10 @@ export function leaveRoom(socketId: string): Room | null {
   const room = rooms.get(binding.code)
   if (!room) return null
 
-  let stillBound = false
-  for (const b of socketToPlayer.values()) {
-    if (b.code === binding.code && b.playerId === binding.playerId) {
-      stillBound = true
-      break
-    }
-  }
-  if (!stillBound) {
+  if (!isPlayerStillBound(binding.code, binding.playerId)) {
     const player = room.players.find((p) => p.id === binding.playerId)
     if (player) player.connected = false
-
-    if (room.hostId === binding.playerId) {
-      cancelHostTransferTimer(room.code)
-      const nextHost = room.players.find((p) => p.connected && p.id !== binding.playerId)
-      if (nextHost) room.hostId = nextHost.id
-    }
+    transferHostIfNeeded(room, binding.playerId)
   }
   touch(room)
   return room
@@ -1048,21 +1070,12 @@ export function disconnectSocket(
 
     // If host is gone, transfer after a bit more wait so the night can continue
     if (current.hostId === binding.playerId) {
-      cancelHostTransferTimer(binding.code)
-      const transferDelay = Math.max(0, HOST_TRANSFER_AFTER_MS - DISCONNECT_GRACE_MS)
-      const hostTimer = setTimeout(() => {
-        hostTransferTimers.delete(binding.code)
-        const live = rooms.get(binding.code)
-        if (!live || live.hostId !== binding.playerId) return
-        const host = live.players.find((p) => p.id === binding.playerId)
-        if (host?.connected) return
-        const nextHost = live.players.find((p) => p.connected && p.id !== binding.playerId)
-        if (!nextHost) return
-        live.hostId = nextHost.id
-        touch(live)
-        onSettled?.(live)
-      }, transferDelay)
-      hostTransferTimers.set(binding.code, hostTimer)
+      scheduleHostTransfer(
+        binding.code,
+        binding.playerId,
+        Math.max(0, HOST_TRANSFER_AFTER_MS - DISCONNECT_GRACE_MS),
+        onSettled,
+      )
     }
 
     onSettled?.(current)
