@@ -56,24 +56,44 @@ type Screen = 'home' | 'create' | 'join' | 'find' | 'play'
 const FREE_COUNTS = [10, 20, 30, 50]
 const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
-/** Swish payee (national format). Override with VITE_TIP_URL if you prefer Ko-fi etc. */
-const SWISH_PAYEE = '0730457930'
+/** Same Swish number as sister games (+46 730 457 930). */
+const SWISH_NUMBER = '46730457930'
 const SWISH_DISPLAY = '073-045 79 30'
+const SWISH_MSG = 'Fika Factopia'
 
-function swishTipUrl(payee: string, message: string) {
-  const payload = JSON.stringify({
-    version: '1.0',
-    payee: { payeeAlias: payee },
-    message,
-  })
-  // URL-safe base64 so the deep link survives encoding
-  const data = btoa(payload).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-  return `swish://payment?data=${data}`
+/** Official https link — Universal Link into Swish on phone. */
+const SWISH_HTTPS =
+  (import.meta.env.VITE_TIP_URL as string | undefined)?.trim() ||
+  `https://app.swish.nu/1/p/sw/?sw=${SWISH_NUMBER}&msg=${encodeURIComponent(SWISH_MSG)}`
+
+/** Native scheme — most reliable “open the app now” on iOS/Android. */
+const SWISH_APP =
+  'swish://payment?data=' +
+  encodeURIComponent(
+    JSON.stringify({
+      version: 1,
+      payee: { value: SWISH_NUMBER },
+      message: { value: SWISH_MSG },
+    }),
+  )
+
+function openSwishFika(e: { preventDefault: () => void }) {
+  e.preventDefault()
+  void navigator.clipboard?.writeText('0730457930').catch(() => {})
+  const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  if (!mobile) {
+    window.open(SWISH_HTTPS, '_blank', 'noopener,noreferrer')
+    return
+  }
+  // Same-tab navigation — required for app links (target=_blank often stays in browser).
+  window.location.href = SWISH_APP
+  window.setTimeout(() => {
+    if (document.visibilityState === 'visible') {
+      window.location.href = SWISH_HTTPS
+    }
+  }, 900)
 }
 
-const TIP_URL =
-  (import.meta.env.VITE_TIP_URL as string | undefined)?.trim() ||
-  swishTipUrl(SWISH_PAYEE, 'Fika Factopia')
 const PARTY_PATHS_URL = 'https://partypaths.com'
 const SABOTEXT_URL = 'https://sabotext.com'
 const SCOURGEBORN_URL = 'https://scourgeborn.com'
@@ -357,13 +377,7 @@ export default function App() {
 
             <p className="footer-note">{ui.freeTierOk}</p>
             {error && screen === 'home' && <p className="error">{error}</p>}
-            <a
-              className="tip-fika"
-              href={TIP_URL}
-              onClick={() => {
-                void navigator.clipboard?.writeText(SWISH_PAYEE).catch(() => {})
-              }}
-            >
+            <a className="tip-fika" href={SWISH_HTTPS} onClick={openSwishFika}>
               <strong>{ui.tipLink}</strong>
               <span>{ui.tipHint.replace('{number}', SWISH_DISPLAY)}</span>
             </a>
