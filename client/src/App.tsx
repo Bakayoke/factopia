@@ -56,7 +56,24 @@ type Screen = 'home' | 'create' | 'join' | 'find' | 'play'
 const FREE_COUNTS = [10, 20, 30, 50]
 const QUESTION_MS = 20_000
 const REVEAL_MS = 6_000
-const TIP_URL = (import.meta.env.VITE_TIP_URL as string | undefined) || ''
+/** Swish payee (national format). Override with VITE_TIP_URL if you prefer Ko-fi etc. */
+const SWISH_PAYEE = '0730457930'
+const SWISH_DISPLAY = '073-045 79 30'
+
+function swishTipUrl(payee: string, message: string) {
+  const payload = JSON.stringify({
+    version: '1.0',
+    payee: { payeeAlias: payee },
+    message,
+  })
+  // URL-safe base64 so the deep link survives encoding
+  const data = btoa(payload).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  return `swish://payment?data=${data}`
+}
+
+const TIP_URL =
+  (import.meta.env.VITE_TIP_URL as string | undefined)?.trim() ||
+  swishTipUrl(SWISH_PAYEE, 'Fika Factopia')
 const PARTY_PATHS_URL = 'https://partypaths.com'
 const SABOTEXT_URL = 'https://sabotext.com'
 const SCOURGEBORN_URL = 'https://scourgeborn.com'
@@ -340,11 +357,16 @@ export default function App() {
 
             <p className="footer-note">{ui.freeTierOk}</p>
             {error && screen === 'home' && <p className="error">{error}</p>}
-            {TIP_URL && (
-              <a className="btn btn-ghost" href={TIP_URL} target="_blank" rel="noreferrer">
-                {ui.tipLink}
-              </a>
-            )}
+            <a
+              className="tip-fika"
+              href={TIP_URL}
+              onClick={() => {
+                void navigator.clipboard?.writeText(SWISH_PAYEE).catch(() => {})
+              }}
+            >
+              <strong>{ui.tipLink}</strong>
+              <span>{ui.tipHint.replace('{number}', SWISH_DISPLAY)}</span>
+            </a>
             <p className="footer-note">{ui.footer}</p>
             <a
               className="sister-game"

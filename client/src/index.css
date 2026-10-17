@@ -242,6 +242,38 @@ button {
   padding: 0.65rem 0.5rem;
 }
 
+.tip-fika {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+  text-align: left;
+  background: color-mix(in srgb, #c9921a 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, #c9921a 35%, transparent);
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.tip-fika:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, #c9921a 55%, transparent);
+}
+
+.tip-fika strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+
+.tip-fika span {
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 .sister-game {
   display: grid;
   gap: 0.25rem;
