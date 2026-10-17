@@ -38,10 +38,17 @@ export function clearSession() {
 }
 
 let socket: Socket | null = null
-let rejoinInFlight: Promise<Ack<{ playerId: string; room: PublicRoom }>> | null = null
+let rejoinInFlight: Promise<Ack<{ playerId: string; room: PublicRoom }> | null> | null = null
+/** Bumped on create/join/leave so in-flight auto-rejoin cannot yank UI to a stale room. */
+let sessionEpoch = 0
 let connectionListenersAttached = false
 
 const handlers: ConnectionHandlers = {}
+
+export function bumpSessionEpoch() {
+  sessionEpoch += 1
+  return sessionEpoch
+}
 
 function socketUrl() {
   const url = import.meta.env.VITE_SOCKET_URL as string | undefined
@@ -71,6 +78,9 @@ export function getSocket() {
       handlers.onConnection?.(false)
     })
     socket.on('room', (room: PublicRoom) => {
+      const session = loadSession()
+      // Ignore room updates for rooms we're not bound to (stale dual-join)
+      if (session && room.code !== session.code) return
       handlers.onRoom?.(room)
     })
     socket.on('reaction', (payload: ReactionEvent) => {
@@ -88,29 +98,62 @@ export function bindSocketHandlers(next: ConnectionHandlers) {
   getSocket()
 }
 
-export async function ensureSessionBound(retries = 4): Promise<Ack<{ playerId: string; room: PublicRoom }> | null> {
+function isRoomGoneError(error?: string) {
+  if (!error) return false
+  const e = error.toLowerCase()
+  return (
+    e.includes('finns inte') ||
+    e.includes('hittades inte') ||
+    e.includes('not found') ||
+    e.includes('hittade inget')
+  )
+}
+
+export async function ensureSessionBound(
+  retries = 4,
+): Promise<Ack<{ playerId: string; room: PublicRoom }> | null> {
   const session = loadSession()
   if (!session) return null
   if (rejoinInFlight) return rejoinInFlight
+
+  const epochAtStart = sessionEpoch
 
   rejoinInFlight = (async () => {
     let last: Ack<{ playerId: string; room: PublicRoom }> = {
       error: 'rejoin failed',
     } as Ack<{ playerId: string; room: PublicRoom }>
     for (let i = 0; i < retries; i++) {
-      last = await rejoinGame(session.code, session.playerId)
+      if (sessionEpoch !== epochAtStart) return null
+      const current = loadSession()
+      if (!current || current.code !== session.code || current.playerId !== session.playerId) {
+        return null
+      }
+      last = await rejoinGame(current.code, current.playerId)
+      if (sessionEpoch !== epochAtStart) return null
       if (!last.error && last.room) {
-        saveSession(session)
+        // Only persist if session still matches (create/join may have replaced it)
+        const still = loadSession()
+        if (
+          still &&
+          still.code === current.code &&
+          still.playerId === current.playerId &&
+          sessionEpoch === epochAtStart
+        ) {
+          saveSession(still)
+        }
         return last
       }
-      if (
-        last.error?.includes('finns inte') ||
-        last.error?.includes('hittades inte') ||
-        last.error?.includes('not found')
-      ) {
+      if (isRoomGoneError(last.error)) {
         break
       }
       await new Promise((r) => setTimeout(r, 700 * (i + 1)))
+    }
+    if (sessionEpoch !== epochAtStart) return null
+    if (isRoomGoneError(last.error)) {
+      const still = loadSession()
+      if (still?.code === session.code && still.playerId === session.playerId) {
+        clearSession()
+      }
     }
     return last
   })()
@@ -156,7 +199,8 @@ type Ack<T> = T & { error?: string }
 async function emitAck<T>(event: string, data: unknown): Promise<Ack<T>> {
   try {
     const s = await whenConnected()
-    if (event !== 'create' && event !== 'join' && event !== 'rejoin') {
+    // Never auto-rejoin before create/join/leave — that races and restores stale rooms
+    if (event !== 'create' && event !== 'join' && event !== 'rejoin' && event !== 'leave') {
       await ensureSessionBound(2)
     }
     return await new Promise<Ack<T>>((resolve) => {
@@ -177,6 +221,7 @@ export function createGame(
   advanceMode: AdvanceMode,
   language: QuizLanguage,
 ) {
+  bumpSessionEpoch()
   return emitAck<{ playerId: string; room: PublicRoom }>('create', {
     name,
     questionCount,
@@ -187,6 +232,7 @@ export function createGame(
 }
 
 export function joinGame(code: string, name: string) {
+  bumpSessionEpoch()
   return emitAck<{
     playerId: string
     room: PublicRoom
@@ -197,6 +243,12 @@ export function joinGame(code: string, name: string) {
 
 export function rejoinGame(code: string, playerId: string) {
   return emitAck<{ playerId: string; room: PublicRoom }>('rejoin', { code, playerId })
+}
+
+export function leaveGame() {
+  bumpSessionEpoch()
+  clearSession()
+  return emitAck<{ ok?: boolean }>('leave', {})
 }
 
 export function setCount(count: number) {

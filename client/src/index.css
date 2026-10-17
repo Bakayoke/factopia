@@ -944,6 +944,14 @@ input:focus {
   font-size: 0.8rem;
 }
 
+.players li.is-offline {
+  opacity: 0.55;
+}
+
+.players li.is-offline .you {
+  color: var(--muted);
+}
+
 .players .host-tag {
   font-size: 0.75rem;
   color: var(--accent-deep);

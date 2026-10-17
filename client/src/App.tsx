@@ -7,6 +7,7 @@ import {
   ensureSessionBound,
   fetchLobbies,
   joinGame,
+  leaveGame,
   loadSession,
   nextQuestion,
   rematchGame,
@@ -161,7 +162,11 @@ export default function App() {
 
   useEffect(() => {
     bindSocketHandlers({
-      onRoom: (next) => setRoom(next),
+      onRoom: (next) => {
+        const session = loadSession()
+        if (session && next.code !== session.code) return
+        setRoom(next)
+      },
       onConnection: (ok) => setConnected(ok),
       onReaction: (r) => {
         setReactions((prev) => [...prev.slice(-14), r])
@@ -179,11 +184,22 @@ export default function App() {
     setBusy(true)
     ensureSessionBound(5).then((res) => {
       setBusy(false)
-      if (!res || res.error || !res.room) {
-        // Only clear if room is truly gone
-        if (res?.error?.includes('finns inte') || res?.error?.includes('hittades inte')) {
+      // Aborted / superseded by create/join/leave
+      if (res === null) return
+      if (res.error || !res.room) {
+        if (
+          res.error?.includes('finns inte') ||
+          res.error?.includes('hittades inte') ||
+          res.error?.includes('Hittade inget') ||
+          res.error?.includes('not found')
+        ) {
           clearSession()
         }
+        return
+      }
+      // Don't yank into an old room if user already started something else
+      const current = loadSession()
+      if (!current || current.code !== session.code || current.playerId !== session.playerId) {
         return
       }
       setName(session.name)
@@ -244,7 +260,7 @@ export default function App() {
   }
 
   function leave() {
-    clearSession()
+    void leaveGame()
     setRoom(null)
     setPlayerId(null)
     setScreen('home')
@@ -901,13 +917,17 @@ function Lobby({
         ) : participants.length > 0 ? (
           <ul className={`players${tvMode ? ' tv-players' : ''}`}>
             {participants.map((p) => (
-              <li key={p.id}>
+              <li key={p.id} className={!p.connected ? 'is-offline' : undefined}>
                 <span>
                   {p.name}
                   {room.teamMode && p.teamId === 'a' ? ` · ${ui.teamA}` : ''}
                   {room.teamMode && p.teamId === 'b' ? ` · ${ui.teamB}` : ''}
                 </span>
-                {p.id === playerId && <span className="you">{ui.you}</span>}
+                {!p.connected ? (
+                  <span className="you">{ui.offline}</span>
+                ) : p.id === playerId ? (
+                  <span className="you">{ui.you}</span>
+                ) : null}
               </li>
             ))}
           </ul>

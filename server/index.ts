@@ -12,6 +12,7 @@ import {
   getRoom,
   hydrateRooms,
   joinRoom,
+  leaveRoom,
   liveActivity,
   onQuestionTimeout,
   onRevealTimeout,
@@ -151,10 +152,16 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST'],
     credentials: true,
   },
-  pingInterval: 20_000,
-  pingTimeout: 60_000,
+  pingInterval: 15_000,
+  pingTimeout: 25_000,
   connectTimeout: 30_000,
 })
+
+function leaveSocketRooms(socket: { leave: (room: string) => void }, codes: Array<string | undefined>) {
+  for (const code of codes) {
+    if (code) socket.leave(code)
+  }
+}
 
 function broadcastRoom(roomCode: string) {
   const room = getRoom(roomCode)
@@ -164,7 +171,8 @@ function broadcastRoom(roomCode: string) {
   for (const socketId of sockets) {
     const binding = getBinding(socketId)
     const socket = io.sockets.sockets.get(socketId)
-    if (socket && binding) {
+    // Only deliver to sockets whose binding matches this room (prevents stale dual-join UI yank)
+    if (socket && binding && binding.code === roomCode) {
       socket.emit('room', toPublicRoom(room, binding.playerId))
     }
   }
@@ -173,7 +181,7 @@ function broadcastRoom(roomCode: string) {
 io.on('connection', (socket) => {
   socket.on('create', ({ name, questionCount, hostPlays, advanceMode, language, partyToken }, ack) => {
     try {
-      const { room, playerId } = createRoom(
+      const { room, playerId, leftCode } = createRoom(
         name,
         questionCount,
         socket.id,
@@ -182,6 +190,8 @@ io.on('connection', (socket) => {
         language === 'en' ? 'en' : 'sv',
         typeof partyToken === 'string' ? partyToken : null,
       )
+      leaveSocketRooms(socket, [leftCode])
+      if (leftCode) broadcastRoom(leftCode)
       socket.join(room.code)
       const payload = { playerId, room: toPublicRoom(room, playerId) }
       ack?.(payload)
@@ -261,6 +271,8 @@ io.on('connection', (socket) => {
       })
       return
     }
+    leaveSocketRooms(socket, [result.leftCode])
+    if (result.leftCode) broadcastRoom(result.leftCode)
     socket.join(result.room.code)
     const payload = { playerId: result.playerId, room: toPublicRoom(result.room, result.playerId) }
     ack?.(payload)
@@ -273,9 +285,22 @@ io.on('connection', (socket) => {
       ack?.({ error: result.error })
       return
     }
-    socket.join(result.code)
-    ack?.({ playerId, room: toPublicRoom(result, playerId) })
-    broadcastRoom(result.code)
+    leaveSocketRooms(socket, [result.leftCode])
+    if (result.leftCode) broadcastRoom(result.leftCode)
+    socket.join(result.room.code)
+    ack?.({ playerId, room: toPublicRoom(result.room, playerId) })
+    broadcastRoom(result.room.code)
+  })
+
+  socket.on('leave', (_data, ack) => {
+    const room = leaveRoom(socket.id)
+    if (!room) {
+      ack?.({ ok: true })
+      return
+    }
+    socket.leave(room.code)
+    ack?.({ ok: true })
+    broadcastRoom(room.code)
   })
 
   socket.on('setCount', ({ count }, ack) => {

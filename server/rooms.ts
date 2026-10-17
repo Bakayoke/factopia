@@ -31,13 +31,15 @@ import type {
 } from './types.js'
 
 const makeCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ', 4)
-const DISCONNECT_GRACE_MS = 60_000
+/** Mark offline quickly so flaky Wi‑Fi / background tabs don't look "stuck online". */
+const DISCONNECT_GRACE_MS = 20_000
 const HOST_TRANSFER_AFTER_MS = 90_000
 const ROOM_IDLE_MS = 12 * 60 * 60 * 1000
 
 const rooms = new Map<string, Room>()
 const socketToPlayer = new Map<string, { code: string; playerId: string }>()
 const disconnectTimers = new Map<string, ReturnType<typeof setTimeout>>()
+const hostTransferTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
 let onPersist: (() => void) | null = null
 
@@ -61,6 +63,71 @@ function cancelDisconnectTimer(code: string, playerId: string) {
     clearTimeout(t)
     disconnectTimers.delete(key)
   }
+}
+
+function cancelHostTransferTimer(code: string) {
+  const t = hostTransferTimers.get(code)
+  if (t) {
+    clearTimeout(t)
+    hostTransferTimers.delete(code)
+  }
+}
+
+/**
+ * Detach a socket from any previous room/player before binding a new one.
+ * Marks the old player offline immediately so leave→create doesn't leave ghosts.
+ */
+export function detachSocket(socketId: string): { code: string } | null {
+  const prev = socketToPlayer.get(socketId)
+  if (!prev) return null
+  socketToPlayer.delete(socketId)
+  const room = rooms.get(prev.code)
+  if (!room) return { code: prev.code }
+  // Only mark offline if no other socket still holds this player
+  let stillBound = false
+  for (const b of socketToPlayer.values()) {
+    if (b.code === prev.code && b.playerId === prev.playerId) {
+      stillBound = true
+      break
+    }
+  }
+  if (!stillBound) {
+    cancelDisconnectTimer(prev.code, prev.playerId)
+    const player = room.players.find((p) => p.id === prev.playerId)
+    if (player) player.connected = false
+    touch(room)
+  }
+  return { code: prev.code }
+}
+
+/** Explicit leave from client — immediate offline + unbind (no grace). */
+export function leaveRoom(socketId: string): Room | null {
+  const binding = socketToPlayer.get(socketId)
+  if (!binding) return null
+  socketToPlayer.delete(socketId)
+  cancelDisconnectTimer(binding.code, binding.playerId)
+  const room = rooms.get(binding.code)
+  if (!room) return null
+
+  let stillBound = false
+  for (const b of socketToPlayer.values()) {
+    if (b.code === binding.code && b.playerId === binding.playerId) {
+      stillBound = true
+      break
+    }
+  }
+  if (!stillBound) {
+    const player = room.players.find((p) => p.id === binding.playerId)
+    if (player) player.connected = false
+
+    if (room.hostId === binding.playerId) {
+      cancelHostTransferTimer(room.code)
+      const nextHost = room.players.find((p) => p.connected && p.id !== binding.playerId)
+      if (nextHost) room.hostId = nextHost.id
+    }
+  }
+  touch(room)
+  return room
 }
 
 function roomLimits(room: Room) {
@@ -93,7 +160,7 @@ export function createRoom(
   advanceMode: AdvanceMode = 'auto',
   language: QuizLanguage = 'sv',
   partyToken?: string | null,
-): { room: Room; playerId: string } {
+): { room: Room; playerId: string; leftCode?: string } {
   const pass = lookupPass(partyToken)
   const premiumExpiresAt = pass?.expiresAt ?? null
   const limits = limitsFor(tierFromExpiry(premiumExpiresAt))
@@ -144,9 +211,14 @@ export function createRoom(
   }
 
   rooms.set(code, room)
+  const left = detachSocket(socketId)
   socketToPlayer.set(socketId, { code, playerId })
   touch(room)
-  return { room, playerId }
+  return {
+    room,
+    playerId,
+    leftCode: left && left.code !== code ? left.code : undefined,
+  }
 }
 
 export function joinRoom(
@@ -154,7 +226,7 @@ export function joinRoom(
   name: string,
   socketId: string,
 ):
-  | { room: Room; playerId: string }
+  | { room: Room; playerId: string; leftCode?: string }
   | {
       error: string
       code?: 'ROOM_FULL' | 'NOT_FOUND' | 'STARTED'
@@ -177,28 +249,61 @@ export function joinRoom(
   const displayName =
     name.trim().slice(0, 20) || (room.language === 'en' ? 'Player' : 'Spelare')
 
-  const maxPlayers = roomLimits(room).maxPlayers
-  if (maxPlayers > 0 && room.players.length >= maxPlayers) {
-    const existing = room.waitlist.find(
-      (w) => w.name.toLowerCase() === displayName.toLowerCase(),
-    )
-    if (!existing) {
-      room.waitlist.push({
-        id: crypto.randomUUID(),
-        name: displayName,
-        at: Date.now(),
-      })
-      room.waitlist = room.waitlist.slice(-24)
+  // Reclaim a disconnected player with the same name (avoids ghost duplicates)
+  const reclaimable = room.players.find(
+    (p) =>
+      !p.connected &&
+      p.name.toLowerCase() === displayName.toLowerCase() &&
+      (room.status === 'lobby' || room.status === 'finished'),
+  )
+
+  if (!reclaimable) {
+    const maxPlayers = roomLimits(room).maxPlayers
+    // Disconnected lobby ghosts shouldn't block joins forever
+    const seatedCount =
+      room.status === 'lobby'
+        ? room.players.filter((p) => p.connected).length
+        : room.players.length
+    if (maxPlayers > 0 && seatedCount >= maxPlayers) {
+      const existing = room.waitlist.find(
+        (w) => w.name.toLowerCase() === displayName.toLowerCase(),
+      )
+      if (!existing) {
+        room.waitlist.push({
+          id: crypto.randomUUID(),
+          name: displayName,
+          at: Date.now(),
+        })
+        room.waitlist = room.waitlist.slice(-24)
+      }
+      touch(room)
+      return {
+        error:
+          maxPlayers <= 5
+            ? `Rummet är fullt (max ${maxPlayers} gratis). Lås upp Party för fler spelare.`
+            : `Rummet är fullt (max ${maxPlayers})`,
+        code: 'ROOM_FULL',
+        roomCode: room.code,
+        waitlistCount: room.waitlist.length,
+      }
     }
+  }
+
+  // Only detach after we know join will succeed
+  const left = detachSocket(socketId)
+
+  if (reclaimable) {
+    cancelDisconnectTimer(room.code, reclaimable.id)
+    cancelHostTransferTimer(room.code)
+    reclaimable.connected = true
+    reclaimable.name = displayName
+    socketToPlayer.set(socketId, { code: room.code, playerId: reclaimable.id })
+    room.waitlist = room.waitlist.filter((w) => w.name.toLowerCase() !== displayName.toLowerCase())
     touch(room)
     return {
-      error:
-        maxPlayers <= 5
-          ? `Rummet är fullt (max ${maxPlayers} gratis). Lås upp Party för fler spelare.`
-          : `Rummet är fullt (max ${maxPlayers})`,
-      code: 'ROOM_FULL',
-      roomCode: room.code,
-      waitlistCount: room.waitlist.length,
+      room,
+      playerId: reclaimable.id,
+      leftCode: left && left.code !== room.code ? left.code : undefined,
     }
   }
 
@@ -221,7 +326,11 @@ export function joinRoom(
   room.waitlist = room.waitlist.filter((w) => w.name.toLowerCase() !== displayName.toLowerCase())
   socketToPlayer.set(socketId, { code: room.code, playerId })
   touch(room)
-  return { room, playerId }
+  return {
+    room,
+    playerId,
+    leftCode: left && left.code !== room.code ? left.code : undefined,
+  }
 }
 
 export function getBinding(socketId: string) {
@@ -935,20 +1044,25 @@ export function disconnectSocket(
     }
     const player = current.players.find((p) => p.id === binding.playerId)
     if (player) player.connected = false
+    touch(current)
 
     // If host is gone, transfer after a bit more wait so the night can continue
     if (current.hostId === binding.playerId) {
-      setTimeout(() => {
-        const room = rooms.get(binding.code)
-        if (!room || room.hostId !== binding.playerId) return
-        const host = room.players.find((p) => p.id === binding.playerId)
+      cancelHostTransferTimer(binding.code)
+      const transferDelay = Math.max(0, HOST_TRANSFER_AFTER_MS - DISCONNECT_GRACE_MS)
+      const hostTimer = setTimeout(() => {
+        hostTransferTimers.delete(binding.code)
+        const live = rooms.get(binding.code)
+        if (!live || live.hostId !== binding.playerId) return
+        const host = live.players.find((p) => p.id === binding.playerId)
         if (host?.connected) return
-        const nextHost = room.players.find((p) => p.connected && p.id !== binding.playerId)
+        const nextHost = live.players.find((p) => p.connected && p.id !== binding.playerId)
         if (!nextHost) return
-        room.hostId = nextHost.id
-        touch(room)
-        onSettled?.(room)
-      }, Math.max(0, HOST_TRANSFER_AFTER_MS - DISCONNECT_GRACE_MS))
+        live.hostId = nextHost.id
+        touch(live)
+        onSettled?.(live)
+      }, transferDelay)
+      hostTransferTimers.set(binding.code, hostTimer)
     }
 
     onSettled?.(current)
@@ -962,18 +1076,25 @@ export function reconnectSocket(
   code: string,
   playerId: string,
   socketId: string,
-): Room | { error: string } {
+): { room: Room; leftCode?: string } | { error: string } {
   const room = rooms.get(code.toUpperCase())
   if (!room) return { error: 'Rummet finns inte' }
   const player = room.players.find((p) => p.id === playerId)
   if (!player) return { error: 'Spelaren hittades inte' }
+
+  const left = detachSocket(socketId)
   cancelDisconnectTimer(room.code, playerId)
+  cancelHostTransferTimer(room.code)
   player.connected = true
   for (const [sid, b] of socketToPlayer.entries()) {
     if (b.playerId === playerId && sid !== socketId) socketToPlayer.delete(sid)
   }
   socketToPlayer.set(socketId, { code: room.code, playerId })
-  return room
+  touch(room)
+  return {
+    room,
+    leftCode: left && left.code !== room.code ? left.code : undefined,
+  }
 }
 
 export function toPublicRoom(room: Room, playerId?: string): PublicRoom {
@@ -1067,6 +1188,30 @@ export function hydrateRooms(saved: Room[]) {
       // Keep if party still active
       if (!raw.premiumExpiresAt || raw.premiumExpiresAt <= now) continue
     }
+
+    const questions = Array.isArray(raw.questions) ? raw.questions : []
+    const wasInProgress = raw.status === 'question' || raw.status === 'reveal'
+    // Preserve scores + questions across restarts. Mid-round: land on reveal so
+    // the night can continue (manual next / short auto timer) instead of wiping to lobby.
+    let status: RoomStatus = raw.status
+    let currentIndex = typeof raw.currentIndex === 'number' ? raw.currentIndex : -1
+    let endsAt = 0
+    let revealCorrectIndex: number | null = null
+    let questionStartedAt = 0
+
+    if (wasInProgress) {
+      if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) {
+        status = 'finished'
+        currentIndex = Math.max(0, questions.length - 1)
+      } else {
+        status = 'reveal'
+        const q = questions[currentIndex]
+        revealCorrectIndex = q?.correctIndex ?? null
+        endsAt = raw.advanceMode === 'manual' ? 0 : now + REVEAL_MS
+        questionStartedAt = now
+      }
+    }
+
     const room: Room = {
       ...raw,
       categoryPack: normalizePackId(raw.categoryPack),
@@ -1079,22 +1224,20 @@ export function hydrateRooms(saved: Room[]) {
         teamId: p.teamId === 'a' || p.teamId === 'b' ? p.teamId : null,
       })),
       teamMode: Boolean(raw.teamMode),
-      answers: {},
-      answerTimes: {},
-      // Mid-question rooms resume safer from lobby if timers are stale
-      status:
-        raw.status === 'question' || raw.status === 'reveal' ? 'lobby' : raw.status,
-      questions: raw.status === 'question' || raw.status === 'reveal' ? [] : raw.questions ?? [],
-      currentIndex: -1,
-      endsAt: 0,
-      questionStartedAt: 0,
-      revealCorrectIndex: null,
-      lastRound: null,
+      answers: wasInProgress ? {} : (raw.answers ?? {}),
+      answerTimes: wasInProgress ? {} : (raw.answerTimes ?? {}),
+      status,
+      questions,
+      currentIndex,
+      endsAt,
+      questionStartedAt,
+      revealCorrectIndex: wasInProgress ? revealCorrectIndex : (raw.revealCorrectIndex ?? null),
+      lastRound: wasInProgress ? null : (raw.lastRound ?? null),
       streaks: raw.streaks && typeof raw.streaks === 'object' ? raw.streaks : {},
       nextPackVotes: {},
       optionCounts: null,
       rankDrama: null,
-      suddenDeath: false,
+      suddenDeath: Boolean(raw.suddenDeath) && wasInProgress,
       suddenDeathDone: Boolean(raw.suddenDeathDone),
       updatedAt: raw.updatedAt ?? now,
     }
